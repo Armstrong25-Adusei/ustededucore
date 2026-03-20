@@ -40,7 +40,7 @@ const StudentAPI = (() => {
     if (window.EDUCORE_API_BASE) return window.EDUCORE_API_BASE.replace(/\/?$/, '/');
 
     // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
-    const BACKEND = 'http://ustededucore.rf.gd';
+    const BACKEND = 'https://ustededucore.rf.gd';
     if (window.location.origin !== BACKEND) {
       return BACKEND + '/backend/api.php/';
     }
@@ -172,7 +172,7 @@ const StudentAPI = (() => {
     if (override) return override;
     // On InfinityFree: /frontend/student-login.html
     // On Vercel: /student-login.html (files are at root)
-    const BACKEND = 'http://ustededucore.rf.gd';
+    const BACKEND = 'https://ustededucore.rf.gd';
     if (window.location.origin === BACKEND) {
       return '/frontend/student-login.html';
     }

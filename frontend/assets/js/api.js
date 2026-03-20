@@ -39,7 +39,7 @@ const API = (() => {
     // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
     // If this JS is running from a different origin than the backend,
     // use the hardcoded InfinityFree backend URL directly.
-    const BACKEND = 'http://ustededucore.rf.gd';
+    const BACKEND = 'https://ustededucore.rf.gd';
     if (window.location.origin !== BACKEND) {
       return BACKEND + '/backend/api.php/';
     }
