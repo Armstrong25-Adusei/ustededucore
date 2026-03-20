@@ -1,807 +1,744 @@
-<?php
-/**
- * EduCore — api.php  v9.0
- * ─────────────────────────────────────────────────────────────────────────────
- * Single entry point.  All routes below are handled here.
- *
- * LECTURER AUTH
- *   POST  auth/register
- *   POST  auth/login
- *   POST  auth/logout
- *   GET   auth/me
- *   GET   auth/verify-email?token=…
- *   POST  auth/resend-verification
- *   POST  auth/forgot-password
- *   POST  auth/reset-password
- *
- * INSTITUTIONS (public)
- *   GET   institutions/search?q=…
- *
- * STUDENT AUTH
- *   POST  student/auth/register
- *   POST  student/auth/login
- *   GET   student/auth/verify-email?token=…
- *   POST  student/auth/resend-verification
- *   POST  student/auth/forgot-password
- *   POST  student/auth/reset-password
- *
- * STUDENT PROFILE  (JWT required)
- *   GET   student/me
- *   GET   student/profile
- *   PATCH student/profile
- *   GET   student/security
- *   POST  student/device/remove
- *   POST  student/device/unbind-request
- *   GET   student/audit
- *   POST  student/photo               — upload profile photo (multipart/form-data)
- *   DELETE student/photo              — remove profile photo
- *
- * STUDENT DATA  (JWT required)
- *   GET   student/session/active
- *   GET   student/session/{id}/geofence-map
- *   GET   student/session/{id}/qr-current
- *   POST  student/checkin
- *   GET   student/checkin/history
- *   GET   student/checkin/receipt/{id}
- *   GET   student/classes
- *   GET   student/classes/{id}
- *   GET   student/classes/{id}/attendance
- *   GET   student/attendance
- *   GET   student/attendance/stats
- *   GET   student/attendance/streak
- *   GET   student/attendance/risk
- *   POST  student/override/request
- *   GET   student/override/history
- *   GET   student/notifications
- *   GET   student/notifications/unread-count
- *   POST  student/notifications/{id}/read
- *   POST  student/notifications/read-all
- *   GET   student/geofence/logs
- *
- * LECTURER PROFILE & PHOTO  (lecturer JWT required)
- *   GET   lecturer/profile            — fetch editable profile fields
- *   PATCH lecturer/profile            — update full_name, email, phone, title, bio
- *   POST  lecturer/photo               — upload profile photo (multipart/form-data)
- *                                        validates MIME+size, re-encodes via GD, strips EXIF
- *                                        returns { photo_url, photo_updated_at }
- *   DELETE lecturer/photo              — remove current profile photo
- *                                        deletes file from disk, NULLs profile_photo in DB
- *
- * LECTURER DASHBOARD / CLASSES / STUDENTS / MASTER-LIST / ATTENDANCE
- * SESSIONS / OVERRIDE / SYNC / REPORTS / SETTINGS / AUDIT / NOTIFICATIONS
- * ACTIVITIES  — (lecturer-scoped routes)
- *
- * SESSIONS (lecturer) — additional list endpoint
- *   GET   sessions                     — list all sessions (filter: ?class_id=)
- *
- * COURSE MESSAGES  (lecturer JWT required)
- *   GET   messages/unread-counts       — { channels: [{ class_id, unread }] }
- *   GET   messages/{class_id}          — paginated (?since=lastId&limit=40)
- *   POST  messages/{class_id}          — send { body, is_broadcast, parent_id }
- *   POST  messages/{class_id}/read     — mark read { up_to_message_id }
- *   POST  messages/{msg_id}/react      — toggle emoji reaction { emoji }
- *   DELETE messages/{msg_id}           — soft-delete (lecturer only)
- * ─────────────────────────────────────────────────────────────────────────────
- */
-declare(strict_types=1);
+/* =============================================================
+   EduCore ÔÇö api.js  v6.0
+   Central HTTP client for all pages at the frontend root:
+     index.html, login.html, signup.html,
+     student-login.html, student-signup.html,
+     pages/dashboard.html and all /pages/* lecturer pages.
 
-// ── Load .env ──────────────────────────────────────────────────────────────
-// Try .env in current dir first, then parent dirs
-$_envPaths = [__DIR__.'/.env', __DIR__.'/../.env', __DIR__.'/../../.env'];
-foreach ($_envPaths as $_envFile) {
-    if (file_exists($_envFile)) {
-        foreach (file($_envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $_line) {
-            if (str_starts_with(trim($_line), '#') || !str_contains($_line, '=')) continue;
-            [$_key, $_val] = explode('=', $_line, 2) + ['', ''];
-            $_ENV[trim($_key)] = trim($_val);
-        }
-        break;
-    }
-}
-unset($_envPaths, $_envFile, $_line, $_key, $_val);
+   Exposes two globals:
+     API          ÔÇö full raw client (lecturer + student routes)
+     EduCoreAPI   ÔÇö convenience namespace used by HTML inline scripts
+                    EduCoreAPI.lecturer.*  (login, signup)
+                    EduCoreAPI.student.*   (student-login, student-signup)
+   ============================================================= */
 
-// ── CORS ───────────────────────────────────────────────────────────────────
-// Always send CORS headers — required for Vercel (cross-origin) frontend
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-
-// Allowed origins: InfinityFree + Vercel deployments
-$allowedOrigins = array_filter(array_map('trim', explode(',', $_ENV['CORS_ORIGINS'] ?? '*')));
-
-$isAllowed = in_array('*', $allowedOrigins, true)
-    || in_array($origin, $allowedOrigins, true)
-    || str_ends_with($origin, '.vercel.app')        // allow any Vercel deployment
-    || str_ends_with($origin, '.rf.gd')              // allow InfinityFree subdomains
-    || $origin === 'https://ustededucore.vercel.app'; // explicit Vercel URL
-
-if ($isAllowed && $origin) {
-    header("Access-Control-Allow-Origin: {$origin}");
-    header('Access-Control-Allow-Credentials: true');
-} else {
-    // Fallback: allow all (safe for testing, tighten in production)
-    header('Access-Control-Allow-Origin: *');
+/* ÔöÇÔöÇ APIError ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
+class APIError extends Error {
+  constructor(message, status = 0) {
+    super(message);
+    this.name   = 'APIError';
+    this.status = status;
+    this.errors = {};
+  }
 }
 
-header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-header('Access-Control-Max-Age: 86400');
-header('Access-Control-Expose-Headers: Content-Type');
+/* ÔöÇÔöÇ Core API client (IIFE) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
+const API = (() => {
 
-// Handle preflight OPTIONS request immediately
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
-}
+  // ÔöÇÔöÇ BASE URL resolution ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // api.js lives at: <appRoot>/assets/js/api.js
+  // Used by pages at both <appRoot>/login.html and <appRoot>/assets/pages/*
+  // Strategy:
+  // 1. Calculate from script location (most reliable)
+  // 2. Calculate from current page location and remove /frontend/ if present
+  // 3. Final fallback with correct path
+  const BASE = (() => {
+    // ── 1. Manual override (highest priority) ────────────────────────────
+    if (window.EDUCORE_API_BASE) return window.EDUCORE_API_BASE.replace(/\/?$/, '/');
 
-
-header('Content-Type: application/json; charset=UTF-8');
-
-// ── Shared dependencies ────────────────────────────────────────────────────
-require_once __DIR__ . '/config/Database.php';
-require_once __DIR__ . '/config/Config.php';
-require_once __DIR__ . '/config/jwt.php';
-require_once __DIR__ . '/utils/JWT.php';
-require_once __DIR__ . '/config/TriggerCompat.php';
-require_once __DIR__ . '/middleware/AuthMiddleware.php';
-
-// ── Parse route ────────────────────────────────────────────────────────────
-$method = $_SERVER['REQUEST_METHOD'];
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-// Fallback to PATH_INFO if REQUEST_URI isn't giving us the path info
-if (!$uri || $uri === '/www.educore.com/backend/api.php') {
-    $uri = $_SERVER['PATH_INFO'] ?? $_SERVER['REQUEST_URI'];
-}
-
-$path = trim(preg_replace([
-    '#^.*?api\.php#',
-    '#^/?api/?#',
-], '', $uri), '/');
-
-$parts = explode('/', $path);  // e.g. ['student', 'session', 'active']
-
-function loadCtrl(string $name): void {
-    require_once __DIR__ . "/controllers/{$name}.php";
-}
-
-try {
-
-    // ══════════════════════════════════════════════════════════════════
-    // PING (health check — no auth required)
-    // ══════════════════════════════════════════════════════════════════
-    if ($parts[0] === 'ping') {
-        http_response_code(200);
-        echo json_encode(['status' => 'ok']);
-        exit;
+    // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
+    // On Vercel: use /api/ proxy (vercel.json rewrites to InfinityFree backend)
+    // This avoids CORS entirely — browser sees it as same-origin.
+    const BACKEND = 'https://ustededucore.rf.gd';
+    if (window.location.origin !== BACKEND) {
+      return '/api/';
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // INSTITUTIONS (public)
-    // ══════════════════════════════════════════════════════════════════
-    if ($parts[0] === 'institutions') {
-        loadCtrl('InstitutionController');
-        $ctrl = new InstitutionController();
-        $sub  = $parts[1] ?? '';
-        match (true) {
-            $method === 'GET' && $sub === 'search' => $ctrl->search(),
-            default => notFound(),
-        };
+    // ── 3. Same-origin: auto-detect from script location ─────────────────
+    try {
+      const src = (document.currentScript || {}).src || '';
+      if (src && src.startsWith('http')) {
+        const url   = new URL(src);
+        const parts = url.pathname.split('/').filter(Boolean);
+        parts.splice(-3); // remove api.js, js, assets
+        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') parts.pop();
+        const root = parts.length ? '/' + parts.join('/') + '/' : '/';
+        return root + 'backend/api.php/';
+      }
+    } catch (_) {}
+
+    // ── 4. Fallback: derive from current page URL ─────────────────────────
+    try {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      parts.pop();
+      while (parts.length > 1 &&
+             ['assets','pages','students','lecturers','frontend'].includes(parts[parts.length - 1])) {
+        parts.pop();
+      }
+      return '/' + parts.join('/') + '/backend/api.php/';
+    } catch (_) {}
+
+    return '/backend/api.php/';
+  })();
+
+  // ÔöÇÔöÇ Device fingerprint (stable per browser/device) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // Builds a SHA-256 hash from stable browser signals so the same
+  // physical device always produces the same hash across sessions.
+  // Falls back to a cached random UUID only if SubtleCrypto is
+  // unavailable (very old browsers / non-HTTPS).
+  async function getDeviceHash() {
+    const KEY = 'ec_device_hash';
+    const cached = localStorage.getItem(KEY);
+    if (cached) return cached;
+
+    let hash;
+    try {
+      const raw = [
+        navigator.userAgent,
+        navigator.platform,
+        screen.width,
+        screen.height,
+        screen.colorDepth,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        navigator.hardwareConcurrency ?? '',
+        navigator.language,
+      ].join('|');
+
+      const buf    = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+      hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+      // SubtleCrypto unavailable (non-HTTPS or very old browser) ÔÇö fall back to random UUID
+      hash = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = (Math.random() * 16) | 0;
+        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+      });
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // LECTURER AUTH  (auth/*)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'auth') {
-        loadCtrl('AuthController');
-        $ctrl = new AuthController();
-        $sub  = $parts[1] ?? '';
-        match (true) {
-            $method === 'POST' && $sub === 'register'            => $ctrl->register(),
-            $method === 'POST' && $sub === 'login'               => $ctrl->login(),
-            $method === 'POST' && $sub === 'logout'              => $ctrl->logout(),
-            $method === 'GET'  && $sub === 'me'                  => $ctrl->me(),
-            $method === 'GET'  && $sub === 'verify-email'        => $ctrl->verifyEmail(),
-            $method === 'POST' && $sub === 'resend-verification' => $ctrl->resendVerification(),
-            $method === 'POST' && $sub === 'forgot-password'     => $ctrl->forgotPassword(),
-            $method === 'POST' && $sub === 'reset-password'      => $ctrl->resetPassword(),
-            default => notFound(),
-        };
+    localStorage.setItem(KEY, hash);
+    return hash;
+  }
+
+  // Synchronous shim used by legacy callers ÔÇö returns cached hash or
+  // empty string on first load (async getDeviceHash() resolves it).
+  function getDeviceUUID() {
+    return localStorage.getItem('ec_device_hash') || '';
+  }
+
+  // ÔöÇÔöÇ Token stores ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const lecturerToken = {
+    get   : ()  => localStorage.getItem('ec_token'),
+    set   : (t) => localStorage.setItem('ec_token', t),
+    clear : ()  => {
+      localStorage.removeItem('ec_token');
+      localStorage.removeItem('ec_lecturer');
+    },
+  };
+
+  const studentToken = {
+    get   : ()  => localStorage.getItem('ec_student_token'),
+    set   : (t) => localStorage.setItem('ec_student_token', t),
+    clear : ()  => {
+      localStorage.removeItem('ec_student_token');
+      localStorage.removeItem('ec_student');
+      localStorage.removeItem('ec_student_id');
+    },
+  };
+
+  // ÔöÇÔöÇ Core fetch ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  async function request(method, endpoint, body = null, opts = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+
+    // Auto-attach the right token depending on namespace
+    const tk = opts.useStudentToken
+      ? studentToken.get()
+      : lecturerToken.get();
+    if (tk) headers['Authorization'] = `Bearer ${tk}`;
+
+    const config = { method, headers };
+    if (body !== null && method !== 'GET') {
+      config.body = JSON.stringify(body);
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // LECTURER  (lecturer/*)
-    //
-    // POST   lecturer/photo    — multipart upload; validates MIME+size, re-encodes via GD,
-    //                            strips EXIF, stores safe filename, updates lecturers table.
-    //                            Returns { photo_url, photo_updated_at }
-    // DELETE lecturer/photo    — deletes file from disk, NULLs profile_photo + _updated_at
-    //
-    // PATCH  lecturer/profile  — update editable profile fields (full_name, email,
-    //                            phone, title, bio).  staff_id, institution_id,
-    //                            department_id are read-only here.
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'lecturer') {
-        $lecSub = $parts[1] ?? '';
+    let res;
+    try {
+      // InfinityFree strips Authorization headers — append _token as fallback
+      const _url = tk ? BASE + endpoint + (endpoint.includes('?') ? '&' : '?') + '_token=' + encodeURIComponent(tk) : BASE + endpoint;
+      res = await fetch(_url, config);
+    } catch {
+      throw new APIError('Network error ÔÇö please check your connection.', 0);
+    }
 
-        if ($lecSub === 'photo') {
-            loadCtrl('LecturerPhotoController');
-            $ctrl = new LecturerPhotoController();
-            match ($method) {
-                'POST'   => $ctrl->upload(),
-                'DELETE' => $ctrl->remove(),
-                default  => notFound(),
-            };
-        } elseif ($lecSub === 'profile') {
-            // PATCH lecturer/profile — update name / email / phone / title / bio
-            loadCtrl('LecturerProfileController');
-            $ctrl = new LecturerProfileController();
-            match ($method) {
-                'GET'   => $ctrl->show(),
-                'PATCH' => $ctrl->update(),
-                default => notFound(),
-            };
-        } elseif ($lecSub === 'messages') {
-            // Lecturer DM helpers used by lec-messages.html
-            // Routes:
-            //   GET  lecturer/messages/dms
-            //   GET  lecturer/messages/students
-            //   POST lecturer/messages/dm/start
-            //   GET  lecturer/messages/dm/{dm_id}
-            //   POST lecturer/messages/dm/{dm_id}/send
-            loadCtrl('CourseMessageController');
-            $ctrl = new CourseMessageController();
-            $p2   = $parts[2] ?? '';
-            $p3   = $parts[3] ?? '';
-            $p4   = $parts[4] ?? '';
-            match (true) {
-                $method === 'GET'  && $p2 === 'dms'                              => $ctrl->getDirectMessages(),
-                $method === 'GET'  && $p2 === 'students'                         => $ctrl->getDmStudents(),
-                $method === 'POST' && $p2 === 'dm' && $p3 === 'start'            => $ctrl->startDm(),
-                $method === 'GET'  && $p2 === 'dm' && is_numeric($p3)            => $ctrl->getDmThread((int)$p3),
-                $method === 'POST' && $p2 === 'dm' && is_numeric($p3) && $p4 === 'send'
-                                                                                => $ctrl->sendDm((int)$p3),
-                default => notFound(),
-            };
+    if (res.status === 401 && !opts.skipAuthRedirect) {
+      // Only auto-redirect if there was a token (session expired)
+      // If no token, it's likely invalid credentials from login attempt
+      const hasToken = opts.useStudentToken 
+        ? studentToken.get() 
+        : lecturerToken.get();
+      
+      if (hasToken) {
+        // Token exists but API returned 401 = token expired
+        if (opts.useStudentToken) {
+          studentToken.clear();
+          const _stuRedir = window.location.origin === 'https://ustededucore.rf.gd' || window.location.origin === 'http://ustededucore.rf.gd'
+        ? '/frontend/student-login.html?expired=1'
+        : '/student-login.html?expired=1';
+      window.location.href = _stuRedir;
         } else {
-            notFound();
+          lecturerToken.clear();
+          const _loginRedir = window.location.origin === 'https://ustededucore.rf.gd' || window.location.origin === 'http://ustededucore.rf.gd'
+        ? '/frontend/login.html?expired=1'
+        : '/login.html?expired=1';
+      window.location.href = _loginRedir;
         }
+        throw new APIError('Session expired. Please log in again.', 401);
+      }
+      // No token but got 401 = bad credentials, let error pass through below
     }
 
-    // ══════════════════════════════════════════════════════════════════
-    // ALL STUDENT ROUTES  (student/*)
-    // parts: [0]=>'student', [1]=>sub, [2]=>id_or_action, [3]=>action
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'student') {
-        $sub    = $parts[1] ?? '';   // 'auth' | 'me' | 'profile' | 'security' | 'device' |
-                                     // 'session' | 'checkin' | 'classes' | 'attendance' |
-                                     // 'override' | 'notifications' | 'geofence' | 'audit'
-        $p2     = $parts[2] ?? '';   // numeric id, 'active', 'stats', etc.
-        $p3     = $parts[3] ?? '';   // 'attendance', 'read', etc.
-        $id     = is_numeric($p2) ? (int)$p2 : null;
+    let data;
+    try { data = await res.json(); }
+    catch { throw new APIError('Invalid server response.', res.status); }
 
-        // ── student/auth/* ────────────────────────────────────────────
-        if ($sub === 'auth') {
-            loadCtrl('StudentAuthController');
-            $ctrl   = new StudentAuthController();
-            $action = $p2; // register | login | verify-email | resend-verification | forgot-password | reset-password
-            match (true) {
-                $method === 'POST' && $action === 'register'            => $ctrl->register(),
-                $method === 'POST' && $action === 'login'               => $ctrl->login(),
-                $method === 'GET'  && $action === 'verify-email'        => $ctrl->verifyEmail(),
-                $method === 'POST' && $action === 'resend-verification' => $ctrl->resendVerification(),
-                $method === 'POST' && $action === 'forgot-password'     => $ctrl->forgotPassword(),
-                $method === 'POST' && $action === 'reset-password'      => $ctrl->resetPassword(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/me  ───────────────────────────────────────────────
-        elseif ($sub === 'me' && $method === 'GET') {
-            loadCtrl('StudentProfileController');
-            (new StudentProfileController())->getMe();
-        }
-
-        // ── student/profile  ──────────────────────────────────────────
-        elseif ($sub === 'profile') {
-            loadCtrl('StudentProfileController');
-            $ctrl = new StudentProfileController();
-            match ($method) {
-                'GET'   => $ctrl->getMe(),
-                'PATCH' => $ctrl->updateProfile(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/security  ─────────────────────────────────────────
-        elseif ($sub === 'security' && $method === 'GET') {
-            loadCtrl('StudentProfileController');
-            (new StudentProfileController())->getSecurity();
-        }
-
-        // ── student/audit  ────────────────────────────────────────────
-        elseif ($sub === 'audit' && $method === 'GET') {
-            loadCtrl('StudentProfileController');
-            (new StudentProfileController())->getAudit();
-        }
-
-        // ── student/device/*  ─────────────────────────────────────────
-        elseif ($sub === 'device') {
-            loadCtrl('StudentProfileController');
-            $ctrl   = new StudentProfileController();
-            $action = $p2; // 'remove' | 'unbind-request'
-            match (true) {
-                $method === 'POST' && $action === 'remove'         => $ctrl->removeDevice(),
-                $method === 'POST' && $action === 'unbind-request' => $ctrl->requestUnbind(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/photo  ────────────────────────────────────────────
-        elseif ($sub === 'photo') {
-            loadCtrl('StudentPhotoController');
-            $ctrl = new StudentPhotoController();
-            match ($method) {
-                'POST'   => $ctrl->upload(),
-                'DELETE' => $ctrl->remove(),
-                default  => notFound(),
-            };
-        }
-
-        // ── student/session/*  ───────────────────────────────────────
-        elseif ($sub === 'session') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            // p2 = 'active' OR numeric session_id
-            // p3 = 'geofence-map' | 'qr-current'
-            match (true) {
-                $method === 'GET' && $p2 === 'active'                  => $ctrl->getActiveSession(),
-                $method === 'GET' && $id && $p3 === 'geofence-map'     => $ctrl->getGeofenceMap($id),
-                $method === 'GET' && $id && $p3 === 'qr-current'       => $ctrl->getSessionQR($id),
-                default => notFound(),
-            };
-        }
-
-        // ── student/checkin/*  ───────────────────────────────────────
-        elseif ($sub === 'checkin') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            // POST checkin  /  GET checkin/history  /  GET checkin/receipt/{id}
-            $p4   = $parts[4] ?? ''; // receipt id if needed
-            match (true) {
-                $method === 'POST' && $p2 === ''          => $ctrl->checkin(),
-                $method === 'GET'  && $p2 === 'history'   => $ctrl->getHistory(),
-                $method === 'GET'  && $p2 === 'receipt' && is_numeric($p3)
-                                                          => $ctrl->getReceipt((int)$p3),
-                default => notFound(),
-            };
-        }
-
-        // ── student/classes/*  ───────────────────────────────────────
-        elseif ($sub === 'classes') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            match (true) {
-                $method === 'GET' && !$id                          => $ctrl->getClasses(),
-                $method === 'GET' && $id && $p3 === ''             => $ctrl->getClass($id),
-                $method === 'GET' && $id && $p3 === 'attendance'   => $ctrl->getClassAttendance($id),
-                default => notFound(),
-            };
-        }
-
-        // ── student/attendance/*  ────────────────────────────────────
-        elseif ($sub === 'attendance') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            match (true) {
-                $method === 'GET' && $p2 === ''       => $ctrl->getAttendance(),
-                $method === 'GET' && $p2 === 'stats'  => $ctrl->getStats(),
-                $method === 'GET' && $p2 === 'streak' => $ctrl->getStreak(),
-                $method === 'GET' && $p2 === 'risk'   => $ctrl->getRisk(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/override/*  ──────────────────────────────────────
-        elseif ($sub === 'override') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            match (true) {
-                $method === 'POST' && $p2 === 'request' => $ctrl->submitOverride(),
-                $method === 'GET'  && $p2 === 'history' => $ctrl->getOverrideHistory(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/notifications/*  ─────────────────────────────────
-        elseif ($sub === 'notifications') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            match (true) {
-                $method === 'GET'  && $p2 === ''               => $ctrl->getNotifications(),
-                $method === 'GET'  && $p2 === 'unread-count'   => $ctrl->unreadCount(),
-                $method === 'POST' && $p2 === 'read-all'       => $ctrl->markAllRead(),
-                $method === 'POST' && $id  && $p3 === 'read'   => $ctrl->markRead($id),
-                default => notFound(),
-            };
-        }
-
-        // ── student/geofence/*  ──────────────────────────────────────
-        elseif ($sub === 'geofence') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            match (true) {
-                $method === 'GET' && $p2 === 'logs' => $ctrl->getGeofenceLogs(),
-                default => notFound(),
-            };
-        }
-
-        // ── student/messages/*  ──────────────────────────────────────
-        // Route map:
-        //   GET  student/messages                   → getMessageChannels()  [unified list]
-        //   GET  student/messages/dms               → getDirectMessages()
-        //   GET  student/messages/members           → getMessageMembers()
-        //   POST student/messages/react             → reactToMessage()       [NEW]
-        //   POST student/messages/delete            → deleteMessage()
-        //   POST student/messages/dm/start          → startDirectMessage()
-        //   GET  student/messages/dm/{id}           → getDirectMessageThread(id)
-        //   POST student/messages/dm/{id}/send      → sendDirectMessage(id)
-        //   GET  student/messages/{class_id}        → getMessages(id)
-        //   POST student/messages/{class_id}        → sendMessage(id)
-        //   POST student/messages/{class_id}/read   → markChannelRead(id)   [NEW]
-        elseif ($sub === 'messages') {
-            loadCtrl('StudentDataController');
-            $ctrl = new StudentDataController();
-            $p4 = $parts[4] ?? '';
-            match (true) {
-                // Unified list (channels + DMs merged, sorted by last_time)
-                $method === 'GET'  && $p2 === ''
-                    => $ctrl->getMessageChannels(),
-
-                // DM thread list
-                $method === 'GET'  && $p2 === 'dms'
-                    => $ctrl->getDirectMessages(),
-
-                // Members for DM picker
-                $method === 'GET'  && $p2 === 'members'
-                    => $ctrl->getMessageMembers(),
-
-                // Toggle emoji reaction — POST student/messages/react
-                // Body: { message_id, emoji, context_type: 'channel'|'dm' }
-                // Returns: { success, emoji, count, reacted_by_me }
-                $method === 'POST' && $p2 === 'react'
-                    => $ctrl->reactToMessage(),
-
-                // Soft-delete — POST student/messages/delete
-                // Body: { message_id, context_type: 'channel'|'dm' }
-                $method === 'POST' && $p2 === 'delete'
-                    => $ctrl->deleteMessage(),
-
-                // Start or retrieve DM thread
-                $method === 'POST' && $p2 === 'dm' && $p3 === 'start'
-                    => $ctrl->startDirectMessage(),
-
-                // DM thread messages — GET student/messages/dm/{thread_id}?since={lastId}
-                $method === 'GET'  && $p2 === 'dm' && is_numeric($p3)
-                    => $ctrl->getDirectMessageThread((int)$p3),
-
-                // Send DM — POST student/messages/dm/{thread_id}/send
-                $method === 'POST' && $p2 === 'dm' && is_numeric($p3) && $p4 === 'send'
-                    => $ctrl->sendDirectMessage((int)$p3),
-
-                // Channel messages — GET student/messages/{class_id}?since={lastId}
-                $method === 'GET'  && $id
-                    => $ctrl->getMessages($id),
-
-                // Send to channel — POST student/messages/{class_id}
-                $method === 'POST' && $id && $p3 === ''
-                    => $ctrl->sendMessage($id),
-
-                // Mark channel read — POST student/messages/{class_id}/read
-                // Body: { up_to_message_id }  — clears unread badge
-                $method === 'POST' && $id && $p3 === 'read'
-                    => $ctrl->markChannelRead($id),
-
-                default => notFound(),
-            };
-        }
-
-        else { notFound(); }
+    if (!res.ok) {
+      const msg = data?.error || data?.message || `Error ${res.status}`;
+      const err = new APIError(msg, res.status);
+      err.errors = data?.errors || {};
+      throw err;
     }
-    
+    return data;
+  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // LECTURER DASHBOARD
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'dashboard') {
-        loadCtrl('DashboardController');
-        if ($method === 'GET') (new DashboardController())->index();
-        else notFound();
+  // ÔöÇÔöÇ Multipart upload ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  async function upload(endpoint, formData, opts = {}) {
+    const headers = {};
+    const tk = opts.useStudentToken
+      ? studentToken.get()
+      : lecturerToken.get();
+    if (tk) headers['Authorization'] = `Bearer ${tk}`;
+
+    let res;
+    try {
+      const _uploadUrl = tk ? BASE + endpoint + (endpoint.includes('?') ? '&' : '?') + '_token=' + encodeURIComponent(tk) : BASE + endpoint;
+      res = await fetch(_uploadUrl, { method: 'POST', headers, body: formData });
+    } catch {
+      throw new APIError('Upload failed ÔÇö check your connection.', 0);
     }
-
-    // ══════════════════════════════════════════════════════════════════
-    // CLASSES
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'classes') {
-        loadCtrl('ClassController');
-        $ctrl = new ClassController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $sub  = $parts[2] ?? null;
-        match (true) {
-            $method === 'GET'    && !$id                        => $ctrl->index(),
-            $method === 'POST'   && !$id                        => $ctrl->create(),
-            $method === 'GET'    && $id && !$sub                => $ctrl->show($id),
-            $method === 'PUT'    && $id && !$sub                => $ctrl->update($id),
-            $method === 'DELETE' && $id && !$sub                => $ctrl->delete($id),
-            $method === 'POST'   && $id && $sub === 'regen'     => $ctrl->regenJoinCode($id),
-            $method === 'GET'    && $id && $sub === 'students'  => $ctrl->students($id),
-            default => notFound(),
-        };
+    if (res.status === 401) {
+      lecturerToken.clear();
+      window.location.href = '/login.html?expired=1';
+      throw new APIError('Session expired.', 401);
     }
+    const data = await res.json();
+    if (!res.ok) throw new APIError(data?.error || 'Upload error.', res.status);
+    return data;
+  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // STUDENTS (lecturer-scoped roster)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'students') {
-        loadCtrl('StudentController');
-        $ctrl = new StudentController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $slug = $parts[1] ?? null;
-        $sub  = $parts[2] ?? null;
-        $act  = $parts[3] ?? null;
-        match (true) {
-            $method === 'GET'    && !$id && $slug !== 'lookup'                         => $ctrl->index(),
-            $method === 'GET'    && $slug === 'lookup'                                 => $ctrl->lookup(),
-            $method === 'GET'    && $id && !$sub                                       => $ctrl->show($id),
-            $method === 'PATCH'  && $id && !$sub                                       => $ctrl->updateStatus($id),
-            $method === 'GET'    && $id && $sub === 'biometrics' && !$act              => $ctrl->biometricStatus($id),
-            $method === 'POST'   && $id && $sub === 'biometrics' && $act === 'fingerprint' => $ctrl->enrollFingerprint($id),
-            $method === 'POST'   && $id && $sub === 'biometrics' && $act === 'face'    => $ctrl->enrollFace($id),
-            $method === 'DELETE' && $id && $sub === 'biometrics'                       => $ctrl->deleteBiometrics($id),
-            // Lecturer device reset for a student
-            $method === 'POST'   && $id && $sub === 'devices' && $act === 'reset'      => $ctrl->resetStudentDevices($id),
-            default => notFound(),
-        };
+  // ÔöÇÔöÇ HTTP sugar ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const get   = (ep, params, opts)  => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return request('GET', ep + qs, null, opts || {});
+  };
+  const post  = (ep, body, opts)    => request('POST',   ep, body,  opts || {});
+  const put   = (ep, body, opts)    => request('PUT',    ep, body,  opts || {});
+  const patch = (ep, body, opts)    => request('PATCH',  ep, body,  opts || {});
+  const del   = (ep, opts)          => request('DELETE', ep, null,  opts || {});
+
+  // ÔöÇÔöÇ Student-scoped sugar (auto-adds useStudentToken flag) ÔöÇÔöÇÔöÇÔöÇ
+  const SOPT = { useStudentToken: true };
+  const sget   = (ep, params) => get(ep, params, SOPT);
+  const spost  = (ep, body)   => post(ep, body, SOPT);
+  const spatch = (ep, body)   => patch(ep, body, SOPT);
+
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+  // LECTURER ENDPOINTS
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+  // ÔöÇÔöÇ Lecturer auth ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const auth = {
+    register           : body  => post('auth/register',             body),
+    login              : body  => post('auth/login',                body),
+    logout             : ()    => post('auth/logout',               {}),
+    me                 : ()    => get('auth/me'),
+    resendVerification : body  => post('auth/resend-verification',  body),
+    forgotPassword     : body  => post('auth/forgot-password',      body),
+    resetPassword      : body  => post('auth/reset-password',       body),
+  };
+
+  // ÔöÇÔöÇ Dashboard ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const dashboard = {
+    index : () => get('dashboard'),
+  };
+
+  // ÔöÇÔöÇ Classes ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const classes = {
+    list      : ()           => get('classes'),
+    get       : id           => get(`classes/${id}`),
+    create    : body         => post('classes', body),
+    update    : (id, body)   => put(`classes/${id}`, body),
+    delete    : id           => del(`classes/${id}`),
+    regenCode : id           => post(`classes/${id}/regen`, {}),
+    students  : (id, params) => get(`classes/${id}/students`, params),
+  };
+
+  // ÔöÇÔöÇ Sessions (live) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const sessions = {
+    list            : params => get('sessions', params),
+    open            : body  => post('attendance/session/open', body),
+    close           : id    => post(`sessions/${id}/close`, {}),
+    getOpen         : ()    => get('attendance/session/open'),
+    detail          : id    => get(`sessions/${id}`),
+    extend          : id    => post(`sessions/${id}/extend`, {}),
+    refreshGeofence : (id, body) => post(`sessions/${id}/refresh-geofence`, body),
+    rotateQR        : id    => patch(`sessions/${id}`, { rotate_qr: true }),
+    currentCode     : id    => get(`sessions/${id}/current-code`),
+    recentCheckins  : id    => get(`sessions/${id}/recent-checkins`),
+    liveStats       : id    => get(`sessions/${id}/live-stats`),
+  };
+
+  // ÔöÇÔöÇ Attendance records ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const attendance = {
+    record      : body         => post('attendance/record', body),
+    edit        : (id, body)   => patch(`attendance/record/${id}`, body),
+    summary     : params       => get('attendance/summary', params),
+    heatmap     : params       => get('attendance/heatmap', params),
+    syncPending : ()           => get('attendance/sync/pending'),
+    syncResolve : body         => post('attendance/sync/resolve', body),
+  };
+
+  // ÔöÇÔöÇ Student roster (lecturer-facing) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const students = {
+    list              : params      => get('students', params),
+    get               : id          => get(`students/${id}`),
+    lookup            : generatedId => get('students/lookup', { generated_id: generatedId }),
+    update            : (id, body)  => patch(`students/${id}`, body),
+    biometricStatus   : id          => get(`students/${id}/biometrics`),
+    enrollFingerprint : (id, body)  => post(`students/${id}/biometrics/fingerprint`, body),
+    enrollFace        : (id, body)  => post(`students/${id}/biometrics/face`, body),
+    deleteBiometrics  : id          => del(`students/${id}/biometrics`),
+  };
+
+  // ÔöÇÔöÇ Master list ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const masterList = {
+    list   : params   => get('master-list', params),
+    upload : formData => upload('master-list/upload', formData),
+    delete : id       => del(`master-list/${id}`),
+  };
+
+  // ÔöÇÔöÇ Override (lecturer actions) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const override = {
+    request        : body       => post('override/request', body),
+    getPending     : ()         => get('override/pending'),
+    approve        : (id, body) => post(`override/${id}/approve`, body ?? {}),
+    reject         : (id, body) => post(`override/${id}/reject`,  body ?? {}),
+    sessionHistory : sessId     => get(`override/session/${sessId}`),
+  };
+
+  // ÔöÇÔöÇ Offline sync ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const sync = {
+    index       : ()   => get('sync'),
+    push        : body => post('sync', body),
+    retry       : id   => post(`sync/${id}/retry`, {}),
+    clearFailed : ()   => post('sync/clear-failed', {}),
+  };
+
+  // ÔöÇÔöÇ Reports ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const reports = {
+    summary : params => get('reports/summary', params),
+    heatmap : params => get('reports/heatmap', params),
+    risk    : params => get('reports/risk', params),
+  };
+
+  // ÔöÇÔöÇ Settings ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const settings = {
+    get  : ()     => get('settings'),
+    save : body   => post('settings', body),
+  };
+
+  // ÔöÇÔöÇ Lecturer profile photo ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // POST   lecturer/photo  ÔÇö multipart upload; returns { photo_url, photo_updated_at }
+  // DELETE lecturer/photo  ÔÇö removes the file from disk and NULLs the DB column
+  const photo = {
+    upload : (formData) => upload('lecturer/photo', formData),
+    remove : ()         => del('lecturer/photo'),
+  };
+
+  // ÔöÇÔöÇ Lecturer profile (editable fields) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // GET   lecturer/profile  ÔÇö fetch full_name, email, phone, title, bio
+  // PATCH lecturer/profile  ÔÇö update those same editable fields
+  const lecturerProfile = {
+    get    : ()     => get('lecturer/profile'),
+    update : (body) => patch('lecturer/profile', body),
+  };
+
+  // ÔöÇÔöÇ Audit log ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const audit = {
+    list : params => get('audit', params),
+  };
+
+  // ÔöÇÔöÇ Notifications (lecturer) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const notifications = {
+    list        : params => get('notifications', params),
+    markRead    : id     => post(`notifications/${id}/read`, {}),
+    markAllRead : ()     => post('notifications/read-all', {}),
+  };
+
+  // ÔöÇÔöÇ Course Messages (lecturer) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // Endpoints: messages/{class_id}
+  //   GET  ?since={lastId}&limit=40  ÔÇö cursor-paginated history
+  //   POST                           ÔÇö send a message (body, is_broadcast, parent_id)
+  //   POST messages/{class_id}/read  ÔÇö mark messages read up to message_id
+  //   GET  messages/unread-counts    ÔÇö { channels: [{ class_id, unread }] }
+  //   POST messages/{msg_id}/react   ÔÇö toggle emoji reaction
+  //   DELETE messages/{msg_id}       ÔÇö soft-delete (lecturer only)
+  const messages = {
+    /**
+     * List messages for a channel (cursor-paginated).
+     * params: { since: lastMessageId, limit: 40 }
+     * Returns: { messages: [...] }  or  [ ... ]
+     */
+    list : (classId, since = 0, limit = 40) =>
+      get(`messages/${classId}`, { since, limit }),
+
+    /**
+     * Send a message to a course channel.
+     * body: { body: string, is_broadcast: 0|1, parent_id: int|null }
+     * Returns the new message object.
+     */
+    send : (classId, body) =>
+      post(`messages/${classId}`, body),
+
+    /**
+     * Batch-mark messages as read.
+     * Inserts read records up to (and including) upToMessageId.
+     */
+    markRead : (classId, upToMessageId) =>
+      post(`messages/${classId}/read`, { up_to_message_id: upToMessageId }),
+
+    /**
+     * Get unread counts for all channels.
+     * Returns: { channels: [{ class_id, unread }] }
+     */
+    unreadCounts : () =>
+      get('messages/unread-counts'),
+
+    /**
+     * Toggle an emoji reaction on a message.
+     * Adds the reaction if absent; removes it if present.
+     * body: { emoji: '­ƒæì' }
+     */
+    react : (messageId, emoji) =>
+      post(`messages/${messageId}/react`, { emoji }),
+
+    /**
+     * Soft-delete a message (lecturer only).
+     * Sets is_deleted = 1, deleted_by = 'lecturer'.
+     */
+    delete : (messageId) =>
+      del(`messages/${messageId}`),
+  };
+
+  // ÔöÇÔöÇ Course activities ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const activities = {
+    list   : params       => get('activities', params),
+    get    : id           => get(`activities/${id}`),
+    create : body         => post('activities', body),
+    update : (id, body)   => put(`activities/${id}`, body),
+    delete : id           => del(`activities/${id}`),
+  };
+
+  // ÔöÇÔöÇ Institutions (public, no auth) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  const institutions = {
+    search : q => get('institutions/search', { q }),
+  };
+
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+  // STUDENT ENDPOINTS (via api.php student/* routes)
+  // Used by student-login.html, student-signup.html,
+  // and students/dashboard.html via this file
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+  const studentAuth = {
+    register           : body  => spost('student/auth/register',            body),
+    login              : body  => spost('student/auth/login',               body),
+    resendVerification : email => spost('student/auth/resend-verification',  { email }),
+    forgotPassword     : email => spost('student/auth/forgot-password',      { email }),
+    resetPassword      : body  => spost('student/auth/reset-password',       body),
+  };
+
+  const studentProfile = {
+    getMe         : ()         => sget('student/me'),
+    get           : ()         => sget('student/profile'),
+    update        : body       => spatch('student/profile', body),
+    getSecurity   : ()         => sget('student/security'),
+    removeDevice  : (deviceId) => spost('student/device/remove', { device_id: deviceId }),
+    requestUnbind : ()         => spost('student/device/unbind-request', {}),
+    getAudit      : params     => sget('student/audit', params),
+  };
+
+  const studentClasses = {
+    list       : ()           => sget('student/classes'),
+    get        : id           => sget(`student/classes/${id}`),
+    attendance : (id, params) => sget(`student/classes/${id}/attendance`, params),
+  };
+
+  const studentSession = {
+    getActive   : ()  => sget('student/session/active'),
+    getGeofence : id  => sget(`student/session/${id}/geofence-map`),
+    getQR       : id  => sget(`student/session/${id}/qr-current`),
+  };
+
+  const studentCheckin = {
+    submit : body => spost('student/checkin', {
+      ...body,
+      device_uuid : getDeviceUUID(),
+    }),
+    getReceipt : attId  => sget(`student/checkin/receipt/${attId}`),
+    getHistory : params => sget('student/checkin/history', params),
+  };
+
+  const studentAttendance = {
+    list   : params => sget('student/attendance', params),
+    stats  : ()     => sget('student/attendance/stats'),
+    streak : ()     => sget('student/attendance/streak'),
+    risk   : ()     => sget('student/attendance/risk'),
+  };
+
+  const studentOverride = {
+    submit  : body   => spost('student/override/request', {
+      ...body,
+      device_uuid : getDeviceUUID(),
+    }),
+    history : params => sget('student/override/history', params),
+  };
+
+  const studentNotifications = {
+    list        : params => sget('student/notifications', params),
+    markRead    : id     => spost(`student/notifications/${id}/read`, {}),
+    markAllRead : ()     => spost('student/notifications/read-all', {}),
+    unreadCount : ()     => sget('student/notifications/unread-count'),
+  };
+
+  const studentGeofence = {
+    logs : params => sget('student/geofence/logs', params),
+  };
+
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+  // SESSION HELPERS
+  // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+  function saveLecturerSession(tokenStr, lecturerObj) {
+    lecturerToken.set(tokenStr);
+    localStorage.setItem('ec_lecturer', JSON.stringify(lecturerObj));
+  }
+
+  function saveStudentSession(tokenStr, studentObj) {
+    studentToken.set(tokenStr);
+    localStorage.setItem('ec_student', JSON.stringify(studentObj));
+    if (studentObj?.student_id) {
+      localStorage.setItem('ec_student_id', String(studentObj.student_id));
     }
+  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // MASTER-LIST
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'master-list') {
-        loadCtrl('MasterListController');
-        $ctrl = new MasterListController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $sub  = $parts[1] ?? null;
-        match (true) {
-            $method === 'GET'    && !$id             => $ctrl->index(),
-            $method === 'POST'   && $sub === 'upload' => $ctrl->upload(),
-            $method === 'DELETE' && $id              => $ctrl->delete($id),
-            default => notFound(),
-        };
-    }
+  function getStoredLecturer() {
+    try { return JSON.parse(localStorage.getItem('ec_lecturer')); }
+    catch { return null; }
+  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // ATTENDANCE (lecturer-scoped)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'attendance') {
-        loadCtrl('AttendanceController');
-        $ctrl   = new AttendanceController();
-        $sub    = $parts[1] ?? '';
-        $action = $parts[2] ?? null;
-        $id     = is_numeric($action ?? '') ? (int)$action : null;
-        match (true) {
-            $method === 'POST' && $sub === 'session' && $action === 'open'                    => $ctrl->openSession(),
-            $method === 'POST' && $sub === 'session' && $action === 'close' && isset($parts[3]) => $ctrl->closeSession((int)$parts[3]),
-            $method === 'GET'  && $sub === 'session' && $action === 'open'                    => $ctrl->getOpenSessions(),
-            $method === 'GET'  && $sub === 'session' && $id                                   => $ctrl->sessionDetail($id),
-            $method === 'POST' && $sub === 'record'  && !$id                                  => $ctrl->recordAttendance(),
-            $method === 'PATCH'&& $sub === 'record'  && $id                                   => $ctrl->editRecord($id),
-            $method === 'GET'  && $sub === 'summary'                                          => $ctrl->summary(),
-            $method === 'GET'  && $sub === 'heatmap'                                          => $ctrl->heatmap(),
-            $method === 'GET'  && $sub === 'sync' && $action === 'pending'                    => $ctrl->pendingSync(),
-            $method === 'POST' && $sub === 'sync' && $action === 'resolve'                    => $ctrl->resolveSync(),
-            default => notFound(),
-        };
-    }
+  function getStoredStudent() {
+    try { return JSON.parse(localStorage.getItem('ec_student')); }
+    catch { return null; }
+  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // SESSIONS (live — SessionController)
-    // GET  sessions            — list sessions; optional ?class_id= filter
-    // GET  sessions/{id}       — single session detail
-    // POST sessions/{id}/close — end a session
-    // ... (other sub-actions below)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'sessions') {
-        loadCtrl('SessionController');
-        $ctrl = new SessionController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $sub  = $parts[2] ?? null;
-        // GET /sessions or GET /sessions/{id}/*  — all other verbs require an id
-        if (!$id && $method !== 'GET') notFound();
-        match (true) {
-            $method === 'GET'   && !$id                         => $ctrl->index(),
-            $method === 'GET'   && $id && !$sub                 => $ctrl->show($id),
-            $method === 'POST'  && $id && $sub === 'close'      => $ctrl->close($id),
-            $method === 'POST'  && $id && $sub === 'extend'     => $ctrl->extend($id),
-            $method === 'POST'  && $id && $sub === 'refresh-geofence'
-                                                                => $ctrl->refreshGeofence($id, json_decode(file_get_contents('php://input'), true) ?? []),
-            $method === 'PATCH' && $id && !$sub                 => $ctrl->update($id, json_decode(file_get_contents('php://input'), true) ?? []),
-            $method === 'GET'   && $id && $sub === 'current-code'     => $ctrl->currentCode($id),
-            $method === 'GET'   && $id && $sub === 'recent-checkins'  => $ctrl->recentCheckins($id),
-            $method === 'GET'   && $id && $sub === 'live-stats'       => $ctrl->liveStats($id),
-            default => notFound(),
-        };
-    }
+  function clearLecturerSession() { lecturerToken.clear(); }
+  function clearStudentSession()  { studentToken.clear();  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // OVERRIDE (lecturer)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'override') {
-        loadCtrl('OverrideController');
-        $ctrl   = new OverrideController();
-        $sub    = $parts[1] ?? '';
-        $id     = is_numeric($sub) ? (int)$sub : null;
-        $action = $parts[2] ?? null;
-        $sessId = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : null;
-        match (true) {
-            $method === 'POST' && $sub === 'request'                    => $ctrl->submitRequest(),
-            $method === 'GET'  && $sub === 'pending'                    => $ctrl->getPending(),
-            $method === 'POST' && $id && $action === 'approve'          => $ctrl->approve($id),
-            $method === 'POST' && $id && $action === 'reject'           => $ctrl->reject($id),
-            $method === 'GET'  && $sub === 'session' && $sessId         => $ctrl->sessionHistory($sessId),
-            default => notFound(),
-        };
-    }
+  function isLecturerLoggedIn() { return !!lecturerToken.get(); }
+  function isStudentLoggedIn()  { return !!studentToken.get();  }
 
-    // ══════════════════════════════════════════════════════════════════
-    // SYNC
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'sync') {
-        loadCtrl('SyncController');
-        $ctrl = new SyncController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $sub  = $parts[1] ?? null;
-        $act  = $parts[2] ?? null;
-        match (true) {
-            $method === 'GET'  && !$id && $sub !== 'clear-failed' => $ctrl->index(),
-            $method === 'POST' && !$id && $sub !== 'clear-failed' => $ctrl->push(),
-            $method === 'POST' && $id  && $act === 'retry'        => $ctrl->retry($id),
-            $method === 'POST' && $sub === 'clear-failed'         => $ctrl->clearFailed(),
-            default => notFound(),
-        };
-    }
+  // ÔöÇÔöÇ Public surface ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  return {
+    // HTTP primitives
+    get, post, put, patch, del, upload, request,
 
-    // ══════════════════════════════════════════════════════════════════
-    // REPORTS
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'reports') {
-        loadCtrl('ReportController');
-        $ctrl = new ReportController();
-        $sub  = $parts[1] ?? '';
-        match (true) {
-            $method === 'GET' && $sub === 'summary' => $ctrl->summary(),
-            $method === 'GET' && $sub === 'heatmap' => $ctrl->heatmap(),
-            $method === 'GET' && $sub === 'risk'    => $ctrl->riskStudents(),
-            default => notFound(),
-        };
-    }
+    // Lecturer modules
+    auth, dashboard,
+    classes, sessions, attendance,
+    students, masterList,
+    override, sync,
+    reports, settings, audit,
+    notifications, messages, activities,
+    institutions, photo, lecturerProfile,
 
-    // ══════════════════════════════════════════════════════════════════
-    // SETTINGS
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'settings') {
-        loadCtrl('SettingsController');
-        $ctrl = new SettingsController();
-        match ($method) {
-            'GET'  => $ctrl->index(),
-            'POST' => $ctrl->save(),
-            default => notFound(),
-        };
-    }
+    // Student modules
+    studentAuth, studentProfile,
+    studentClasses, studentSession,
+    studentCheckin, studentAttendance,
+    studentOverride, studentNotifications,
+    studentGeofence,
 
-    // ══════════════════════════════════════════════════════════════════
-    // AUDIT
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'audit') {
-        loadCtrl('AuditController');
-        if ($method === 'GET') (new AuditController())->index();
-        else notFound();
-    }
+    // Session helpers
+    saveLecturerSession, saveStudentSession,
+    getStoredLecturer,   getStoredStudent,
+    clearLecturerSession, clearStudentSession,
+    isLecturerLoggedIn,  isStudentLoggedIn,
+    getDeviceUUID,
+    getDeviceHash,
 
-    // ══════════════════════════════════════════════════════════════════
-    // NOTIFICATIONS (lecturer)
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'notifications') {
-        loadCtrl('NotificationController');
-        $ctrl = new NotificationController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        $sub  = $parts[1] ?? null;
-        $act  = $parts[2] ?? null;
-        match (true) {
-            $method === 'GET'  && $sub === 'unread-count'       => $ctrl->unreadCount(),
-            $method === 'GET'  && !$id && $sub !== 'read-all' => $ctrl->index(),
-            $method === 'POST' && $id  && $act === 'read'     => $ctrl->markRead($id),
-            $method === 'POST' && $sub === 'read-all'         => $ctrl->markAllRead(),
-            default => notFound(),
-        };
-    }
+    // Token handles (for advanced use)
+    lecturerToken, studentToken,
+  };
 
-    // ══════════════════════════════════════════════════════════════════
-    // ACTIVITIES
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'activities') {
-        loadCtrl('ActivityController');
-        $ctrl = new ActivityController();
-        $id   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-        match (true) {
-            $method === 'GET'    && !$id => $ctrl->index(),
-            $method === 'POST'   && !$id => $ctrl->create(),
-            $method === 'GET'    && $id  => $ctrl->show($id),
-            $method === 'PUT'    && $id  => $ctrl->update($id),
-            $method === 'DELETE' && $id  => $ctrl->delete($id),
-            default => notFound(),
-        };
-    }
+})();
 
-    // ══════════════════════════════════════════════════════════════════
-    // COURSE MESSAGES  (lecturer JWT required)
-    // ══════════════════════════════════════════════════════════════════
-    // Route layout:
-    //   GET    messages/unread-counts              → unread badge data for all channels
-    //   GET    messages/{class_id}?since=&limit=   → paginated message history
-    //   POST   messages/{class_id}                 → send a message
-    //   POST   messages/{class_id}/read            → mark read up to message_id
-    //   POST   messages/{msg_id}/react             → toggle emoji reaction
-    //   DELETE messages/{msg_id}                   → soft-delete (lecturer only)
-    //
-    // Ambiguity resolution: parts[1] is EITHER a class_id (numeric, no sub)
-    // or a message_id (numeric, sub = 'react').
-    // 'unread-counts' is a string sentinel handled first.
-    // ══════════════════════════════════════════════════════════════════
-    elseif ($parts[0] === 'messages') {
-        loadCtrl('CourseMessageController');
-        $ctrl   = new CourseMessageController();
-        $p1     = $parts[1] ?? '';          // class_id | msg_id | 'unread-counts'
-        $p2     = $parts[2] ?? '';          // 'read' | 'react' | ''
-        $numId  = is_numeric($p1) ? (int)$p1 : null;
+/* ÔöÇÔöÇ Device detection helpers (shared by EduCoreAPI.student.login/register) ÔöÇÔöÇ */
+function _guessDeviceName() {
+  const ua = navigator.userAgent || '';
+  let os = 'Unknown';
+  if (/Android/i.test(ua))        os = 'Android';
+  else if (/iPhone/i.test(ua))    os = 'iPhone';
+  else if (/iPad/i.test(ua))      os = 'iPad';
+  else if (/Windows/i.test(ua))   os = 'Windows';
+  else if (/Macintosh/i.test(ua)) os = 'Mac';
+  else if (/Linux/i.test(ua))     os = 'Linux';
 
-        match (true) {
-            // GET messages/unread-counts
-            $method === 'GET'    && $p1 === 'unread-counts'
-                => $ctrl->unreadCounts(),
+  let br = 'Browser';
+  if (/Edg\//i.test(ua))          br = 'Edge';
+  else if (/OPR\//i.test(ua))     br = 'Opera';
+  else if (/Chrome/i.test(ua))    br = 'Chrome';
+  else if (/Firefox/i.test(ua))   br = 'Firefox';
+  else if (/Safari/i.test(ua))    br = 'Safari';
 
-            // GET messages/{class_id}?since=&limit=
-            $method === 'GET'    && $numId && $p2 === ''
-                => $ctrl->index($numId),
-
-            // POST messages/{class_id}   — send a message
-            $method === 'POST'   && $numId && $p2 === ''
-                => $ctrl->send($numId),
-
-            // POST messages/{class_id}/read   — batch mark read
-            $method === 'POST'   && $numId && $p2 === 'read'
-                => $ctrl->markRead($numId),
-
-            // POST messages/{msg_id}/react   — toggle reaction
-            $method === 'POST'   && $numId && $p2 === 'react'
-                => $ctrl->react($numId),
-
-            // DELETE messages/{msg_id}   — soft-delete
-            $method === 'DELETE' && $numId && $p2 === ''
-                => $ctrl->delete($numId),
-
-            default => notFound(),
-        };
-    }
-
-    else { notFound(); }
-
-} catch (Throwable $e) {
-    error_log('[EduCore API] Unhandled: ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
-    http_response_code(500);
-    echo json_encode(['error' => 'An unexpected server error occurred.']);
+  return `${os} / ${br}`;
 }
 
-function notFound(): never {
-    http_response_code(404);
-    echo json_encode(['error' => 'API endpoint not found.']);
-    exit;
+function _guessDeviceType() {
+  const ua = navigator.userAgent || '';
+  if (/Mobi|Android.*Mobile|iPhone/i.test(ua)) return 'mobile';
+  if (/iPad|Android(?!.*Mobile)/i.test(ua))    return 'tablet';
+  return 'desktop';
 }
+
+/* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+   EduCoreAPI ÔÇö compatibility namespace
+   HTML inline scripts call:
+     EduCoreAPI.lecturer.login(email, pw)
+     EduCoreAPI.lecturer.register({...})
+     EduCoreAPI.lecturer.forgotPassword(email)
+     EduCoreAPI.lecturer.redirectIfLoggedIn(url)
+     EduCoreAPI.student.login(sid, pw)
+     EduCoreAPI.student.register({...})
+     EduCoreAPI.student.forgotPassword(email)
+     EduCoreAPI.student.redirectIfLoggedIn(url)
+   ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */
+const EduCoreAPI = {
+
+  /* ÔöÇÔöÇ Lecturer ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
+  lecturer: {
+    /**
+     * Redirect to `url` if a valid lecturer token exists in localStorage.
+     * Called at page-load on login.html to skip the form for active sessions.
+     */
+    redirectIfLoggedIn(url) {
+      if (localStorage.getItem('ec_token')) {
+        window.location.href = url;
+      }
+    },
+
+    isLoggedIn() {
+      return !!localStorage.getItem('ec_token');
+    },
+
+    /**
+     * login.html calls: EduCoreAPI.lecturer.login(email, pw)
+     * On success: stores token + lecturer object, resolves.
+     * On failure: rejects with Error(message) so the form can show it.
+     */
+    async login(email, password) {
+      const data = await API.auth.login({ email, password });
+      // Backend returns { token, lecturer: { ... } }
+      API.saveLecturerSession(data.token, data.lecturer);
+      return data;
+    },
+
+    /**
+     * signup.html calls: EduCoreAPI.lecturer.register({ name, staff_id, email, password })
+     * On success: resolves (step 3 screen shown by HTML).
+     * On failure: rejects with Error(message).
+     */
+    async register(body) {
+      return API.auth.register(body);
+    },
+
+    /**
+     * login.html calls: EduCoreAPI.lecturer.forgotPassword(email)
+     * Returns the API response (success/error handled by modal).
+     */
+    async forgotPassword(email) {
+      return API.auth.forgotPassword({ email });
+    },
+
+    async logout() {
+      try { await API.auth.logout(); } catch { /* ignore */ }
+      API.clearLecturerSession();
+      window.location.href = '/frontend/login.html';
+    },
+  },
+
+  /* ÔöÇÔöÇ Student ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ */
+  student: {
+    /**
+     * Redirect to `url` if a valid student token exists.
+     * Called at page-load on student-login.html.
+     */
+    redirectIfLoggedIn(url) {
+      if (localStorage.getItem('ec_student_token')) {
+        window.location.href = url;
+      }
+    },
+
+    isLoggedIn() {
+      return !!localStorage.getItem('ec_student_token');
+    },
+
+    /**
+     * student-login.html calls: EduCoreAPI.student.login(sid, pw)
+     * sid = index_number or email (the input field labelled "Student ID or email")
+     * Injects device_uuid automatically.
+     */
+    async login(sid, password) {
+      const data = await API.studentAuth.login({
+        index_number : sid,
+        password,
+        device_uuid  : await API.getDeviceHash(),
+        device_name  : _guessDeviceName(),
+        device_type  : _guessDeviceType(),
+        browser      : navigator.userAgent || '',
+      });
+      API.saveStudentSession(data.token, data.student);
+      return data;
+    },
+
+    async register(body) {
+      return API.studentAuth.register({
+        ...body,
+        device_uuid : await API.getDeviceHash(),
+        device_name : _guessDeviceName(),
+        device_type : _guessDeviceType(),
+        browser     : navigator.userAgent || '',
+      });
+    },
+
+    /**
+     * student-login.html calls: EduCoreAPI.student.forgotPassword(email)
+     */
+    async forgotPassword(email) {
+      return API.studentAuth.forgotPassword(email);
+    },
+
+    /**
+     * Resend verification email.
+     */
+    async resendVerification(email) {
+      return API.studentAuth.resendVerification(email);
+    },
+
+    async logout() {
+      API.clearStudentSession();
+      window.location.href = '/frontend/student-login.html';
+    },
+  },
+};
+
+// Make EduCoreAPI globally accessible (for inline scripts that run after this file)
+window.EduCoreAPI = EduCoreAPI;
+window.API        = API;
