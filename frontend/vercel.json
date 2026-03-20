@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/backend/api.php/:path*",
       "destination": "https://ustededucore.rf.gd/backend/api.php/:path*"
+    },
+    {
+      "source": "/backend/:path*",
+      "destination": "https://ustededucore.rf.gd/backend/:path*"
     }
   ]
 }
