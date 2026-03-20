@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EduCore — Attendance</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0f0d0b;--bg2:#161310;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--indigo:#5b6bd4;--in2:#7b8dea;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:6px;--r2:10px;--r3:14px;--r4:18px;--sb:250px}
+[data-theme="light"]{--bg:#f2ece2;--bg2:#ebe3d8;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--go3:#e0a830;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88;--indigo:#4050b8;--in2:#5566d0}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+html{scroll-behavior:smooth}
+body{animation:fadeIn .4s ease-out}
+.cnt>*{animation:slideUp .5s ease-out backwards}
+.cnt>*:nth-child(2){animation-delay:.05s}
+.cnt>*:nth-child(3){animation-delay:.1s}
+.cnt>*:nth-child(4){animation-delay:.15s}
+.cnt>*:nth-child(5){animation-delay:.2s}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .3s ease,color .3s ease}
+a{color:inherit;text-decoration:none;transition:all .2s ease}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit}
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .3s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 13px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:9px}
+.b-ico{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25);transition:transform .2s ease}
+.b-ico:hover{transform:scale(1.05)}
+.b-ico svg{width:17px;height:17px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center;transition:all .2s ease;flex-shrink:0}
+.sb-x:hover{color:var(--tx);transform:rotate(90deg)}
+.sb-x svg{width:12px;height:12px;stroke-width:2}
+.role-chip{margin:10px 12px 4px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(91,107,212,.12);border:1px solid rgba(91,107,212,.25);color:var(--in2)}
+.role-chip svg{width:10px;height:10px}
+.nav-sect{padding:12px 9px 3px}
+.nav-sect-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:4px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;font-weight:500;transition:all .2s ease}
+.ni a svg{width:17px;height:17px;stroke-width:1.75;flex-shrink:0;transition:transform .2s ease}
+.ni a:hover{background:rgba(91,107,212,.07);color:var(--in2);transform:translateX(2px)}
+.ni a:hover svg{transform:scale(1.1)}
+.ni.on a{background:rgba(91,107,212,.10);border-left:2px solid var(--in2);padding-left:9px;color:var(--in2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.sb-ft{padding:13px 14px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;margin-top:auto}
+.ava{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden;cursor:pointer;transition:transform .2s ease}
+.ava:hover{transform:scale(1.05)}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.84rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.68rem;color:var(--dim);font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s ease;cursor:pointer}
+.lg svg{width:14px;height:14px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3);transform:rotate(15deg)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);animation:fadeIn .2s ease}
+.ov.on{display:block}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,2.5vw,1.75rem);background:rgba(15,13,11,.95);border-bottom:1px solid var(--bdr);backdrop-filter:blur(20px);gap:10px;transition:background .3s ease}
+[data-theme="light"] .tb{background:rgba(242,236,226,.95)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:8px}
+.mbt{display:none;width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center;transition:all .2s ease;flex-shrink:0}
+.mbt svg{width:17px;height:17px;stroke-width:2}
+.mbt:hover{color:var(--go2);border-color:var(--go2);transform:rotate(90deg)}
+.pgt{font-family:var(--fh);font-size:1.1rem;font-style:italic;color:var(--tx)}
+.srch{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:0 12px;height:36px;min-width:240px;max-width:360px;transition:all .3s ease}
+.srch:focus-within{border-color:rgba(91,107,212,.4);box-shadow:0 0 0 3px rgba(91,107,212,.1)}
+.srch svg{width:15px;height:15px;color:var(--dim);flex-shrink:0}
+.srch input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.875rem;color:var(--tx);width:100%}
+.srch input::placeholder{color:var(--dim)}
+.ib{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .2s ease;position:relative;flex-shrink:0;cursor:pointer}
+.ib svg{width:17px;height:17px;stroke-width:1.75}
+.ib:hover{color:var(--in2);border-color:rgba(91,107,212,.3);transform:translateY(-2px)}
+.prof-wrap{position:relative}
+.prof-btn{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:var(--r2);border:1px solid var(--bdr);background:var(--surf2);cursor:pointer;transition:all .2s ease}
+.prof-btn:hover{border-color:rgba(91,107,212,.3);transform:translateY(-1px)}
+.prof-av{width:30px;height:30px;border-radius:var(--r);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.prof-av img{width:100%;height:100%;object-fit:cover}
+.prof-nm{font-size:.875rem;font-weight:600;color:var(--tx);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof-btn svg{width:13px;height:13px;color:var(--dim);flex-shrink:0;transition:transform .3s ease}
+.prof-btn.open svg{transform:rotate(180deg)}
+.prof-dd{position:absolute;top:calc(100% + 6px);right:0;width:220px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden;z-index:400;animation:ddIn .2s var(--ez);display:none}
+.prof-dd.open{display:block}
+@keyframes ddIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.dd-head{padding:14px 16px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:11px}
+.dd-av{width:40px;height:40px;border-radius:var(--r2);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.dd-av img{width:100%;height:100%;object-fit:cover}
+.dd-nm{font-size:.92rem;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-id{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+.dd-dept{font-size:.7rem;color:var(--sub)}
+.dd-items{padding:5px}
+.dd-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;cursor:pointer;transition:all .2s ease;width:100%}
+.dd-item svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.dd-item:hover{background:rgba(91,107,212,.07);color:var(--in2);transform:translateX(2px)}
+.dd-item.danger:hover{background:rgba(200,88,50,.07);color:var(--rust)}
+.dd-sep{height:1px;background:var(--bdr2);margin:4px 5px}
+.cnt{padding:1.75rem clamp(1rem,3vw,2rem);max-width:1100px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;flex-wrap:wrap;gap:10px}
+.ph-t{font-family:var(--fh);font-size:1.5rem;font-style:italic;color:var(--tx)}
+.ph-s{font-size:.875rem;color:var(--sub)}
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.sk-line{height:14px;border-radius:var(--r)}
+.sk-line.sm{height:10px}
+.sk-line.lg{height:20px}
+.sk-block{border-radius:var(--r2)}
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.875rem;color:var(--tx);cursor:pointer;animation:ti .3s var(--ez);max-width:300px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+@keyframes ti{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.t svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--in2)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s ease;border:1px solid}
+.btn-indigo{background:rgba(91,107,212,.15);border-color:rgba(91,107,212,.35);color:var(--in2)}
+.btn-indigo:hover{background:rgba(91,107,212,.25);transform:translateY(-2px);box-shadow:0 4px 8px rgba(91,107,212,.2)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}
+.btn-out:hover{border-color:rgba(91,107,212,.3);color:var(--in2);transform:translateY(-2px)}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn-sm svg{width:13px;height:13px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:600;border:1px solid;transition:transform .2s ease}
+.chip:hover{transform:scale(1.05)}
+.chip.present{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.25);color:var(--te2)}
+.chip.absent{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--rust)}
+.chip.late{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.25);color:var(--go2)}
+.chip.excused{background:rgba(91,107,212,.1);border-color:rgba(91,107,212,.25);color:var(--in2)}
+.tbl-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;transition:all .3s ease}
+.tbl-wrap:hover{border-color:rgba(91,107,212,.2)}
+.tbl{width:100%;border-collapse:collapse;font-size:.875rem}
+.tbl th{padding:10px 16px;text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:var(--surf2);border-bottom:1px solid var(--bdr);white-space:nowrap}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr{transition:all .2s ease}
+.tbl tr:hover td{background:rgba(91,107,212,.05)}
+.tbl-title{font-family:var(--fh);font-size:.9rem;font-style:italic;color:var(--tx);padding:14px 16px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.fsel-wrap{position:relative}
+.fsel{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 28px 7px 12px;font-size:.8rem;color:var(--tx);outline:none;cursor:pointer;transition:all .2s ease;appearance:none;-webkit-appearance:none}
+.fsel:focus{border-color:rgba(91,107,212,.4);box-shadow:0 0 0 3px rgba(91,107,212,.1)}
+.fsel:hover{border-color:rgba(91,107,212,.2)}
+.fsel-wrap::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--dim);pointer-events:none}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;gap:12px}
+.empty svg{width:40px;height:40px;color:var(--dim);stroke-width:1.5}
+.empty-t{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--sub)}
+.empty-s{font-size:.82rem;color:var(--dim);max-width:280px}
+.rate-vis{display:flex;align-items:center;gap:20px;padding:18px;background:var(--surf);border:1px solid rgba(91,107,212,.18);border-radius:var(--r2);margin-bottom:1.4rem;flex-wrap:wrap;transition:all .3s ease}
+.rate-vis:hover{border-color:rgba(91,107,212,.3);transform:translateY(-2px)}
+.rate-info{flex:1;min-width:200px}
+.rate-pct{font-family:var(--fh);font-size:2rem;color:var(--tx);line-height:1;margin-bottom:3px}
+.rate-lbl{font-size:.8rem;color:var(--sub);margin-bottom:12px}
+.rate-bars{display:flex;flex-direction:column;gap:7px}
+.rbar-row{display:flex;align-items:center;gap:8px;font-size:.75rem}
+.rbar-lbl{width:55px;color:var(--sub);flex-shrink:0}
+.rbar-track{flex:1;height:5px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.rbar-fill{height:100%;border-radius:99px;transition:width .6s var(--ez)}
+.rbar-count{width:22px;text-align:right;color:var(--dim);font-family:var(--fm)}
+.meth-tag{font-size:.63rem;padding:2px 7px;border-radius:99px;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub);white-space:nowrap;transition:transform .2s ease}
+.meth-tag:hover{transform:scale(1.05)}
+.meth-tag.qr{background:rgba(91,107,212,.08);border-color:rgba(91,107,212,.2);color:var(--in2)}
+.meth-tag.manual{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.2);color:var(--go2)}
+.meth-tag.override{background:rgba(45,158,138,.08);border-color:rgba(45,158,138,.2);color:var(--te2)}
+.course-nm{font-size:.84rem;font-weight:600;color:var(--tx)}
+.course-cd{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+@media(max-width:768px){:root{--sb:270px}.sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}.main{margin-left:0}.mbt{display:flex}.srch{display:none}.prof-nm{display:none}.cnt{padding:1.25rem 1rem}}
+</style>
+</head>
+<body>
+<div class="pg">
+<aside class="sb" id="sb">
+  <div class="sb-hd"><div class="brand"><div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="b-nm">EduCore</div></div><button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Student</div>
+  <div class="nav-sect"><div class="nav-sect-label">My Space</div><nav class="nav">
+    <div class="ni"><a href="stu-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="stu-checkin.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Check-in</span></a></div>
+    <div class="ni"><a href="stu-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span class="nl">Override Requests</span></a></div>
+    <div class="ni"><a href="stu-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="stu-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">My Courses</span></a></div>
+    <div class="ni on"><a href="stu-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Account</div><nav class="nav">
+    <div class="ni"><a href="stu-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+  <div class="sb-ft">
+    <div class="ava" id="sb-av" onclick="location.href='stu-settings.html'">…</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-name">&nbsp;</div><div class="ui" id="sb-idx">&nbsp;</div></div>
+    <button class="lg" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov" onclick="closeSb()"></div>
+
+<div class="main">
+  <div class="tb">
+    <div class="tb-l">
+      <button class="mbt" onclick="openSb()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Attendance</span>
+    </div>
+    <div class="tb-r">
+      <div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search-input" placeholder="Search sessions…" oninput="filterRows()"></div>
+      <button class="ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+      <div class="prof-wrap">
+        <div class="prof-btn" id="prof-btn" onclick="toggleProf()"><div class="prof-av" id="prof-av">…</div><span class="prof-nm" id="prof-nm">…</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="prof-dd" id="prof-dd">
+          <div class="dd-head"><div class="dd-av" id="dd-av">…</div><div><div class="dd-nm" id="dd-nm">Loading…</div><div class="dd-id" id="dd-idx"></div><div class="dd-dept" id="dd-dept"></div></div></div>
+          <div class="dd-items">
+            <div class="dd-item" onclick="location.href='stu-settings.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>View Profile</div>
+            <div class="dd-sep"></div>
+            <div class="dd-item" onclick="toggleTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><span id="theme-lbl">Light Mode</span></div>
+            <div class="dd-sep"></div>
+            <div class="dd-item danger" id="btn-logout2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cnt">
+    <div class="ph">
+      <div><div class="ph-t">My Attendance</div><div class="ph-s" id="ph-sub">Loading records…</div></div>
+      <a href="stu-requests.html" class="btn btn-indigo btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Dispute a record</a>
+    </div>
+
+    <div class="rate-vis" id="rate-vis">
+      <div class="sk sk-block" style="width:90px;height:90px;border-radius:50%;flex-shrink:0"></div>
+      <div class="rate-info">
+        <div class="sk sk-line lg" style="width:120px;margin-bottom:6px">&nbsp;</div>
+        <div class="sk sk-line sm" style="width:200px;margin-bottom:14px">&nbsp;</div>
+        <div class="rate-bars">
+          <div class="rbar-row"><span class="rbar-lbl">Present</span><div class="rbar-track"><div class="rbar-fill sk" style="width:100%;height:5px"></div></div><span class="rbar-count">—</span></div>
+          <div class="rbar-row"><span class="rbar-lbl">Absent</span><div class="rbar-track"><div class="rbar-fill sk" style="width:100%;height:5px"></div></div><span class="rbar-count">—</span></div>
+          <div class="rbar-row"><span class="rbar-lbl">Late</span><div class="rbar-track"><div class="rbar-fill sk" style="width:100%;height:5px"></div></div><span class="rbar-count">—</span></div>
+          <div class="rbar-row"><span class="rbar-lbl">Excused</span><div class="rbar-track"><div class="rbar-fill sk" style="width:100%;height:5px"></div></div><span class="rbar-count">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <div class="fsel-wrap"><select class="fsel" id="filter-course" onchange="filterRows()"><option value="">All Courses</option></select></div>
+      <div class="fsel-wrap"><select class="fsel" id="filter-status" onchange="filterRows()">
+        <option value="">All Statuses</option>
+        <option value="present">Present</option>
+        <option value="absent">Absent</option>
+        <option value="late">Late</option>
+        <option value="excused">Excused</option>
+      </select></div>
+    </div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-title">
+        Session Records
+        <span id="row-count" style="font-size:.75rem;color:var(--sub);font-weight:400"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr>
+            <th>#</th><th>Course</th><th>Date</th><th>Time</th><th>Status</th><th>Method</th><th>Action</th>
+          </tr></thead>
+          <tbody id="att-tbody"></tbody>
+        </table>
+        <div id="att-skeleton" style="padding:0 16px">
+          <div style="padding:12px 0;border-bottom:1px solid var(--bdr2);display:flex;gap:12px"><span class="sk sk-line" style="width:100%">&nbsp;</span></div>
+          <div style="padding:12px 0;border-bottom:1px solid var(--bdr2);display:flex;gap:12px"><span class="sk sk-line" style="width:100%">&nbsp;</span></div>
+          <div style="padding:12px 0;border-bottom:1px solid var(--bdr2);display:flex;gap:12px"><span class="sk sk-line" style="width:100%">&nbsp;</span></div>
+          <div style="padding:12px 0;display:flex;gap:12px"><span class="sk sk-line" style="width:100%">&nbsp;</span></div>
+        </div>
+      </div>
+      <div class="empty" id="att-empty" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div class="empty-t">No records found</div>
+        <div class="empty-s" id="empty-msg">Your attendance records will appear here once sessions are recorded</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+
+<script src="../../js/student-api.js"></script>
+<script src="../../js/student-legacy-bridge.js"></script>
+<script>
+if(!StudentAPI.auth.requireAuth('/frontend/student-login.html')){}
+const $=id=>document.getElementById(id);
+function openSb(){$('sb').classList.add('on');$('ov').classList.add('on')}
+function closeSb(){$('sb').classList.remove('on');$('ov').classList.remove('on')}
+function toggleProf(){$('prof-btn').classList.toggle('open');$('prof-dd').classList.toggle('open')}
+document.addEventListener('click',e=>{const w=document.querySelector('.prof-wrap');if(w&&!w.contains(e.target)){$('prof-btn').classList.remove('open');$('prof-dd').classList.remove('open')}});
+function toggleTheme(){const h=document.documentElement,t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);$('theme-lbl').textContent=t==='dark'?'Light Mode':'Dark Mode';localStorage.setItem('edu-theme',t)}
+function toast(msg,type='ok'){const t=document.createElement('div');t.className='t '+type;const ic={ok:'<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>',in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${ic[type]||ic.ok}</svg>${msg}`;$('tw').appendChild(t);t.onclick=()=>t.remove();setTimeout(()=>t.remove(),3500)}
+function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML}
+function initials(n){return n?n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase():'?'}
+function setAv(el,src,name){el.innerHTML=src?`<img src="${esc(src)}" alt="">`:`${initials(name)}`}
+function doLogout(){StudentAPI.auth.logout();}
+$('btn-logout').onclick=doLogout; $('btn-logout2').onclick=doLogout;
+(()=>{const t=localStorage.getItem('edu-theme');if(t){document.documentElement.setAttribute('data-theme',t);if(t==='light')$('theme-lbl').textContent='Dark Mode'}})();
+
+let allRows=[];
+
+const chipMap={present:'<span class="chip present">Present</span>',absent:'<span class="chip absent">Absent</span>',late:'<span class="chip late">Late</span>',excused:'<span class="chip excused">Excused</span>'};
+const methMap={qr_code:'<span class="meth-tag qr">QR Code</span>',manual_code:'<span class="meth-tag manual">Manual</span>',manual_override:'<span class="meth-tag override">Override</span>'};
+
+async function loadIdentity(){
+  try{
+    const d=await StudentAPI.profile.getMe();
+    const name=d.student_name||'Student';
+    const photo=d.profile_photo||d.photo_url||'';
+    const idx=d.index_number||'N/A';
+    const program=d.program||'Program';
+    const level=d.level||'N/A';
+    setAv($('sb-av'),photo,name); $('sb-name').textContent=name.split(' ').slice(0,2).join(' '); $('sb-idx').textContent=idx;
+    setAv($('prof-av'),photo,name); $('prof-nm').textContent=name.split(' ')[0]||'Student';
+    setAv($('dd-av'),photo,name); $('dd-nm').textContent=name; $('dd-idx').textContent=idx; $('dd-dept').textContent=`${program} · Level ${level}`;
+  }catch(_){}
+}
+
+async function loadAttendance(){
+  try{
+    const [rowsRes, statsRes, classesRes] = await Promise.all([
+      StudentAPI.attendance.list({limit:500}),
+      StudentAPI.attendance.stats(),
+      StudentAPI.classes.list(),
+    ]);
+
+    const records = Array.isArray(rowsRes?.records) ? rowsRes.records : [];
+    const stats = statsRes?.stats || statsRes || {};
+    const courses = Array.isArray(classesRes?.classes) ? classesRes.classes : [];
+
+    $('att-skeleton').style.display='none';
+
+    buildSummary({
+      total_sessions: Number(stats.total||0),
+      present: Number(stats.present||0),
+      absent: Number(stats.absent||0),
+      late: Number(stats.late||0),
+      excused: Number(stats.excused||0),
+      attendance_pct: Number(stats.rate||0),
+      course_name: 'All courses',
+      semester: '',
+    });
+
+    courses.forEach(c=>{
+      const opt=document.createElement('option'); opt.value=c.class_id; opt.textContent=`${c.course_code} — ${c.class_name}`; $('filter-course').appendChild(opt);
+    });
+
+    allRows=records;
+    $('ph-sub').textContent=`${allRows.length} session${allRows.length===1?'':'s'} recorded`;
+    renderRows(allRows);
+  }catch(e){
+    $('att-skeleton').style.display='none';
+    $('att-empty').style.display='flex';
+    $('empty-msg').textContent='Could not load attendance records';
+    $('ph-sub').textContent='Error loading data';
+  }
+}
+
+function buildSummary(s){
+  if(!s){return;}
+  const total=s.total_sessions||0;
+  const pct=s.attendance_pct??0;
+  const vis=$('rate-vis');
+  vis.innerHTML=`
+    <div style="flex-shrink:0">
+      <svg width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="36" fill="none" stroke="var(--surf2)" stroke-width="8"/>
+        <circle cx="45" cy="45" r="36" fill="none" stroke="var(--in2)" stroke-width="8" stroke-linecap="round"
+          stroke-dasharray="226" stroke-dashoffset="${226-(226*pct/100)}" transform="rotate(-90 45 45)" style="transition:stroke-dashoffset 1.2s var(--ez)"/>
+        <text x="45" y="41" text-anchor="middle" fill="var(--tx)" font-family="var(--fh)" font-size="14" font-weight="600">${pct}%</text>
+        <text x="45" y="55" text-anchor="middle" fill="var(--sub)" font-family="var(--fb)" font-size="9">rate</text>
+      </svg>
+    </div>
+    <div class="rate-info">
+      <div class="rate-pct">${s.present??0} <span style="font-size:1rem;color:var(--sub)">/ ${total} sessions</span></div>
+      <div class="rate-lbl">${esc(s.course_name||'All courses')} · ${esc(s.semester||'')}</div>
+      <div class="rate-bars">
+        ${bar('Present',s.present,total,'var(--te2)')}
+        ${bar('Absent',s.absent,total,'var(--rust)')}
+        ${bar('Late',s.late,total,'var(--go2)')}
+        ${bar('Excused',s.excused,total,'var(--in2)')}
+      </div>
+    </div>`;
+}
+function bar(label,val,total,color){
+  const v=val??0; const pct=total?Math.round(v/total*100):0;
+  return `<div class="rbar-row"><span class="rbar-lbl">${label}</span><div class="rbar-track"><div class="rbar-fill" style="width:${pct}%;background:${color}"></div></div><span class="rbar-count">${v}</span></div>`;
+}
+
+function renderRows(rows){
+  const tbody=$('att-tbody'); tbody.innerHTML='';
+  if(!rows.length){$('att-empty').style.display='flex';$('row-count').textContent='0 records';return;}
+  $('att-empty').style.display='none';
+  $('row-count').textContent=`${rows.length} record${rows.length===1?'':'s'}`;
+  rows.forEach((row,idx)=>{
+    const tr=document.createElement('tr');
+    const canDispute=row.status==='absent'||row.status==='late';
+    const sessionNum=row.session_num??row.session_id??(idx+1);
+    const sessionTime=row.session_time||row.check_in_time||'—';
+    tr.innerHTML=`
+      <td style="font-family:var(--fm);font-size:.75rem;color:var(--dim)">#${esc(String(sessionNum))}</td>
+      <td><div class="course-nm">${esc(row.course_code)}</div><div class="course-cd">${esc(row.class_name)}</div></td>
+      <td style="font-family:var(--fm);font-size:.8rem;white-space:nowrap">${esc(row.session_date)}</td>
+      <td style="font-family:var(--fm);font-size:.8rem;white-space:nowrap">${esc(sessionTime)}</td>
+      <td>${chipMap[row.status]||`<span style="color:var(--dim)">${esc(row.status)}</span>`}</td>
+      <td>${row.verification_method?methMap[row.verification_method]||esc(row.verification_method):'<span style="color:var(--dim);font-size:.78rem">—</span>'}</td>
+      <td>${canDispute?`<a href="stu-requests.html?session=${row.session_id}" class="btn btn-out btn-sm" style="font-size:.72rem;padding:4px 10px">Dispute</a>`:'<span style="color:var(--dim);font-size:.78rem">—</span>'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterRows(){
+  const course=$('filter-course').value;
+  const status=$('filter-status').value;
+  const q=$('search-input').value.toLowerCase().trim();
+  const filtered=allRows.filter(row=>{
+    if(course&&String(row.class_id)!==course)return false;
+    if(status&&row.status!==status)return false;
+    if(q&&!`${row.class_name} ${row.course_code} ${row.session_date} ${row.status}`.toLowerCase().includes(q))return false;
+    return true;
+  });
+  renderRows(filtered);
+}
+
+loadIdentity(); loadAttendance();
+</script>
+<script src="../../js/stu-transition.js"></script>
+</body>
+</html>

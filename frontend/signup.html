@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#f5f0e8"/>
+<title>EduCore — Create Educator Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ──────────────────────────────────────────────────── */
+:root{
+  --cream:#f5f0e8; --cream2:#ede8de; --sand:#e8e0d0;
+  --rust:#c84b31;  --rust2:#e05c3a;
+  --coal:#1a1612;  --ink2:#5a5048; --stone:#8a7d72;
+  --gold:#c4973a;  --gold2:#e0b050;
+  --teal:#2a7a6e;  --teal2:#3d9e90;
+  --bg:var(--cream); --bg2:var(--cream2);
+  --surf:#fff;
+  --border:rgba(58,48,40,0.1); --border2:rgba(58,48,40,0.06);
+  --text:var(--coal); --muted:var(--ink2); --dim:var(--stone);
+  --accent:var(--rust); --accent2:var(--rust2);
+  --ff-h:'Playfair Display',Georgia,serif;
+  --ff-b:'DM Sans',system-ui,sans-serif;
+  --ff-m:'DM Mono',monospace;
+  --r:4px;
+  --ease:cubic-bezier(0.23,1,0.32,1);
+  --sh-lg:0 16px 48px rgba(0,0,0,0.12);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#16120e; --bg2:#1e1a15; --surf:#24201a;
+    --border:rgba(255,240,220,0.09); --border2:rgba(255,240,220,0.05);
+    --text:#f0e8dc; --muted:#a09080; --dim:#6a5c50;
+    --accent:#e06040; --accent2:#f07050;
+    --teal2:#50c0b0; --gold:#d4a840;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--ff-b);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+h1,h2,h3,h4{font-family:var(--ff-h);line-height:1.15;font-weight:500}
+p{color:var(--muted);line-height:1.7}
+
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12}
+.orb1{width:600px;height:600px;background:var(--accent);top:-200px;right:-100px;animation:drift 20s ease-in-out infinite}
+.orb2{width:500px;height:500px;background:var(--teal);bottom:-150px;left:-100px;animation:drift 16s ease-in-out infinite reverse}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,30px)}}
+
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:clamp(16px,3vh,22px) clamp(1.25rem,5vw,2.5rem);border-bottom:1px solid var(--border);background:rgba(245,240,232,0.82);backdrop-filter:blur(14px)}
+@media(prefers-color-scheme:dark){.nav-top{background:rgba(22,18,14,0.82)}}
+.nav-brand{display:flex;align-items:center;gap:11px}
+.nav-logo{width:38px;height:38px;border-radius:3px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--ff-h);font-weight:700;font-size:.85rem;color:#fff;box-shadow:0 2px 12px rgba(200,75,49,.25);font-style:italic}
+.nav-name{font-family:var(--ff-h);font-weight:500;font-size:1.05rem;font-style:italic}
+.nav-right{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nav-right a{color:var(--accent);font-weight:600;transition:color .2s;white-space:nowrap}
+.nav-right a:hover{color:var(--accent2)}
+
+.content{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:clamp(2rem,5vh,3.5rem) clamp(1rem,5vw,2.5rem)}
+.signup-wrap{width:100%;max-width:520px}
+
+/* card */
+.auth-card{background:var(--surf);border:1px solid var(--border);border-radius:6px;padding:clamp(1.75rem,5vw,2.5rem);box-shadow:var(--sh-lg);position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--teal2))}
+
+/* brand row */
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:clamp(1.25rem,4vh,1.75rem)}
+.brand-ico{width:44px;height:44px;border-radius:5px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(200,75,49,.25);flex-shrink:0;color:#fff}
+.brand-ico svg{width:20px;height:20px;stroke-width:1.75}
+.brand-name{font-family:var(--ff-h);font-size:1.1rem;font-weight:500;color:var(--text);font-style:italic}
+.brand-tag{font-size:.72rem;color:var(--dim)}
+
+/* steps bar */
+.steps-bar{display:flex;align-items:center;gap:0;margin-bottom:clamp(1.25rem,4vh,1.75rem)}
+.step-seg{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.step-seg:not(:last-child)::after{content:'';position:absolute;top:16px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border2);transition:background .4s}
+.step-seg.done::after{background:var(--accent)}
+.step-seg.active::after{background:linear-gradient(90deg,var(--accent),var(--border2))}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:var(--dim);transition:all .3s;position:relative;z-index:1;font-family:var(--ff-m)}
+.step-seg.active .step-circle{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 0 0 4px rgba(200,75,49,.12)}
+.step-seg.done .step-circle{border-color:var(--teal);background:var(--teal);color:#fff}
+.step-label{font-size:.65rem;color:var(--dim);font-weight:600;font-family:var(--ff-b);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.step-seg.active .step-label{color:var(--accent)}
+.step-seg.done .step-label{color:var(--teal2)}
+
+/* auth head */
+.auth-head{margin-bottom:clamp(1.25rem,4vh,1.5rem)}
+.auth-title{font-size:clamp(1.25rem,3vw,1.55rem);color:var(--text);margin-bottom:6px;letter-spacing:-.01em;font-weight:400}
+.auth-sub{font-size:.86rem;color:var(--muted);line-height:1.75}
+
+/* form */
+.auth-form{display:flex;flex-direction:column;gap:clamp(.85rem,2.5vh,1rem)}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--ff-b)}
+.fi-w{position:relative}
+.fi{width:100%;background:rgba(255,255,255,.5);border:1px solid var(--border);border-radius:3px;padding:.78rem 1rem;color:var(--text);font-size:.9rem;transition:all .2s;outline:none;-webkit-appearance:none;appearance:none}
+.fi::placeholder{color:var(--dim)}
+.fi:focus{border-color:var(--accent);background:rgba(200,75,49,.04);box-shadow:0 0 0 3px rgba(200,75,49,.08)}
+.fi.err{border-color:var(--accent)!important}
+.fi-r{padding-right:2.8rem}
+.fi-act{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--dim);background:none;border:none;cursor:pointer;padding:4px;transition:color .2s;display:flex;align-items:center}
+.fi-act:hover{color:var(--text)}
+.fi-act svg{width:17px;height:17px}
+.fe{font-size:.73rem;color:var(--accent);min-height:16px}
+.fglobal{font-size:.8rem;color:var(--accent);text-align:center;min-height:18px;font-weight:500}
+.fhint{font-size:.73rem;color:var(--dim);margin-top:3px}
+
+/* pw strength */
+.pw-strength{margin-top:6px;display:none}
+.pw-strength.show{display:block}
+.pw-track{height:3px;background:var(--border2);border-radius:999px;overflow:hidden;margin-bottom:5px}
+.pw-fill{height:100%;border-radius:999px;transition:all .35s;width:0}
+.pw-strength[data-s="weak"]   .pw-fill{width:30%;background:var(--accent)}
+.pw-strength[data-s="fair"]   .pw-fill{width:62%;background:var(--gold)}
+.pw-strength[data-s="strong"] .pw-fill{width:100%;background:var(--teal2)}
+.pw-lbl{font-size:.7rem;font-weight:600;font-family:var(--ff-b)}
+.pw-strength[data-s="weak"]   .pw-lbl{color:var(--accent)}
+.pw-strength[data-s="fair"]   .pw-lbl{color:var(--gold2)}
+.pw-strength[data-s="strong"] .pw-lbl{color:var(--teal2)}
+
+/* buttons */
+.btn-submit{width:100%;padding:clamp(.8rem,2.5vh,.95rem);border-radius:3px;font-family:var(--ff-b);font-weight:600;font-size:.9rem;color:#fff;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .22s var(--ease);box-shadow:0 2px 12px rgba(200,75,49,.25)}
+.btn-submit:hover:not(:disabled){transform:translateY(-1px);background:var(--accent2);box-shadow:0 6px 20px rgba(200,75,49,.35)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-submit svg{width:15px;height:15px;stroke-width:1.75}
+.btn-back{padding:.72rem 1.25rem;border-radius:3px;font-family:var(--ff-b);font-weight:600;font-size:.87rem;color:var(--muted);background:rgba(200,75,49,.06);border:1px solid rgba(200,75,49,.15);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap}
+.btn-back:hover{background:rgba(200,75,49,.12);color:var(--text)}
+.btn-row{display:flex;gap:10px;align-items:center}
+.btn-row .btn-submit{flex:1}
+
+.auth-foot{text-align:center;margin-top:1.25rem;font-size:.84rem;color:var(--muted)}
+.auth-foot a{color:var(--accent);font-weight:600;transition:color .2s}
+.auth-foot a:hover{color:var(--accent2)}
+.legal{font-size:.71rem;color:var(--dim);text-align:center;line-height:1.6;margin-top:.75rem}
+
+/* verify screen */
+.verify-screen{text-align:center;padding:.5rem 0}
+.verify-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,rgba(200,75,49,.1),rgba(42,122,110,.08));border:2px solid rgba(200,75,49,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;animation:pg 2.2s ease-in-out infinite}
+@keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(200,75,49,.25)}50%{box-shadow:0 0 0 16px rgba(200,75,49,0)}}
+.verify-icon svg{width:30px;height:30px;color:var(--accent);stroke-width:1.5}
+.verify-email-box{font-family:var(--ff-b);font-size:.9rem;font-weight:600;color:var(--accent);padding:10px 18px;background:rgba(200,75,49,.06);border:1px solid rgba(200,75,49,.15);border-radius:4px;margin:1rem auto;display:inline-block;word-break:break-all;max-width:100%}
+.resend-row{margin-top:1rem;font-size:.82rem;color:var(--dim)}
+.resend-btn{color:var(--accent);font-weight:600;background:none;border:none;cursor:pointer;font-family:inherit;font-size:.82rem;padding:0;transition:opacity .2s}
+.resend-btn:disabled{opacity:.45;cursor:not-allowed}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:540px){
+  .content{padding:1.25rem 1rem}
+  .auth-card{padding:1.5rem 1.25rem}
+}
+@media(max-width:380px){.step-label{display:none}}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+</div>
+
+<div class="page">
+  <nav class="nav-top">
+    <a class="nav-brand" href="index.html">
+      <div class="nav-logo">EC</div>
+      <div class="nav-name">EduCore</div>
+    </a>
+    <div class="nav-right">
+      <span>Already have an account?</span>
+      <a href="login.html">Sign in →</a>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="signup-wrap">
+      <div class="auth-card" id="signup-root"></div>
+      <div class="auth-foot">
+        Student? <a href="student-signup.html">Student registration →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/ui.js"></script>
+<script>
+(function(){
+  const root=document.getElementById('signup-root');
+  let step=1;
+  const state={name:'',email:'',staff_id:'',pw:''};
+
+  function _esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function fe(id,msg){const e=document.getElementById(id);if(e)e.textContent=msg}
+  function fi(id){const e=document.getElementById(id);if(e)e.classList.add('err')}
+  function clearErrs(){root.querySelectorAll('.fe').forEach(e=>e.textContent='');root.querySelectorAll('.fi').forEach(e=>e.classList.remove('err'))}
+
+  function stepsBar(){
+    const steps=[{n:1,l:'Profile'},{n:2,l:'Security'},{n:3,l:'Verify'}];
+    return `<div class="steps-bar">${steps.map(s=>{
+      const cls=s.n<step?'done':s.n===step?'active':'';
+      const icon=s.n<step?'✓':s.n;
+      return `<div class="step-seg ${cls}"><div class="step-circle">${icon}</div><div class="step-label">${s.l}</div></div>`;
+    }).join('')}</div>`;
+  }
+
+  function brandRow(){
+    return `<div class="auth-brand">
+      <div class="brand-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div>
+      <div><div class="brand-name">EduCore</div><div class="brand-tag">Educator Account Setup</div></div>
+    </div>`;
+  }
+
+  /* Step 1 */
+  function renderStep1(){
+    step=1;
+    root.innerHTML=`
+      ${brandRow()}
+      ${stepsBar()}
+      <div class="auth-head">
+        <h2 class="auth-title">Lecturer Identity</h2>
+        <p class="auth-sub">Establish your identity as an EduCore educator. This information appears in session reports.</p>
+      </div>
+      <form class="auth-form" id="s1-form" novalidate>
+        <div class="fg">
+          <label class="fl" for="r-name">Full Name</label>
+          <input class="fi" type="text" id="r-name" placeholder="Dr. Kwame Mensah" value="${_esc(state.name)}" autocomplete="name"/>
+          <span class="fe" id="r-name-err"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="r-staff">Staff ID</label>
+          <input class="fi" type="text" id="r-staff" placeholder="Institutional Staff ID" value="${_esc(state.staff_id)}"/>
+          <span class="fe" id="r-staff-err"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="r-email">Institutional Email</label>
+          <input class="fi" type="email" id="r-email" placeholder="you@institution.edu.gh" value="${_esc(state.email)}" autocomplete="email"/>
+          <span class="fe" id="r-email-err"></span>
+        </div>
+        <button type="submit" class="btn-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          Continue to Security
+        </button>
+      </form>
+      <div class="legal">By continuing you agree to EduCore's <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.</div>`;
+
+    document.getElementById('s1-form').addEventListener('submit',e=>{
+      e.preventDefault();clearErrs();
+      state.name=document.getElementById('r-name').value.trim();
+      state.staff_id=document.getElementById('r-staff').value.trim();
+      state.email=document.getElementById('r-email').value.trim();
+      let ok=true;
+      if(!state.name){fe('r-name-err','Full name is required');fi('r-name');ok=false;}
+      if(!state.staff_id){fe('r-staff-err','Staff ID is required');fi('r-staff');ok=false;}
+      if(!state.email){fe('r-email-err','Email is required');fi('r-email');ok=false;}
+      else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)){fe('r-email-err','Enter a valid email address');fi('r-email');ok=false;}
+      if(ok) renderStep2();
+    });
+  }
+
+  /* Step 2 */
+  function renderStep2(){
+    step=2;
+    root.innerHTML=`
+      ${brandRow()}
+      ${stepsBar()}
+      <div class="auth-head">
+        <h2 class="auth-title">Security Initialization</h2>
+        <p class="auth-sub">Create a strong password. This secures your account and all attendance records.</p>
+      </div>
+      <div class="auth-form">
+        <div class="fg">
+          <label class="fl" for="r-pw">Password</label>
+          <div class="fi-w">
+            <input class="fi fi-r" type="password" id="r-pw" placeholder="Minimum 8 characters"/>
+            <button type="button" class="fi-act" id="toggle-pw1" aria-label="Toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="pw-strength" id="pw-str">
+            <div class="pw-track"><div class="pw-fill"></div></div>
+            <div class="pw-lbl" id="pw-lbl"></div>
+          </div>
+          <span class="fe" id="r-pw-err"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="r-cpw">Confirm Password</label>
+          <div class="fi-w">
+            <input class="fi fi-r" type="password" id="r-cpw" placeholder="Repeat your password"/>
+            <button type="button" class="fi-act" id="toggle-pw2" aria-label="Toggle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="fe" id="r-cpw-err"></span>
+        </div>
+        <span class="fe fglobal" id="s2-global"></span>
+        <div class="btn-row">
+          <button class="btn-back" id="back-btn">← Back</button>
+          <button class="btn-submit" id="s2-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Create Account
+          </button>
+        </div>
+      </div>`;
+
+    /* pw strength */
+    const pwInput=document.getElementById('r-pw');
+    const pwStr=document.getElementById('pw-str');
+    const pwLbl=document.getElementById('pw-lbl');
+    function score(pw){let s=0;if(pw.length>=8)s++;if(pw.length>=12)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;return s;}
+    pwInput.addEventListener('input',()=>{
+      const s=score(pwInput.value);
+      const lvl=s<=1?'weak':s<=3?'fair':'strong';
+      const lbl=s<=1?'Weak':s<=3?'Fair':'Strong';
+      if(pwInput.value){pwStr.classList.add('show');pwStr.dataset.s=lvl;pwLbl.textContent=lbl;}
+      else{pwStr.classList.remove('show');}
+    });
+
+    attachEyeToggle('toggle-pw1','r-pw');
+    attachEyeToggle('toggle-pw2','r-cpw');
+
+    document.getElementById('back-btn').addEventListener('click',renderStep1);
+
+    document.getElementById('s2-btn').addEventListener('click',async()=>{
+      clearErrs();
+      const pw=document.getElementById('r-pw').value;
+      const cpw=document.getElementById('r-cpw').value;
+      if(pw.length<8){fe('r-pw-err','Password must be at least 8 characters');fi('r-pw');return;}
+      if(pw!==cpw){fe('r-cpw-err','Passwords do not match');fi('r-cpw');return;}
+      state.pw=pw;
+      const btn=document.getElementById('s2-btn');
+      setBtnLoading(btn,true,'Creating account…');
+      try{
+        await EduCoreAPI.lecturer.register({name:state.name,staff_id:state.staff_id,email:state.email,password:state.pw});
+        renderStep3();
+      }catch(err){
+        fe('s2-global',err.message||'Registration failed. Please try again.');
+        setBtnLoading(btn,false);
+      }
+    });
+  }
+
+  /* Step 3 */
+  function renderStep3(){
+    step=3;
+    root.innerHTML=`
+      ${brandRow()}
+      ${stepsBar()}
+      <div class="verify-screen">
+        <div class="verify-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h2 class="auth-title" style="margin-bottom:8px">Check your inbox</h2>
+        <p class="auth-sub">We sent a verification link to:</p>
+        <div class="verify-email-box">${_esc(state.email)}</div>
+        <p style="font-size:.85rem;color:var(--muted);line-height:1.75">Click the link in the email to activate your account. The link expires in 24 hours.</p>
+        <div style="margin-top:1.75rem">
+          <a href="login.html" class="btn-submit" style="text-decoration:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Go to Sign In
+          </a>
+        </div>
+      </div>`;
+  }
+
+  renderStep1();
+})();
+</script>
+</body>
+</html>

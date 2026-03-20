@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0f0d0b;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;
+  --bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);
+  --tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;
+  --gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;
+  --rust:#c85832;--ru2:#e06843;
+  --teal:#2d9e8a;--te2:#45bca5;
+  --fh:'Playfair Display',Georgia,serif;
+  --fb:'DM Sans',system-ui,sans-serif;
+  --fm:'DM Mono',monospace;
+  --ez:cubic-bezier(.23,1,.32,1);
+  --r:6px;--r2:10px;--r3:14px;--sb:250px;
+}
+[data-theme="light"]{
+  --bg:#f2ece2;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;
+  --bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);
+  --tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;
+  --gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s,color .25s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── SIDEBAR ────────────────────────────────────────────────────────────── */
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 13px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:8px}
+.b-ico{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25)}
+.b-ico svg{width:17px;height:17px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:26px;height:26px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center;transition:color .15s}
+.sb-x:hover{color:var(--tx)}
+.sb-x svg{width:13px;height:13px;stroke-width:2}
+.role-chip{margin:10px 12px 4px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}
+.role-chip svg{width:10px;height:10px}
+.nav-sect{padding:12px 9px 3px}
+.nav-sect-label{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;font-weight:500;transition:all .15s}
+.ni a svg{width:17px;height:17px;stroke-width:1.75;flex-shrink:0}
+.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}
+.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:9px;color:var(--go2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.pip{width:8px;height:8px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}
+.sb-ft{padding:13px 14px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;margin-top:auto}
+.ava{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.84rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.68rem;color:var(--dim);font-family:var(--fm)}
+.lg{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lg svg{width:14px;height:14px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.ov.on{display:block}
+
+/* ── TOPBAR ─────────────────────────────────────────────────────────────── */
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}
+[data-theme="light"] .tb{background:rgba(242,236,226,.92)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:8px}
+.mbt{display:none;width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center;transition:color .15s}
+.mbt svg{width:17px;height:17px;stroke-width:2}
+.mbt:hover{color:var(--go2)}
+.pgt{font-family:var(--fh);font-size:1.1rem;font-style:italic;color:var(--tx)}
+.ib{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;cursor:pointer}
+.ib svg{width:17px;height:17px;stroke-width:1.75}
+.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+
+/* ── SHARED ──────────────────────────────────────────────────────────────── */
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.875rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:300px}
+.t svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+.cnt{padding:1.75rem clamp(1rem,3vw,2rem);max-width:740px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;flex-wrap:wrap;gap:10px}
+.ph-t{font-family:var(--fh);font-size:1.5rem;font-style:italic;color:var(--tx)}
+.ph-s{font-size:.875rem;color:var(--sub);margin-top:1px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap}
+.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{color:var(--tx);border-color:rgba(200,150,60,.3)}
+.btn-rust{background:rgba(200,88,50,.1);border-color:rgba(200,88,50,.3);color:var(--ru2)}.btn-rust:hover{background:rgba(200,88,50,.2)}
+.btn-teal{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}.btn-teal:hover{background:rgba(45,158,138,.2)}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── SETTINGS CARD ───────────────────────────────────────────────────────── */
+.scard{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);overflow:hidden;margin-bottom:1.2rem}
+.sc-hd{padding:14px 18px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px}
+.sc-hd svg{width:16px;height:16px;color:var(--go2);stroke-width:2;flex-shrink:0}
+.sc-ht{font-size:.9rem;font-weight:600;color:var(--tx)}
+.sc-hs{font-size:.75rem;color:var(--sub);margin-top:1px}
+.sc-body{padding:18px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.fg:last-child{margin-bottom:0}
+.fl{font-size:.78rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+.fi{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:.75rem 1rem;color:var(--tx);font-size:.9rem;outline:none;font-family:var(--fb);transition:border-color .2s}
+.fi:focus{border-color:rgba(200,150,60,.45)}
+.fi::placeholder{color:var(--dim)}
+select.fi{cursor:pointer}
+textarea.fi{resize:vertical;min-height:80px;line-height:1.55}
+.fi[readonly]{opacity:.55;cursor:not-allowed}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frow3{display:grid;grid-template-columns:auto 1fr 1fr;gap:12px}
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type=range]{flex:1;accent-color:var(--go2);height:4px}
+.range-val{font-family:var(--fm);font-size:.82rem;color:var(--go2);min-width:38px;text-align:right;font-weight:700}
+
+/* ── PROFILE IDENTITY CARD ────────────────────────────────────────────────
+   Shows the read-only data the lecturer cannot change (institution, dept,
+   last login, account status, member since) alongside editable fields.   */
+.identity-card{
+  background:linear-gradient(135deg,rgba(200,150,60,.06),rgba(200,150,60,.02));
+  border:1px solid rgba(200,150,60,.16);
+  border-radius:var(--r2);
+  padding:16px 18px;
+  margin-bottom:1.2rem;
+  display:flex;align-items:flex-start;gap:16px;
+  position:relative;overflow:hidden;
+}
+.identity-card::before{
+  content:'';position:absolute;top:-50px;right:-50px;
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,150,60,.07),transparent 70%);
+  pointer-events:none;
+}
+.id-av{
+  width:72px;height:72px;border-radius:var(--r2);
+  background:linear-gradient(135deg,var(--gold),var(--go2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fh);font-size:1.4rem;font-style:italic;font-weight:700;
+  color:#1a1200;flex-shrink:0;
+  border:2px solid rgba(200,150,60,.3);overflow:hidden;
+}
+.id-av img{width:100%;height:100%;object-fit:cover}
+.id-info{flex:1;min-width:0}
+.id-name{font-family:var(--fh);font-size:1.15rem;color:var(--tx);margin-bottom:2px}
+.id-title-prefix{color:var(--go2)}
+.id-staffid{font-family:var(--fm);font-size:.72rem;color:var(--dim);margin-bottom:8px}
+.id-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.itag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.itag svg{width:10px;height:10px;flex-shrink:0;stroke-width:2}
+.itag.gold{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.2);color:var(--go2)}
+.itag.teal{background:rgba(45,158,138,.08);border-color:rgba(45,158,138,.2);color:var(--te2)}
+.id-meta-row{display:flex;gap:16px;flex-wrap:wrap}
+.id-meta-item{font-size:.72rem;color:var(--sub);display:flex;align-items:center;gap:4px}
+.id-meta-item svg{width:11px;height:11px;stroke-width:2;flex-shrink:0;color:var(--dim)}
+
+/* ── PHOTO UPLOAD ZONE ────────────────────────────────────────────────────
+   Drag-and-drop zone with crop/resize overlay inside the profile section. */
+.photo-section{
+  display:flex;align-items:flex-start;gap:20px;
+  padding:18px;
+  background:var(--surf2);border:1px solid var(--bdr);
+  border-radius:var(--r2);
+  margin-bottom:1.2rem;
+  flex-wrap:wrap;
+}
+
+/* The drop target / current photo display */
+.photo-drop-wrap{
+  position:relative;
+  width:100px;height:100px;
+  flex-shrink:0;
+}
+.photo-drop{
+  width:100px;height:100px;
+  border-radius:var(--r2);
+  border:2px dashed rgba(200,150,60,.35);
+  background:var(--surf);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:border-color .2s,background .2s;
+  overflow:hidden;
+  position:relative;
+}
+.photo-drop:hover,.photo-drop.drag-over{
+  border-color:var(--go2);
+  background:rgba(200,150,60,.06);
+}
+.photo-drop.drag-over{border-style:solid}
+.photo-drop-hint{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  font-size:.7rem;color:var(--dim);text-align:center;padding:8px;
+  pointer-events:none;
+}
+.photo-drop-hint svg{width:28px;height:28px;color:var(--dim);stroke-width:1.25}
+.photo-drop img{
+  width:100%;height:100%;object-fit:cover;
+  display:block;border-radius:calc(var(--r2) - 2px);
+}
+/* Hover overlay on photo when one is set */
+.photo-drop-overlay{
+  position:absolute;inset:0;
+  background:rgba(15,13,11,.65);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;font-size:.68rem;color:#fff;
+  opacity:0;transition:opacity .2s;
+  pointer-events:none;
+  border-radius:calc(var(--r2) - 2px);
+}
+.photo-drop-wrap:hover .photo-drop-overlay{opacity:1}
+.photo-drop-overlay svg{width:18px;height:18px;stroke-width:2}
+
+/* Right column: buttons + hints */
+.photo-actions{flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px}
+.photo-action-row{display:flex;gap:8px;flex-wrap:wrap}
+.photo-spec{font-size:.75rem;color:var(--dim);line-height:1.55}
+.photo-spec strong{color:var(--sub)}
+/* Remove link */
+.photo-remove{font-size:.75rem;color:var(--rust);cursor:pointer;transition:opacity .15s;display:none}
+.photo-remove:hover{opacity:.75}
+.photo-remove.visible{display:inline-flex;align-items:center;gap:4px}
+.photo-remove svg{width:12px;height:12px;stroke-width:2}
+
+/* ── CROP MODAL ────────────────────────────────────────────────────────────
+   Canvas-based crop + zoom/rotate picker.
+   Shown after image is selected (drop or click).
+   User drags the image to reposition, uses slider to zoom.             */
+.crop-modal-ov{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+  animation:fadeIn .18s;
+}
+.crop-modal-ov.open{display:flex}
+.crop-modal{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);
+  width:100%;max-width:420px;
+  box-shadow:0 28px 72px rgba(0,0,0,.6);
+  overflow:hidden;
+  animation:cropSlide .22s var(--ez);
+}
+@keyframes cropSlide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.crop-hd{
+  padding:14px 18px;border-bottom:1px solid var(--bdr2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.crop-title{font-family:var(--fh);font-size:1rem;color:var(--tx)}
+.crop-close{
+  width:28px;height:28px;border-radius:50%;border:1px solid var(--bdr);
+  color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;
+}
+.crop-close:hover{color:var(--tx)}
+.crop-close svg{width:13px;height:13px;stroke-width:2}
+/* The viewport: shows a circle mask over the image canvas */
+.crop-viewport{
+  position:relative;
+  width:100%;
+  padding-bottom:80%; /* roughly square */
+  background:var(--surf2);
+  overflow:hidden;
+  cursor:grab;
+  user-select:none;
+}
+.crop-viewport:active{cursor:grabbing}
+.crop-canvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  touch-action:none;
+}
+/* Circle guide overlay — shows the 400x400 crop area */
+.crop-circle-guide{
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle 38% at 50% 50%, transparent 99%, rgba(0,0,0,.55) 100%);
+}
+/* Grid inside the circle */
+.crop-circle-guide::after{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:76%;height:76%;
+  border:1.5px solid rgba(255,255,255,.2);
+  border-radius:50%;
+  box-shadow:
+    inset 0 0 0 calc(76%/3) transparent,
+    0 0 0 1px rgba(255,255,255,.08),
+    inset calc(76%/-3) 0 0 0 rgba(255,255,255,.07),
+    inset calc(76%/3) 0 0 0 rgba(255,255,255,.07);
+}
+.crop-controls{padding:14px 18px;border-top:1px solid var(--bdr2)}
+.crop-ctrl-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.crop-ctrl-lbl{font-size:.72rem;color:var(--sub);min-width:50px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.crop-ctrl-row input[type=range]{flex:1;accent-color:var(--go2)}
+.crop-ctrl-val{font-family:var(--fm);font-size:.72rem;color:var(--go2);min-width:36px;text-align:right}
+.crop-action-row{display:flex;gap:8px;justify-content:flex-end}
+/* Rotate buttons */
+.rot-btn{
+  width:32px;height:32px;border-radius:var(--r);
+  border:1px solid var(--bdr);color:var(--sub);background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;
+}
+.rot-btn:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+.rot-btn svg{width:14px;height:14px;stroke-width:2}
+
+/* ── TOGGLE ─────────────────────────────────────────────────────────────── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid var(--bdr2)}
+.toggle-row:last-child{border-bottom:none}
+.tr-info .tr-t{font-size:.875rem;font-weight:600;color:var(--tx)}
+.tr-info .tr-s{font-size:.75rem;color:var(--sub)}
+.toggle{width:38px;height:22px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--go2);border-color:var(--go2)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.toggle.on::after{transform:translateX(16px)}
+
+/* ── PASSWORD EYE TOGGLE ─────────────────────────────────────────────────── */
+.pw-wrap{position:relative}
+.pw-wrap .fi{padding-right:3rem}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--dim);cursor:pointer;transition:color .15s;padding:4px}
+.pw-eye:hover{color:var(--sub)}
+.pw-eye svg{width:16px;height:16px;stroke-width:1.75}
+/* Password strength bar */
+.pw-strength{height:3px;border-radius:99px;margin-top:5px;transition:width .3s,background .3s;background:var(--bdr);width:0}
+.pw-strength[data-s="1"]{width:25%;background:var(--rust)}
+.pw-strength[data-s="2"]{width:50%;background:var(--go2)}
+.pw-strength[data-s="3"]{width:75%;background:var(--te2)}
+.pw-strength[data-s="4"]{width:100%;background:var(--te2)}
+
+/* ── READ-ONLY PROFILE INFO GRID ─────────────────────────────────────────── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;margin-bottom:1.2rem}
+.ig-cell{padding:11px 14px;border-bottom:1px solid var(--bdr2);display:flex;flex-direction:column;gap:2px}
+.ig-cell:nth-child(odd){border-right:1px solid var(--bdr2)}
+.ig-cell:nth-last-child(-n+2){border-bottom:none}
+.ig-lbl{font-size:.68rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.09em}
+.ig-val{font-size:.875rem;color:var(--tx);font-family:var(--fm)}
+.ig-val.norm{font-family:var(--fb);font-weight:500}
+.badge-active{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.2);color:var(--te2);font-size:.68rem;font-weight:600}
+.badge-verified{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;background:rgba(200,150,60,.08);border:1px solid rgba(200,150,60,.2);color:var(--go2);font-size:.68rem;font-weight:600}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media(max-width:680px){
+  .frow{grid-template-columns:1fr}
+  .frow3{grid-template-columns:1fr 1fr}
+  .info-grid{grid-template-columns:1fr}
+  .ig-cell:nth-child(odd){border-right:none}
+  .ig-cell:nth-last-child(-n+2){border-bottom:1px solid var(--bdr2)}
+  .ig-cell:last-child{border-bottom:none}
+  .identity-card{flex-direction:column}
+  .photo-section{flex-direction:column}
+}
+@media(max-width:600px){
+  .sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}
+  .main{margin-left:0}.mbt{display:flex}
+  .cnt{padding:1.25rem 1rem}
+  .tb{height:54px;padding:0 1rem}
+  .crop-modal{max-width:100%}
+}
+@media(min-width:1440px){:root{--sb:270px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<!-- ══════════════════════════════ SIDEBAR ══════════════════════════════ -->
+<aside class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div class="b-nm">EduCore</div>
+    </div>
+    <button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>Lecturer</div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Active Ops</div><nav class="nav">
+    <div class="ni"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req" style="display:none">0</span></a></div>
+    <div class="ni"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+    <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Students</span></a></div>
+    <div class="ni"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Intelligence</div><nav class="nav">
+    <div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">System</div><nav class="nav">
+    <div class="ni on"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+
+  <div class="sb-ft">
+    <div class="ava" id="sb-ava">?</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-nm">—</div><div class="ui" id="sb-id">—</div></div>
+    <button class="lg" id="lg-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov"></div>
+
+<!-- ══════════════════════════════ MAIN ════════════════════════════════════ -->
+<div class="main">
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Settings</span>
+    </div>
+    <div class="tb-r">
+      <div class="ib" id="th-btn">
+        <svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+      <div class="ph">
+        <div>
+          <div class="ph-t">Settings</div>
+          <div class="ph-s">Profile, session rules &amp; SATE parameters</div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SECTION 1 — PROFILE
+           ══════════════════════════════════════════════════════════ -->
+      <div class="scard">
+        <div class="sc-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div><div class="sc-ht">Profile</div><div class="sc-hs">Your identity card &amp; editable information</div></div>
+        </div>
+        <div class="sc-body">
+
+          <!-- Identity card: read-only snapshot of who this lecturer is -->
+          <div class="identity-card" id="identity-card">
+            <div class="id-av" id="id-av">?</div>
+            <div class="id-info">
+              <div class="id-name" id="id-name">Loading…</div>
+              <div class="id-staffid" id="id-staffid">—</div>
+              <div class="id-tags" id="id-tags"></div>
+              <div class="id-meta-row" id="id-meta-row"></div>
+            </div>
+          </div>
+
+          <!-- Read-only account info grid -->
+          <div class="info-grid" id="info-grid">
+            <div class="ig-cell"><div class="ig-lbl">Institution</div><div class="ig-val norm" id="ig-inst">—</div></div>
+            <div class="ig-cell"><div class="ig-lbl">Department</div><div class="ig-val norm" id="ig-dept">—</div></div>
+            <div class="ig-cell"><div class="ig-lbl">Account Status</div><div class="ig-val" id="ig-status">—</div></div>
+            <div class="ig-cell"><div class="ig-lbl">Email Verified</div><div class="ig-val" id="ig-verified">—</div></div>
+            <div class="ig-cell"><div class="ig-lbl">Member Since</div><div class="ig-val norm" id="ig-joined">—</div></div>
+            <div class="ig-cell"><div class="ig-lbl">Last Login</div><div class="ig-val norm" id="ig-login">—</div></div>
+          </div>
+
+          <!-- ── PHOTO UPLOAD ZONE ───────────────────────────────── -->
+          <div class="photo-section">
+            <!-- Drop target -->
+            <div class="photo-drop-wrap">
+              <div class="photo-drop" id="photo-drop" title="Click or drag & drop a photo">
+                <div class="photo-drop-hint" id="photo-drop-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Drag &amp; drop or click
+                </div>
+              </div>
+              <div class="photo-drop-overlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Change photo
+              </div>
+            </div>
+
+            <!-- Upload controls + spec text -->
+            <div class="photo-actions">
+              <div class="photo-action-row">
+                <label class="btn btn-out" for="photo-file-input" style="font-size:.82rem;padding:7px 14px;cursor:pointer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload Photo
+                </label>
+                <input type="file" id="photo-file-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+                <button class="btn btn-rust photo-remove" id="photo-remove-btn" style="font-size:.82rem;padding:7px 14px" title="Remove current photo">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                  Remove
+                </button>
+              </div>
+              <p class="photo-spec">
+                <strong>Drag & drop</strong> an image onto the box, or click <strong>Upload Photo</strong>.<br>
+                After selecting, you can <strong>zoom</strong> and <strong>drag to reposition</strong> before saving.<br>
+                Accepted: JPG, PNG, WebP · Max 3 MB · Output: 400×400 px
+              </p>
+            </div>
+          </div>
+
+          <!-- Editable fields -->
+          <div class="frow3" style="margin-bottom:1rem">
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Title</label>
+              <select class="fi" id="f-title">
+                <option value="">None</option>
+                <option value="Dr.">Dr.</option>
+                <option value="Prof.">Prof.</option>
+                <option value="Mr.">Mr.</option>
+                <option value="Mrs.">Mrs.</option>
+                <option value="Ms.">Ms.</option>
+                <option value="Rev.">Rev.</option>
+                <option value="Eng.">Eng.</option>
+              </select>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Full Name</label>
+              <input type="text" class="fi" id="f-name" placeholder="Your full name"/>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Staff ID</label>
+              <input type="text" class="fi" id="f-staffid" placeholder="Staff ID" readonly/>
+            </div>
+          </div>
+          <div class="frow" style="margin-bottom:1rem">
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Email Address</label>
+              <input type="email" class="fi" id="f-email" placeholder="your@email.com"/>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label class="fl">Phone</label>
+              <input type="tel" class="fi" id="f-phone" placeholder="+233 244 000 000"/>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Bio <span style="color:var(--dim);font-weight:400;text-transform:none;letter-spacing:0"> — short professional biography</span></label>
+            <textarea class="fi" id="f-bio" placeholder="e.g. Lecturer in Computer Science with a focus on software engineering and AI…" rows="3"></textarea>
+          </div>
+          <button class="btn btn-gold" id="save-profile-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SECTION 2 — CHANGE PASSWORD
+           ══════════════════════════════════════════════════════════ -->
+      <div class="scard">
+        <div class="sc-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <div><div class="sc-ht">Change Password</div><div class="sc-hs">Keep your account secure</div></div>
+        </div>
+        <div class="sc-body">
+          <div class="fg">
+            <label class="fl">Current Password</label>
+            <div class="pw-wrap">
+              <input type="password" class="fi" id="f-cur-pw" placeholder="Current password" autocomplete="current-password"/>
+              <span class="pw-eye" id="eye-cur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">New Password</label>
+              <div class="pw-wrap">
+                <input type="password" class="fi" id="f-new-pw" placeholder="Minimum 8 characters" autocomplete="new-password"/>
+                <span class="pw-eye" id="eye-new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+              </div>
+              <div class="pw-strength" id="pw-strength"></div>
+            </div>
+            <div class="fg">
+              <label class="fl">Confirm</label>
+              <div class="pw-wrap">
+                <input type="password" class="fi" id="f-conf-pw" placeholder="Repeat new password" autocomplete="new-password"/>
+                <span class="pw-eye" id="eye-conf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-out" id="save-pw-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Update Password
+          </button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SECTION 3 — SESSION CONFIGURATION
+           ══════════════════════════════════════════════════════════ -->
+      <div class="scard">
+        <div class="sc-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div><div class="sc-ht">Session Configuration</div><div class="sc-hs">QR rotation speed, grace periods, geofence radius &amp; SATE layers</div></div>
+        </div>
+        <div class="sc-body">
+          <div class="fg">
+            <label class="fl">QR Rotation Speed</label>
+            <div class="range-row">
+              <input type="range" id="qr-speed" min="10" max="60" value="15" step="5">
+              <span class="range-val" id="qr-speed-val">15s</span>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Late Threshold (min after start)</label>
+              <input type="number" class="fi" id="f-late" placeholder="e.g. 15" min="1" max="60" value="15"/>
+            </div>
+            <div class="fg">
+              <label class="fl">Absent Threshold (minutes)</label>
+              <input type="number" class="fi" id="f-absent" placeholder="e.g. 30" min="1" max="120" value="30"/>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Default Geofence Radius</label>
+            <select class="fi" id="f-geo">
+              <option value="20">20m — Strict Single Room</option>
+              <option value="30" selected>30m — Standard Lecture Hall</option>
+              <option value="50">50m — Building Level</option>
+              <option value="100">100m — Campus Wide</option>
+            </select>
+          </div>
+          <div style="border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;margin-bottom:1rem">
+            <div class="toggle-row">
+              <div class="tr-info"><div class="tr-t">Require Password on Check-in</div><div class="tr-s">Layer 6 of SATE — student must re-enter password to check in</div></div>
+              <div class="toggle on" id="tog-pw" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-info"><div class="tr-t">GPS Strict Mode</div><div class="tr-s">Reject check-ins from students beyond the geofence radius</div></div>
+              <div class="toggle on" id="tog-gps" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-info"><div class="tr-t">Email Notifications</div><div class="tr-s">Receive alerts for override requests and attendance anomalies</div></div>
+              <div class="toggle on" id="tog-notif" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+          <button class="btn btn-gold" id="save-sess-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Session Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           SECTION 4 — DANGER ZONE
+           ══════════════════════════════════════════════════════════ -->
+      <div class="scard" style="border-color:rgba(200,88,50,.2)">
+        <div class="sc-hd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><div class="sc-ht" style="color:var(--ru2)">Danger Zone</div><div class="sc-hs">Irreversible actions</div></div>
+        </div>
+        <div class="sc-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div><div style="font-size:.875rem;font-weight:600;color:var(--tx)">Sign Out All Devices</div><div style="font-size:.78rem;color:var(--sub)">Invalidates all active sessions immediately</div></div>
+            <button class="btn btn-rust" id="signout-all-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- .cnt -->
+  </main>
+</div><!-- .main -->
+</div><!-- .pg -->
+
+<!-- ══════════════════════════ CROP MODAL ══════════════════════════════════ -->
+<div class="crop-modal-ov" id="crop-modal-ov">
+  <div class="crop-modal">
+    <div class="crop-hd">
+      <span class="crop-title">Adjust Your Photo</span>
+      <button class="crop-close" id="crop-cancel-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <!-- Canvas viewport: drag to pan, slider to zoom -->
+    <div class="crop-viewport" id="crop-viewport">
+      <canvas class="crop-canvas" id="crop-canvas"></canvas>
+      <div class="crop-circle-guide"></div>
+    </div>
+    <div class="crop-controls">
+      <div class="crop-ctrl-row">
+        <span class="crop-ctrl-lbl">Zoom</span>
+        <input type="range" id="crop-zoom" min="10" max="300" value="100" step="1">
+        <span class="crop-ctrl-val" id="crop-zoom-val">100%</span>
+      </div>
+      <div class="crop-ctrl-row">
+        <span class="crop-ctrl-lbl">Rotate</span>
+        <input type="range" id="crop-rotate" min="-180" max="180" value="0" step="1">
+        <span class="crop-ctrl-val" id="crop-rotate-val">0°</span>
+        <button class="rot-btn" id="rot-ccw" title="−90°"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg></button>
+        <button class="rot-btn" id="rot-cw" title="+90°"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 11-2.13-9.36L23 10"/></svg></button>
+      </div>
+      <div class="crop-action-row">
+        <button class="btn btn-out" id="crop-cancel-btn2" style="font-size:.82rem;padding:7px 14px">Cancel</button>
+        <button class="btn btn-gold" id="crop-save-btn" style="font-size:.82rem;padding:7px 18px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Photo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tw" id="tw"></div>
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   lec-settings.html — page controller
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function e(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function ini(n){ return n?n.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase():'?'; }
+function toast(m,t='ok'){
+  const ic={ok:'<polyline points="20 6 9 17 4 12"/>',er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>',in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};
+  const tw=document.getElementById('tw'),d=document.createElement('div');
+  d.className=`t ${t}`;
+  d.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${ic[t]||ic.in}</svg><span>${e(m)}</span>`;
+  tw.appendChild(d); d.onclick=()=>d.remove(); setTimeout(()=>d.remove(),4000);
+}
+function fmtDate(ts){ if(!ts)return '—'; const d=new Date(ts); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtDateTime(ts){ if(!ts)return '—'; const d=new Date(ts); return d.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+// ── LecPage boot — called by lec-dashboard.js after auth/me resolves ─────
+window.LecPage = {
+  async boot(lec) {
+    // ── Identity card ──────────────────────────────────────────────────────
+    const name  = lec.full_name || '';
+    const title = lec.title     || '';
+    const initls = ini(name);
+
+    // Big identity card avatar
+    const idAv = document.getElementById('id-av');
+    const photo = lec.profile_photo || lec.photo;
+    if (photo) {
+      let photoPath = photo;
+      if (!photoPath.startsWith('http') && !photoPath.startsWith('/')) {
+        photoPath = '/backend/' + photoPath;
+      }
+      const img = new Image(); img.src = photoPath + (lec.profile_photo_updated_at ? '?v='+new Date(lec.profile_photo_updated_at).getTime() : '');
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+      img.onerror = () => { idAv.textContent = initls; };
+      idAv.textContent = ''; idAv.appendChild(img);
+    } else { idAv.textContent = initls; }
+
+    // Also set sidebar + photo drop
+    _syncAllAvatars(lec);
+
+    document.getElementById('id-name').innerHTML =
+      (title ? `<span class="id-title-prefix">${e(title)} </span>` : '') + e(name);
+    document.getElementById('id-staffid').textContent = lec.staff_id ? '#' + lec.staff_id : '—';
+
+    // Tags: department + institution type
+    const tagsEl = document.getElementById('id-tags');
+    tagsEl.innerHTML = '';
+    if (lec.department_name) tagsEl.innerHTML += `<span class="itag gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg>${e(lec.department_name)}</span>`;
+    if (lec.institution_name) tagsEl.innerHTML += `<span class="itag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>${e(lec.institution_name)}</span>`;
+
+    // Meta: email + phone
+    const metaEl = document.getElementById('id-meta-row');
+    metaEl.innerHTML =
+      `<div class="id-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${e(lec.email||'—')}</div>` +
+      (lec.phone ? `<div class="id-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.8 19.79 19.79 0 01.15 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-.85a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>${e(lec.phone)}</div>` : '');
+
+    // Read-only info grid
+    document.getElementById('ig-inst').textContent     = lec.institution_name || '—';
+    document.getElementById('ig-dept').textContent     = lec.department_name  || 'Not assigned';
+    document.getElementById('ig-joined').textContent   = fmtDate(lec.created_at);
+    document.getElementById('ig-login').textContent    = fmtDateTime(lec.last_login);
+    document.getElementById('ig-status').innerHTML     = lec.is_active !== false && lec.is_active !== 0
+      ? '<span class="badge-active"><span class="badge-dot"></span>Active</span>'
+      : '<span style="color:var(--rust)">Suspended</span>';
+    document.getElementById('ig-verified').innerHTML   = lec.email_verified
+      ? '<span class="badge-verified"><span class="badge-dot"></span>Verified</span>'
+      : '<span style="color:var(--dim)">Not verified</span>';
+
+    // ── Editable fields ────────────────────────────────────────────────────
+    const titleSel = document.getElementById('f-title');
+    if (title) titleSel.value = title;
+    document.getElementById('f-name').value    = name;
+    document.getElementById('f-email').value   = lec.email    || '';
+    document.getElementById('f-staffid').value = lec.staff_id || '';
+    document.getElementById('f-phone').value   = lec.phone    || '';
+    document.getElementById('f-bio').value     = lec.bio      || '';
+
+    // Show/hide remove button based on whether photo exists
+    if (photo) document.getElementById('photo-remove-btn').classList.add('visible');
+
+    // ── Session config ─────────────────────────────────────────────────────
+    try {
+      const res = await API.settings.get();
+      const s = res.settings || res || {};
+      if (s.qr_expiry_seconds)        { document.getElementById('qr-speed').value = s.qr_expiry_seconds; document.getElementById('qr-speed-val').textContent = s.qr_expiry_seconds + 's'; }
+      if (s.late_threshold_minutes)   document.getElementById('f-late').value   = s.late_threshold_minutes;
+      if (s.absent_threshold_minutes) document.getElementById('f-absent').value = s.absent_threshold_minutes;
+      if (s.geofence_radius_meters)   document.getElementById('f-geo').value    = s.geofence_radius_meters;
+      if (s.require_password  != null && !s.require_password)  document.getElementById('tog-pw').classList.remove('on');
+      if (s.gps_strict        != null && !s.gps_strict)        document.getElementById('tog-gps').classList.remove('on');
+      if (s.email_notifications != null && !s.email_notifications) document.getElementById('tog-notif').classList.remove('on');
+    } catch {}
+  }
+};
+
+// ── Sync all avatar elements from lecturer data ─────────────────────────
+function _syncAllAvatars(lec) {
+  const initls = ini(lec.full_name || '');
+  const photo  = lec.profile_photo || lec.photo;
+  let photoPath = photo;
+  if (photoPath && !photoPath.startsWith('http') && !photoPath.startsWith('/')) {
+    photoPath = '/backend/' + photoPath;
+  }
+  const photoUrl = photoPath ? photoPath + (lec.profile_photo_updated_at ? '?v=' + new Date(lec.profile_photo_updated_at).getTime() : '') : null;
+
+  ['sb-ava'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    el.textContent = '';
+    if (photoUrl) { const img = new Image(); img.src = photoUrl; img.style.cssText='width:100%;height:100%;object-fit:cover'; img.onerror=()=>{el.textContent=initls;}; el.appendChild(img); }
+    else { el.textContent = initls; }
+  });
+
+  // Photo drop zone
+  const drop = document.getElementById('photo-drop');
+  const hint = document.getElementById('photo-drop-hint');
+  if (photoUrl) {
+    drop.innerHTML = `<img src="${photoUrl}" alt="Profile photo">`;
+    drop.title = 'Click or drag & drop to change photo';
+    hint.style.display = 'none';
+    document.getElementById('photo-remove-btn').classList.add('visible');
+  } else {
+    hint.style.display = '';
+    document.getElementById('photo-remove-btn').classList.remove('visible');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// CROP ENGINE — canvas-based drag + zoom + rotate cropper
+// ─────────────────────────────────────────────────────────────────────────
+let _cropImg = null;
+let _cropScale = 1;        // zoom scale
+let _cropRotate = 0;       // degrees
+let _cropOffX = 0;         // pan offset X (image centre X in canvas space)
+let _cropOffY = 0;         // pan offset Y
+let _cropDragging = false;
+let _cropDragStart = { x: 0, y: 0 };
+const CROP_OUT_SIZE = 400; // output JPEG size (px)
+
+const _canvas   = document.getElementById('crop-canvas');
+const _ctx      = _canvas.getContext('2d');
+const _viewport = document.getElementById('crop-viewport');
+
+function _initCrop(imgEl) {
+  _cropImg     = imgEl;
+  _cropRotate  = 0;
+  _cropOffX    = 0;
+  _cropOffY    = 0;
+
+  // Fit image to viewport initially — set scale so image fills the circle
+  const vw = _viewport.clientWidth, vh = _viewport.clientHeight;
+  _canvas.width  = vw; _canvas.height = vh;
+
+  const minDim = Math.min(vw, vh);
+  const imgMin = Math.min(imgEl.naturalWidth, imgEl.naturalHeight);
+  _cropScale = (minDim * 0.76) / imgMin;
+  if (_cropScale < 0.1) _cropScale = 0.1;
+  if (_cropScale > 8)   _cropScale = 8;
+
+  document.getElementById('crop-zoom').value     = Math.round(_cropScale * 100);
+  document.getElementById('crop-zoom-val').textContent = Math.round(_cropScale * 100) + '%';
+  document.getElementById('crop-rotate').value   = 0;
+  document.getElementById('crop-rotate-val').textContent = '0°';
+  _drawCrop();
+}
+
+function _drawCrop() {
+  if (!_cropImg) return;
+  const vw = _canvas.width, vh = _canvas.height;
+  _ctx.clearRect(0, 0, vw, vh);
+  _ctx.save();
+  _ctx.translate(vw / 2 + _cropOffX, vh / 2 + _cropOffY);
+  _ctx.rotate(_cropRotate * Math.PI / 180);
+  _ctx.scale(_cropScale, _cropScale);
+  _ctx.drawImage(_cropImg, -_cropImg.naturalWidth / 2, -_cropImg.naturalHeight / 2);
+  _ctx.restore();
+}
+
+// Drag to pan
+_viewport.addEventListener('pointerdown', ev => {
+  _cropDragging = true;
+  _cropDragStart = { x: ev.clientX - _cropOffX, y: ev.clientY - _cropOffY };
+  _viewport.setPointerCapture(ev.pointerId);
+});
+_viewport.addEventListener('pointermove', ev => {
+  if (!_cropDragging) return;
+  _cropOffX = ev.clientX - _cropDragStart.x;
+  _cropOffY = ev.clientY - _cropDragStart.y;
+  _drawCrop();
+});
+_viewport.addEventListener('pointerup',   () => { _cropDragging = false; });
+_viewport.addEventListener('pointercancel', () => { _cropDragging = false; });
+
+// Pinch-to-zoom on touch
+let _pinchDist0 = null, _pinchScale0 = 1;
+_viewport.addEventListener('touchstart', ev => {
+  if (ev.touches.length === 2) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX;
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY;
+    _pinchDist0 = Math.sqrt(dx*dx+dy*dy); _pinchScale0 = _cropScale;
+  }
+}, { passive: true });
+_viewport.addEventListener('touchmove', ev => {
+  if (ev.touches.length === 2 && _pinchDist0) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX;
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    _cropScale = Math.max(0.1, Math.min(8, _pinchScale0 * (dist / _pinchDist0)));
+    document.getElementById('crop-zoom').value = Math.round(_cropScale * 100);
+    document.getElementById('crop-zoom-val').textContent = Math.round(_cropScale * 100) + '%';
+    _drawCrop();
+  }
+}, { passive: true });
+_viewport.addEventListener('touchend', () => { _pinchDist0 = null; });
+
+// Scroll-to-zoom
+_viewport.addEventListener('wheel', ev => {
+  ev.preventDefault();
+  _cropScale = Math.max(0.1, Math.min(8, _cropScale * (ev.deltaY < 0 ? 1.08 : 0.93)));
+  document.getElementById('crop-zoom').value = Math.round(_cropScale * 100);
+  document.getElementById('crop-zoom-val').textContent = Math.round(_cropScale * 100) + '%';
+  _drawCrop();
+}, { passive: false });
+
+// Zoom slider
+document.getElementById('crop-zoom').oninput = function () {
+  _cropScale = this.value / 100;
+  document.getElementById('crop-zoom-val').textContent = this.value + '%';
+  _drawCrop();
+};
+// Rotate slider
+document.getElementById('crop-rotate').oninput = function () {
+  _cropRotate = parseInt(this.value);
+  document.getElementById('crop-rotate-val').textContent = this.value + '°';
+  _drawCrop();
+};
+// Rotate buttons
+document.getElementById('rot-ccw').onclick = () => {
+  _cropRotate = ((_cropRotate - 90) % 360);
+  document.getElementById('crop-rotate').value = _cropRotate;
+  document.getElementById('crop-rotate-val').textContent = _cropRotate + '°';
+  _drawCrop();
+};
+document.getElementById('rot-cw').onclick = () => {
+  _cropRotate = ((_cropRotate + 90) % 360);
+  document.getElementById('crop-rotate').value = _cropRotate;
+  document.getElementById('crop-rotate-val').textContent = _cropRotate + '°';
+  _drawCrop();
+};
+
+// Open / close crop modal
+function _openCropModal(imgEl) {
+  document.getElementById('crop-modal-ov').classList.add('open');
+  // Re-measure canvas size after modal opens
+  requestAnimationFrame(() => {
+    const vw = _viewport.clientWidth, vh = _viewport.clientHeight;
+    _canvas.width = vw; _canvas.height = vh;
+    _initCrop(imgEl);
+  });
+}
+function _closeCropModal() {
+  document.getElementById('crop-modal-ov').classList.remove('open');
+}
+document.getElementById('crop-cancel-btn').onclick  = _closeCropModal;
+document.getElementById('crop-cancel-btn2').onclick = _closeCropModal;
+document.getElementById('crop-modal-ov').onclick = ev => { if (ev.target === ev.currentTarget) _closeCropModal(); };
+
+// ── Save crop → upload to API ─────────────────────────────────────────────
+document.getElementById('crop-save-btn').onclick = async () => {
+  if (!_cropImg) return;
+  const btn = document.getElementById('crop-save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:13px;height:13px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div> Saving…';
+
+  try {
+    // Render final crop to an off-screen 400×400 canvas
+    const out = document.createElement('canvas');
+    out.width = CROP_OUT_SIZE; out.height = CROP_OUT_SIZE;
+    const octx = out.getContext('2d');
+
+    // We need to know the circle radius in the viewport canvas
+    const vw = _canvas.width, vh = _canvas.height;
+    const circleR = Math.min(vw, vh) * 0.38; // matches the 76% diameter circle guide
+
+    // Map viewport circle region → 400x400 output
+    const srcX = vw / 2 + _cropOffX - circleR;
+    const srcY = vh / 2 + _cropOffY - circleR;
+
+    // Redraw at higher resolution by rebuilding transform
+    octx.save();
+    octx.translate(CROP_OUT_SIZE / 2, CROP_OUT_SIZE / 2);
+    // Scale factor: output px per viewport px within the circle
+    const scaleFactor = CROP_OUT_SIZE / (circleR * 2);
+    octx.scale(scaleFactor, scaleFactor);
+    octx.translate(-vw/2 - _cropOffX, -vh/2 - _cropOffY);
+    // Re-apply the crop transform
+    octx.translate(vw / 2 + _cropOffX, vh / 2 + _cropOffY);
+    octx.rotate(_cropRotate * Math.PI / 180);
+    octx.scale(_cropScale, _cropScale);
+    octx.drawImage(_cropImg, -_cropImg.naturalWidth / 2, -_cropImg.naturalHeight / 2);
+    octx.restore();
+
+    // Convert to blob
+    out.toBlob(async (blob) => {
+      if (!blob) { toast('Could not process image', 'er'); btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Photo'; return; }
+
+      const form = new FormData();
+      form.append('photo', blob, 'profile.jpg');
+
+      try {
+        const res = await API.upload('lecturer/photo', form);
+        const photoUrl = res.photo_url || '';
+        toast('Profile photo updated!');
+        _closeCropModal();
+
+        // Update all avatar spots immediately
+        const lec = API.getStoredLecturer() || {};
+        lec.profile_photo = photoUrl;
+        lec.profile_photo_updated_at = new Date().toISOString();
+        localStorage.setItem('ec_lecturer', JSON.stringify(lec));
+        _syncAllAvatars(lec);
+
+        // Also update the large identity card avatar
+        const idAv = document.getElementById('id-av');
+        idAv.textContent = '';
+        const img2 = new Image(); img2.src = photoUrl + '?v=' + Date.now();
+        img2.style.cssText = 'width:100%;height:100%;object-fit:cover';
+        img2.onerror = () => { idAv.textContent = ini(lec.full_name || ''); };
+        idAv.appendChild(img2);
+
+        document.getElementById('photo-remove-btn').classList.add('visible');
+      } catch (err) {
+        toast(err.message || 'Upload failed', 'er');
+      }
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Photo';
+    }, 'image/jpeg', 0.88);
+
+  } catch (err) {
+    toast(err.message || 'Error', 'er');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Save Photo';
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// FILE SELECTION — both click (input) and drag & drop
+// ─────────────────────────────────────────────────────────────────────────
+function _handleFile(file) {
+  if (!file) return;
+  if (!file.type.match(/^image\/(jpeg|png|webp)$/)) { toast('Only JPG, PNG, or WebP images are supported', 'er'); return; }
+  if (file.size > 3 * 1024 * 1024) { toast('Image must be smaller than 3 MB', 'er'); return; }
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => _openCropModal(img);
+    img.onerror = () => toast('Could not load image', 'er');
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Click-to-upload
+document.getElementById('photo-file-input').onchange = function() {
+  if (this.files && this.files[0]) _handleFile(this.files[0]);
+  this.value = ''; // reset so same file can be re-selected
+};
+
+// Click on the drop zone also triggers file input
+document.getElementById('photo-drop').onclick = () => document.getElementById('photo-file-input').click();
+
+// Drag & drop on the drop zone
+const _dropEl = document.getElementById('photo-drop');
+_dropEl.addEventListener('dragover', ev => { ev.preventDefault(); _dropEl.classList.add('drag-over'); });
+_dropEl.addEventListener('dragleave', () => _dropEl.classList.remove('drag-over'));
+_dropEl.addEventListener('drop', ev => {
+  ev.preventDefault(); _dropEl.classList.remove('drag-over');
+  const file = ev.dataTransfer.files[0];
+  _handleFile(file);
+});
+
+// ── Remove photo ──────────────────────────────────────────────────────────
+document.getElementById('photo-remove-btn').onclick = async () => {
+  if (!confirm('Remove your profile photo?')) return;
+  const btn = document.getElementById('photo-remove-btn');
+  btn.disabled = true;
+  try {
+    await API.del('lecturer/photo');
+    toast('Profile photo removed');
+    const lec = API.getStoredLecturer() || {};
+    delete lec.profile_photo; delete lec.profile_photo_updated_at;
+    localStorage.setItem('ec_lecturer', JSON.stringify(lec));
+    _syncAllAvatars(lec);
+    // Reset identity card avatar
+    const idAv = document.getElementById('id-av');
+    idAv.textContent = ini(lec.full_name || '');
+    btn.classList.remove('visible');
+  } catch (err) { toast(err.message || 'Failed to remove photo', 'er'); }
+  finally { btn.disabled = false; }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// SAVE PROFILE
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById('save-profile-btn').onclick = async () => {
+  const btn = document.getElementById('save-profile-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div> Saving…';
+  try {
+    const payload = {
+      full_name : document.getElementById('f-name').value.trim(),
+      email     : document.getElementById('f-email').value.trim(),
+      phone     : document.getElementById('f-phone').value.trim(),
+      title     : document.getElementById('f-title').value,
+      bio       : document.getElementById('f-bio').value.trim(),
+    };
+    await API.settings.save(payload);
+    toast('Profile saved');
+    // Refresh identity card with new values
+    const lec = API.getStoredLecturer() || {};
+    Object.assign(lec, payload);
+    localStorage.setItem('ec_lecturer', JSON.stringify(lec));
+    // Update name display
+    document.getElementById('id-name').innerHTML =
+      (payload.title ? `<span class="id-title-prefix">${e(payload.title)} </span>` : '') + e(payload.full_name);
+    document.getElementById('id-staffid').textContent = lec.staff_id ? '#' + lec.staff_id : '—';
+    _syncAllAvatars(lec);
+  } catch (err) { toast(err.message, 'er'); }
+  finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Profile';
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// PASSWORD
+// ─────────────────────────────────────────────────────────────────────────
+// Eye toggles
+function _eyeToggle(btnId, inputId) {
+  document.getElementById(btnId).onclick = function() {
+    const inp = document.getElementById(inputId);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    this.querySelector('svg').innerHTML = inp.type === 'text'
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  };
+}
+_eyeToggle('eye-cur','f-cur-pw');
+_eyeToggle('eye-new','f-new-pw');
+_eyeToggle('eye-conf','f-conf-pw');
+
+// Password strength meter
+document.getElementById('f-new-pw').oninput = function() {
+  const v = this.value, bar = document.getElementById('pw-strength');
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (v.length >= 12) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  bar.dataset.s = v ? Math.min(4, Math.max(1, s-1)) : '';
+};
+
+document.getElementById('save-pw-btn').onclick = async () => {
+  const cur = document.getElementById('f-cur-pw').value;
+  const nw  = document.getElementById('f-new-pw').value;
+  const cf  = document.getElementById('f-conf-pw').value;
+  if (!cur || !nw)    { toast('Fill in all password fields', 'in'); return; }
+  if (nw !== cf)      { toast('Passwords do not match', 'in'); return; }
+  if (nw.length < 8)  { toast('Password must be at least 8 characters', 'in'); return; }
+  const btn = document.getElementById('save-pw-btn');
+  btn.disabled = true;
+  try {
+    await API.auth.resetPassword({ current_password: cur, new_password: nw, confirm_password: cf });
+    toast('Password updated');
+    ['f-cur-pw','f-new-pw','f-conf-pw'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('pw-strength').dataset.s = '';
+  } catch (err) { toast(err.message, 'er'); }
+  finally { btn.disabled = false; }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// QR SPEED SLIDER
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById('qr-speed').oninput = function() {
+  document.getElementById('qr-speed-val').textContent = this.value + 's';
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// SAVE SESSION SETTINGS
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById('save-sess-btn').onclick = async () => {
+  const btn = document.getElementById('save-sess-btn');
+  btn.disabled = true;
+  try {
+    await API.settings.save({
+      qr_expiry_seconds        : parseInt(document.getElementById('qr-speed').value),
+      late_threshold_minutes   : parseInt(document.getElementById('f-late').value)   || 15,
+      absent_threshold_minutes : parseInt(document.getElementById('f-absent').value) || 30,
+      geofence_radius_meters   : parseInt(document.getElementById('f-geo').value),
+      require_password         : document.getElementById('tog-pw').classList.contains('on'),
+      gps_strict               : document.getElementById('tog-gps').classList.contains('on'),
+      email_notifications      : document.getElementById('tog-notif').classList.contains('on'),
+    });
+    toast('Session settings saved');
+  } catch (err) { toast(err.message, 'er'); }
+  finally { btn.disabled = false; }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// SIGN OUT ALL DEVICES
+// ─────────────────────────────────────────────────────────────────────────
+document.getElementById('signout-all-btn').onclick = async () => {
+  try { await API.auth.logout(); } catch {}
+  API.clearLecturerSession();
+  location.href = '/frontend/login.html';
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// MESSAGES BADGE
+// ─────────────────────────────────────────────────────────────────────────
+(function loadMsgBadge() {
+  if (typeof API === 'undefined') return;
+  function refresh() {
+    if (!API.messages) return;
+    API.messages.unreadCounts().then(r => {
+      const total = (r.channels || []).reduce((s, c) => s + (c.unread || 0), 0);
+      const el = document.getElementById('nav-msg');
+      if (el) { el.textContent = total > 9 ? '9+' : total; el.style.display = total > 0 ? 'flex' : 'none'; }
+    }).catch(() => {});
+  }
+  refresh();
+  setInterval(refresh, 15000);
+})();
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>

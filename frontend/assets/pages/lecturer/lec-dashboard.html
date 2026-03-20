@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Lecturer Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0d0b;--bg2:#161310;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:5px;--r2:8px;--r3:12px;--sb:220px}
+[data-theme="light"]{--bg:#f2ece2;--bg2:#ebe3d8;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s,color .25s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ── PAGE SHELL ── */
+.pg{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 13px 10px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:8px}
+.b-ico{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25)}
+.b-ico svg{width:14px;height:14px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:.88rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:22px;height:22px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center;transition:color .15s}
+.sb-x:hover{color:var(--tx)}
+.sb-x svg{width:11px;height:11px;stroke-width:2}
+.role-chip{margin:8px 10px 3px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}
+.role-chip svg{width:8px;height:8px}
+
+/* Nav sections */
+.nav-sect{padding:10px 7px 2px}
+.nav-sect-label{font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);color:var(--sub);font-size:.79rem;font-weight:500;transition:all .15s;position:relative}
+.ni a svg{width:14px;height:14px;stroke-width:1.75;flex-shrink:0}
+.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}
+.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:7px;color:var(--go2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+
+.sb-ft{padding:10px 11px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:7px;margin-top:auto}
+.ava{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.73rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.6rem;color:var(--dim);font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg{width:24px;height:24px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lg svg{width:12px;height:12px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.ov.on{display:block}
+
+/* ── TOPBAR ── */
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(.9rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}
+[data-theme="light"] .tb{background:rgba(242,236,226,.92)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:7px}
+.mbt{display:none;width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center;transition:color .15s}
+.mbt svg{width:14px;height:14px;stroke-width:2}.mbt:hover{color:var(--go2)}
+.pgt{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+
+/* Search bar */
+.srch{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:0 10px;height:32px;min-width:220px;max-width:340px;transition:border-color .2s}
+.srch:focus-within{border-color:rgba(200,150,60,.4)}
+.srch svg{width:13px;height:13px;color:var(--dim);flex-shrink:0}
+.srch input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.8rem;color:var(--tx);width:100%}
+.srch input::placeholder{color:var(--dim)}
+.kbd{font-size:.6rem;font-family:var(--fm);color:var(--dim);background:var(--surf3);border:1px solid var(--bdr);padding:1px 5px;border-radius:3px;white-space:nowrap}
+
+/* Topbar icon buttons */
+.ib{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative;flex-shrink:0;cursor:pointer}
+.ib svg{width:14px;height:14px;stroke-width:1.75}
+.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+.nbd{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:99px;background:var(--rust);color:#fff;font-size:.52rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg);font-family:var(--fm)}
+
+/* Profile dropdown */
+.prof-wrap{position:relative}
+.prof-btn{display:flex;align-items:center;gap:7px;padding:4px 8px 4px 4px;border-radius:var(--r2);border:1px solid var(--bdr);background:var(--surf2);cursor:pointer;transition:border-color .2s}
+.prof-btn:hover{border-color:rgba(200,150,60,.3)}
+.prof-av{width:26px;height:26px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#1a1200;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.prof-av img{width:100%;height:100%;object-fit:cover}
+.prof-nm{font-size:.77rem;font-weight:600;color:var(--tx);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof-btn svg{width:11px;height:11px;color:var(--dim);flex-shrink:0;transition:transform .2s}
+.prof-btn.open svg{transform:rotate(180deg)}
+.prof-dd{position:absolute;top:calc(100% + 6px);right:0;width:210px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:0 8px 32px rgba(0,0,0,.4);overflow:hidden;z-index:400;animation:ddIn .15s var(--ez);display:none}
+.prof-dd.open{display:block}
+@keyframes ddIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.dd-head{padding:12px 14px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px}
+.dd-av{width:36px;height:36px;border-radius:var(--r2);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#1a1200;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.dd-av img{width:100%;height:100%;object-fit:cover}
+.dd-nm{font-size:.82rem;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-id{font-size:.65rem;color:var(--dim);font-family:var(--fm)}
+.dd-dept{font-size:.65rem;color:var(--sub)}
+.dd-items{padding:5px}
+.dd-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);color:var(--sub);font-size:.79rem;cursor:pointer;transition:all .15s;width:100%}
+.dd-item svg{width:13px;height:13px;stroke-width:2;flex-shrink:0}
+.dd-item:hover{background:rgba(200,150,60,.07);color:var(--go2)}
+.dd-item.danger:hover{background:rgba(200,88,50,.07);color:var(--rust)}
+.dd-sep{height:1px;background:var(--bdr2);margin:4px 5px}
+
+/* Sync heartbeat */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--te2);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+.sync-dot.err{background:var(--rust);animation:none}
+.sync-dot.warn{background:var(--go2)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.4)}70%{box-shadow:0 0 0 4px rgba(69,188,165,0)}}
+.sync-label{font-size:.67rem;color:var(--sub);font-family:var(--fm)}
+
+/* ── CONTENT ── */
+.cnt{padding:1.4rem clamp(.9rem,2.5vw,1.5rem);max-width:1080px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.ph-t{font-family:var(--fh);font-size:1.25rem;font-style:italic;color:var(--tx)}
+.ph-s{font-size:.78rem;color:var(--sub)}
+
+/* Skeleton */
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* Toast */
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.77rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:280px}
+@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.t svg{width:13px;height:13px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+
+/* ── GRID STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:13px 15px;display:flex;align-items:flex-start;gap:11px;transition:border-color .2s}
+.sc:hover{border-color:rgba(200,150,60,.2)}
+.sc-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-ico svg{width:16px;height:16px;stroke-width:1.75}
+.sc-ico.gold{background:rgba(200,150,60,.12);color:var(--go2)}
+.sc-ico.rust{background:rgba(200,88,50,.12);color:var(--ru2)}
+.sc-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}
+.sc-ico.dim{background:var(--surf2);color:var(--sub)}
+.sc-v{font-family:var(--fh);font-size:1.5rem;color:var(--tx);line-height:1}
+.sc-l{font-size:.72rem;color:var(--sub);margin-top:2px}
+.sc-ch{font-size:.65rem;color:var(--te2);margin-top:4px}
+
+/* ── PROFILE CARD ── */
+.prof-card{background:linear-gradient(135deg,rgba(200,150,60,.07),rgba(200,150,60,.02));border:1px solid rgba(200,150,60,.16);border-radius:var(--r3);padding:18px;display:flex;align-items:center;gap:16px;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.prof-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,60,.08),transparent 70%);pointer-events:none}
+.pc-av{width:58px;height:58px;border-radius:var(--r2);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.2rem;font-style:italic;font-weight:600;color:#1a1200;flex-shrink:0;border:2px solid rgba(200,150,60,.3);overflow:hidden}
+.pc-av img{width:100%;height:100%;object-fit:cover}
+.pc-nm{font-family:var(--fh);font-size:1.05rem;color:var(--tx);margin-bottom:2px}
+.pc-id{font-size:.65rem;color:var(--dim);font-family:var(--fm);margin-bottom:5px}
+.pc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:.61rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.tag.gold{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.2);color:var(--go2)}
+.tag svg{width:9px;height:9px;flex-shrink:0;stroke-width:2}
+.pc-r{margin-left:auto;text-align:right;flex-shrink:0}
+.pc-courses{font-family:var(--fh);font-size:1.6rem;color:var(--go2);line-height:1}
+.pc-cl{font-size:.7rem;color:var(--sub)}
+
+/* ── TWO-COL GRID ── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sh-t{font-family:var(--fh);font-size:.9rem;font-style:italic;color:var(--tx)}
+.sh-a{font-size:.74rem;color:var(--go2);transition:opacity .2s}
+.sh-a:hover{opacity:.75}
+
+/* ── SCHEDULE CARD ── */
+.sched-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px}
+.sched-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr2)}
+.sched-item:last-child{border-bottom:none;padding-bottom:0}
+.si-time{font-family:var(--fm);font-size:.72rem;color:var(--dim);min-width:52px;flex-shrink:0}
+.si-dot{width:8px;height:8px;border-radius:50%;background:var(--go2);flex-shrink:0}
+.si-dot.live{background:var(--te2);animation:pp 1.8s infinite}
+.si-nm{font-size:.81rem;font-weight:600;color:var(--tx);flex:1}
+.si-code{font-size:.65rem;color:var(--sub);font-family:var(--fm)}
+.si-act{padding:3px 9px;border-radius:99px;font-size:.66rem;font-weight:600;border:1px solid;cursor:pointer;transition:all .15s;white-space:nowrap}
+.si-act.start{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.3);color:var(--go2)}
+.si-act.start:hover{background:rgba(200,150,60,.2)}
+.si-act.live{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}
+
+/* ── QUICK ACTIONS ── */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qa{display:flex;align-items:center;gap:9px;padding:11px 13px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);cursor:pointer;transition:all .18s}
+.qa:hover{border-color:rgba(200,150,60,.3);background:rgba(200,150,60,.04)}
+.qa-ico{width:30px;height:30px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qa-ico svg{width:14px;height:14px;stroke-width:2}
+.qa-ico.gold{background:rgba(200,150,60,.12);color:var(--go2)}
+.qa-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}
+.qa-ico.rust{background:rgba(200,88,50,.12);color:var(--ru2)}
+.qa-ico.dim{background:var(--surf2);color:var(--sub)}
+.qa-t{font-size:.79rem;font-weight:600;color:var(--tx)}
+.qa-s{font-size:.66rem;color:var(--sub)}
+
+/* ── LIVE SESSION WIDGET ── */
+.live-card{background:var(--surf);border:1px solid rgba(45,158,138,.25);border-radius:var(--r2);padding:14px;position:relative;overflow:hidden;margin-bottom:1.25rem}
+.live-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--te2),var(--teal))}
+.live-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.25);color:var(--te2);font-size:.62rem;font-weight:700;letter-spacing:.06em;margin-bottom:9px}
+.live-badge svg{width:8px;height:8px}
+.live-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.live-info .li-course{font-family:var(--fh);font-size:.98rem;color:var(--tx);margin-bottom:2px}
+.live-info .li-loc{font-size:.72rem;color:var(--sub);display:flex;align-items:center;gap:4px}
+.live-info .li-loc svg{width:11px;height:11px;stroke-width:2}
+.live-count{text-align:right}
+.lc-num{font-family:var(--fh);font-size:1.6rem;color:var(--te2);line-height:1}
+.lc-lbl{font-size:.65rem;color:var(--sub)}
+.live-prog{height:4px;background:var(--surf2);border-radius:99px;margin-top:12px;overflow:hidden}
+.live-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--te2));border-radius:99px;transition:width .5s var(--ez)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid}
+.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}
+.btn-gold:hover{background:var(--go3);border-color:var(--go3)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}
+.btn-out:hover{border-color:var(--bdr);color:var(--tx)}
+.btn-teal{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}
+.btn-teal:hover{background:rgba(45,158,138,.18)}
+.btn svg{width:13px;height:13px;stroke-width:2}
+
+/* No session state */
+.no-sess{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);gap:10px;margin-bottom:1.25rem}
+.no-sess svg{width:28px;height:28px;color:var(--dim);stroke-width:1.5}
+.no-sess p{font-size:.8rem;color:var(--sub)}
+
+/* ── ANOMALY WIDGET ── */
+.anomaly{background:rgba(200,88,50,.05);border:1px solid rgba(200,88,50,.2);border-radius:var(--r2);padding:13px 14px;margin-bottom:1.25rem;display:flex;gap:11px;align-items:flex-start}
+.anomaly svg{width:16px;height:16px;color:var(--ru2);flex-shrink:0;margin-top:1px;stroke-width:2}
+.anomaly-t{font-size:.8rem;font-weight:600;color:var(--ru2);margin-bottom:3px}
+.anomaly-b{font-size:.75rem;color:var(--sub)}
+.anomaly-dismiss{margin-left:auto;font-size:.68rem;color:var(--dim);cursor:pointer;flex-shrink:0;padding:2px 6px;border-radius:var(--r);transition:color .15s}
+.anomaly-dismiss:hover{color:var(--tx)}
+
+/* ── REQUESTS PREVIEW ── */
+.req-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--bdr2)}
+.req-item:last-child{border-bottom:none;padding-bottom:0}
+.req-av{width:28px;height:28px;border-radius:var(--r);background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--sub);flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}
+.req-av img{width:100%;height:100%;object-fit:cover}
+.req-nm{font-size:.79rem;font-weight:600;color:var(--tx)}
+.req-t{font-size:.67rem;color:var(--sub)}
+.req-act{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+.act-btn{padding:3px 9px;border-radius:99px;font-size:.66rem;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid}
+.act-btn.ap{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}
+.act-btn.ap:hover{background:rgba(45,158,138,.2)}
+.act-btn.rj{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--rust)}
+.act-btn.rj:hover{background:rgba(200,88,50,.15)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){.stats-row{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.two{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){
+  .sb{transform:translateX(-100%)}
+  .sb.on{transform:none}
+  .sb-x{display:flex}
+  .main{margin-left:0}
+  .mbt{display:flex}
+  .srch{display:none}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL SIZE + RESPONSIVENESS OVERRIDES
+   ═══════════════════════════════════════════════════ */
+
+/* Larger base tokens */
+:root{
+  --sb: 250px;
+  --r: 6px; --r2: 10px; --r3: 14px;
+}
+
+/* Base font bump */
+body { font-size: 15px; }
+
+/* ── SIDEBAR ── */
+.sb-hd { padding: 18px 16px 13px; }
+.b-ico { width: 34px; height: 34px; }
+.b-ico svg { width: 17px; height: 17px; }
+.b-nm { font-size: 1rem; }
+.role-chip { font-size: .68rem; margin: 10px 12px 4px; padding: 4px 10px; }
+.role-chip svg { width: 10px; height: 10px; }
+.nav-sect { padding: 12px 9px 3px; }
+.nav-sect-label { font-size: .62rem; letter-spacing: .11em; }
+.ni a { padding: 9px 11px; font-size: .875rem; gap: 10px; }
+.ni a svg { width: 17px; height: 17px; }
+.ni.on a { padding-left: 9px; }
+.nb { min-width: 18px; height: 18px; font-size: .62rem; padding: 0 4px; }
+.pip { width: 8px; height: 8px; }
+.sb-ft { padding: 13px 14px; gap: 9px; }
+.ava { width: 34px; height: 34px; font-size: .75rem; }
+.un { font-size: .84rem; }
+.ui { font-size: .68rem; }
+.lg { width: 28px; height: 28px; }
+.lg svg { width: 14px; height: 14px; }
+
+/* ── TOPBAR ── */
+.tb { height: 58px; }
+.mbt { width: 36px; height: 36px; }
+.mbt svg { width: 17px; height: 17px; }
+.pgt { font-size: 1.1rem; }
+.srch, .srch-tb { height: 36px; font-size: .875rem; min-width: 240px; }
+.srch svg, .srch-tb svg { width: 15px; height: 15px; }
+.srch input, .srch-tb input { font-size: .875rem; }
+.kbd { font-size: .68rem; }
+.ib { width: 36px; height: 36px; }
+.ib svg { width: 17px; height: 17px; }
+.nbd { width: 16px; height: 16px; font-size: .6rem; }
+
+/* Profile dropdown topbar */
+.prof-btn { padding: 5px 10px 5px 5px; }
+.prof-av { width: 30px; height: 30px; }
+.prof-nm { font-size: .875rem; }
+.prof-btn svg { width: 13px; height: 13px; }
+.dd-head { padding: 14px 16px; }
+.dd-av { width: 40px; height: 40px; }
+.dd-nm { font-size: .92rem; }
+.dd-id, .dd-dept { font-size: .72rem; }
+.dd-item { font-size: .875rem; padding: 9px 11px; }
+.dd-item svg { width: 15px; height: 15px; }
+
+/* ── CONTENT ── */
+.cnt { padding: 1.75rem clamp(1rem,3vw,2rem); }
+.ph-t { font-size: 1.5rem; }
+.ph-s { font-size: .875rem; }
+
+/* ── STAT CARDS ── */
+.sc { padding: 16px 18px; gap: 13px; }
+.sc-ico { width: 40px; height: 40px; }
+.sc-ico svg { width: 19px; height: 19px; }
+.sc-v { font-size: 1.75rem; }
+.sc-l { font-size: .8rem; }
+.sc-ch { font-size: .72rem; }
+
+/* ── PROFILE CARD ── */
+.pc-av { width: 66px; height: 66px; font-size: 1.35rem; }
+.pc-nm { font-size: 1.15rem; }
+.pc-id { font-size: .72rem; }
+.tag { font-size: .68rem; padding: 3px 10px; }
+.tag svg { width: 10px; height: 10px; }
+.pc-courses { font-size: 1.8rem; }
+.pc-cl { font-size: .78rem; }
+
+/* ── SCHEDULE / ITEMS ── */
+.sh-t { font-size: 1rem; }
+.sh-a { font-size: .82rem; }
+.sched-item { padding: 11px 0; }
+.si-time { font-size: .8rem; min-width: 60px; }
+.si-dot { width: 9px; height: 9px; }
+.si-nm { font-size: .9rem; }
+.si-code { font-size: .72rem; }
+.si-act { font-size: .72rem; padding: 4px 11px; }
+
+/* ── QUICK ACTIONS ── */
+.qa { padding: 13px 15px; gap: 11px; }
+.qa-ico { width: 34px; height: 34px; }
+.qa-ico svg { width: 16px; height: 16px; }
+.qa-t { font-size: .9rem; }
+.qa-s { font-size: .73rem; }
+
+/* ── LIVE CARD ── */
+.live-badge { font-size: .72rem; padding: 3px 10px; }
+.live-badge svg { width: 9px; height: 9px; }
+.li-course { font-size: 1.05rem; }
+.li-loc { font-size: .8rem; }
+.li-loc svg { width: 13px; height: 13px; }
+.lc-num { font-size: 1.8rem; }
+.lc-lbl { font-size: .72rem; }
+
+/* ── BUTTONS ── */
+.btn { padding: 9px 18px; font-size: .875rem; }
+.btn svg { width: 15px; height: 15px; }
+.act-btn { font-size: .73rem; padding: 4px 11px; }
+
+/* ── REQUESTS ── */
+.req-nm { font-size: .9rem; }
+.req-t { font-size: .75rem; }
+.req-av { width: 32px; height: 32px; font-size: .68rem; }
+
+/* ── ANOMALY ── */
+.anomaly svg { width: 18px; height: 18px; }
+.anomaly-t { font-size: .9rem; }
+.anomaly-b { font-size: .82rem; }
+
+/* ── SYNC BAR ── */
+.sync-dot { width: 8px; height: 8px; }
+.sync-label { font-size: .75rem; }
+
+/* ── TABLE STYLES (attendance / students) ── */
+.tbl { font-size: .875rem; }
+.tbl th { font-size: .72rem; padding: 10px 14px; }
+.tbl td { padding: 10px 14px; }
+
+/* ── FORM INPUTS (live session) ── */
+.fl { font-size: .78rem; }
+.fi { font-size: .9rem; padding: .75rem 1rem; }
+.sc-t { font-size: 1.3rem; }
+.sc-s { font-size: .875rem; }
+.step-n { font-size: .68rem; }
+.step-l { font-size: .78rem; }
+
+/* ── LIVE CONSOLE ── */
+.lcs-v { font-size: 1.75rem; }
+.lcs-l { font-size: .78rem; }
+.lc-course { font-size: 1.25rem; }
+.mc-val { font-size: 1.85rem; }
+.mc-lbl { font-size: .68rem; }
+.qr-timer { font-size: .78rem; }
+.cp-title { font-size: .92rem; }
+.cp-cnt { font-size: .78rem; }
+.ci-nm { font-size: .9rem; }
+.ci-idx { font-size: .72rem; }
+.ci-time { font-size: .78rem; }
+.ci-meth { font-size: .68rem; padding: 2px 8px; }
+.ci-av { width: 34px; height: 34px; font-size: .7rem; }
+
+/* ── TOAST ── */
+.t { font-size: .875rem; padding: 10px 14px; }
+.t svg { width: 15px; height: 15px; }
+
+/* ── NO-SESSION STATE ── */
+.no-sess svg { width: 32px; height: 32px; }
+.no-sess p { font-size: .9rem; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — COMPUTERS / LAPTOPS / DEVICES
+   ══════════════════════════════════════════ */
+
+/* Large desktop (≥ 1440px) */
+@media (min-width: 1440px) {
+  :root { --sb: 270px; }
+  body { font-size: 16px; }
+  .cnt { padding: 2rem clamp(1.5rem,3vw,2.5rem); }
+}
+
+/* Standard laptop (1024 – 1439px) */
+@media (max-width: 1439px) and (min-width: 1024px) {
+  :root { --sb: 250px; }
+  .cnt { max-width: 100%; }
+  .stats-row { grid-template-columns: repeat(4,1fr); }
+}
+
+/* Small laptop / large tablet (768 – 1023px) */
+@media (max-width: 1023px) and (min-width: 769px) {
+  :root { --sb: 230px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 260px 1fr; }
+  .lc-grid { grid-template-columns: repeat(3,1fr); }
+  .srch, .srch-tb { min-width: 180px; }
+}
+
+/* Tablet portrait (600 – 768px) */
+@media (max-width: 768px) and (min-width: 601px) {
+  :root { --sb: 220px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: repeat(2,1fr); }
+  .srch, .srch-tb { min-width: 160px; max-width: 220px; }
+  .prof-nm { display: none; }
+}
+
+/* Mobile (≤ 600px) */
+@media (max-width: 600px) {
+  :root { --sb: 260px; }
+  body { font-size: 15px; }
+  .sb { transform: translateX(-100%); }
+  .sb.on { transform: none; }
+  .sb-x { display: flex; }
+  .main { margin-left: 0; }
+  .mbt { display: flex; }
+  .srch, .srch-tb { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr 1fr; }
+  .prof-nm { display: none; }
+  .cnt { padding: 1.25rem 1rem; }
+  .tb { height: 54px; padding: 0 1rem; }
+  .pgt { font-size: 1rem; }
+  .pc-av { width: 52px; height: 52px; }
+  .qa-grid { grid-template-columns: 1fr; }
+}
+
+/* Very small mobile (≤ 380px) */
+@media (max-width: 380px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="pg">
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="b-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <div class="b-nm">EduCore</div>
+    </div>
+    <button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="role-chip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+    Lecturer
+  </div>
+
+  <div class="nav-sect">
+    <div class="nav-sect-label">Active Ops</div>
+    <nav class="nav">
+      <div class="ni on"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+      <div class="ni"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+      <div class="ni"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req">0</span></a></div>
+          <div class="ni" id="nav-msg-item"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+    </nav>
+  </div>
+
+  <div class="nav-sect">
+    <div class="nav-sect-label">Academic</div>
+    <nav class="nav">
+      <div class="ni"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+      <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Students</span></a></div>
+      <div class="ni"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+    </nav>
+  </div>
+
+  <div class="nav-sect">
+    <div class="nav-sect-label">Intelligence</div>
+    <nav class="nav">
+      <div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div>
+    </nav>
+  </div>
+
+  <div class="nav-sect">
+    <div class="nav-sect-label">System</div>
+    <nav class="nav">
+      <div class="ni"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+    </nav>
+  </div>
+
+  <div class="sb-ft">
+    <div class="ava" id="sb-ava">?</div>
+    <div style="flex:1;min-width:0">
+      <div class="un" id="sb-nm">Loading...</div>
+      <div class="ui" id="sb-id">—</div>
+    </div>
+    <button class="lg" id="lg-btn" title="Logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+<div class="ov" id="ov"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- Topbar -->
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="srch" id="srch-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search courses, students…" id="srch-inp"/>
+        <span class="kbd">⌘K</span>
+      </div>
+    </div>
+    <span class="pgt" style="position:absolute;left:50%;transform:translateX(-50%)">Dashboard</span>
+    <div class="tb-r">
+      <!-- Sync heartbeat -->
+      <div style="display:flex;align-items:center;gap:4px;margin-right:4px">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span class="sync-label" id="sync-lbl">Live</span>
+      </div>
+      <!-- Notifications -->
+      <div class="ib" id="notif-btn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="nbd" id="notif-badge" style="display:none">0</span>
+      </div>
+      <!-- Theme toggle -->
+      <div class="ib" id="th-btn" title="Toggle theme">
+        <svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </div>
+      <!-- Profile -->
+      <div class="prof-wrap">
+        <div class="prof-btn" id="prof-btn">
+          <div class="prof-av" id="prof-av">?</div>
+          <span class="prof-nm" id="prof-nm">Loading</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="prof-dd" id="prof-dd">
+          <div class="dd-head">
+            <div class="dd-av" id="dd-av">?</div>
+            <div>
+              <div class="dd-nm" id="dd-nm">—</div>
+              <div class="dd-id" id="dd-id">—</div>
+              <div class="dd-dept" id="dd-dept">—</div>
+            </div>
+          </div>
+          <div class="dd-items">
+            <button class="dd-item" onclick="location.href='lec-settings.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</button>
+            <button class="dd-item" onclick="location.href='lec-settings.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</button>
+            <div class="dd-sep"></div>
+            <button class="dd-item danger" id="dd-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+      <div class="ph">
+        <div>
+          <div class="ph-t">Good morning 👋</div>
+          <div class="ph-s" id="date-lbl">—</div>
+        </div>
+        <button class="btn btn-gold" onclick="location.href='lec-live.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Session
+        </button>
+      </div>
+
+      <!-- Anomaly warning (hidden by default) -->
+      <div class="anomaly" id="anomaly-box" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div style="flex:1">
+          <div class="anomaly-t" id="anomaly-t">Anomaly Detected</div>
+          <div class="anomaly-b" id="anomaly-b"></div>
+        </div>
+        <button class="anomaly-dismiss" id="anomaly-dismiss">Dismiss</button>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-row">
+        <div class="sc">
+          <div class="sc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+          <div><div class="sc-v" id="stat-courses"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Courses</div></div>
+        </div>
+        <div class="sc">
+          <div class="sc-ico teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div><div class="sc-v" id="stat-students"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Students</div></div>
+        </div>
+        <div class="sc">
+          <div class="sc-ico rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></div>
+          <div><div class="sc-v" id="stat-req"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Pending Requests</div></div>
+        </div>
+        <div class="sc">
+          <div class="sc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div><div class="sc-v" id="stat-rate"><div class="sk" style="width:40px;height:24px"></div></div><div class="sc-l">Avg Attendance</div></div>
+        </div>
+      </div>
+
+      <!-- Lecturer profile card -->
+      <div class="prof-card">
+        <div class="pc-av" id="pc-av">?</div>
+        <div>
+          <div class="pc-nm" id="pc-nm">Loading...</div>
+          <div class="pc-id" id="pc-id">—</div>
+          <div class="pc-tags">
+            <span class="tag gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg><span id="pc-dept">—</span></span>
+            <span class="tag" id="pc-inst-tag">—</span>
+          </div>
+        </div>
+        <div class="pc-r">
+          <div class="pc-courses" id="pc-course-count">—</div>
+          <div class="pc-cl">courses assigned</div>
+        </div>
+      </div>
+
+      <!-- Live session / Quick Actions -->
+      <div id="live-section"></div>
+
+      <!-- Today schedule + Requests -->
+      <div class="two">
+        <div>
+          <div class="sh"><span class="sh-t">Today's Schedule</span><a href="lec-courses.html" class="sh-a">All courses →</a></div>
+          <div class="sched-wrap" id="sched-wrap">
+            <div class="sk" style="height:45px;margin-bottom:8px"></div>
+            <div class="sk" style="height:45px;margin-bottom:8px"></div>
+            <div class="sk" style="height:45px"></div>
+          </div>
+        </div>
+        <div>
+          <div class="sh"><span class="sh-t">Pending Requests</span><a href="lec-requests.html" class="sh-a">View all →</a></div>
+          <div class="sched-wrap" id="req-wrap">
+            <div class="sk" style="height:45px;margin-bottom:8px"></div>
+            <div class="sk" style="height:45px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="sh" style="margin-bottom:10px"><span class="sh-t">Quick Actions</span></div>
+      <div class="qa-grid">
+        <div class="qa" onclick="location.href='lec-live.html'">
+          <div class="qa-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          <div><div class="qa-t">Start Session</div><div class="qa-s">Launch live attendance</div></div>
+        </div>
+        <div class="qa" onclick="location.href='lec-attendance.html'">
+          <div class="qa-ico teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+          <div><div class="qa-t">View Attendance</div><div class="qa-s">Records & history</div></div>
+        </div>
+        <div class="qa" onclick="location.href='lec-students.html?action=upload'">
+          <div class="qa-ico dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <div><div class="qa-t">Upload Student List</div><div class="qa-s">CSV import</div></div>
+        </div>
+        <div class="qa" onclick="regenCode()">
+          <div class="qa-ico rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/></svg></div>
+          <div><div class="qa-t">Generate Join Code</div><div class="qa-s">Regenerate course code</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+// ── Auth guard ──────────────────────────────────────────────
+if (!localStorage.getItem('ec_token')) { location.href = '/frontend/login.html'; }
+
+// ── Theme ───────────────────────────────────────────────────
+(function(){
+  const t = localStorage.getItem('ec_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('ico-dk').style.display = t === 'dark' ? 'block' : 'none';
+  document.getElementById('ico-lt').style.display = t === 'light' ? 'block' : 'none';
+})();
+document.getElementById('th-btn').onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme');
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('ec_theme', n);
+  document.getElementById('ico-dk').style.display = n === 'dark' ? 'block' : 'none';
+  document.getElementById('ico-lt').style.display = n === 'light' ? 'block' : 'none';
+};
+
+// ── Sidebar ─────────────────────────────────────────────────
+const SB = document.getElementById('sb'), OV = document.getElementById('ov');
+document.getElementById('mbt').onclick = () => { SB.classList.add('on'); OV.classList.add('on'); };
+document.getElementById('sb-x').onclick = () => { SB.classList.remove('on'); OV.classList.remove('on'); };
+OV.onclick = () => { SB.classList.remove('on'); OV.classList.remove('on'); };
+
+// ── Profile dropdown ─────────────────────────────────────────
+const profBtn = document.getElementById('prof-btn');
+const profDD = document.getElementById('prof-dd');
+profBtn.onclick = (e) => { e.stopPropagation(); profBtn.classList.toggle('open'); profDD.classList.toggle('open'); };
+document.addEventListener('click', () => { profBtn.classList.remove('open'); profDD.classList.remove('open'); });
+document.getElementById('dd-logout').onclick = () => doLogout();
+document.getElementById('lg-btn').onclick = () => doLogout();
+async function doLogout() {
+  try { await API.auth.logout(); } catch {}
+  API.clearLecturerSession();
+  location.href = '/frontend/login.html';
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function e(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function ini(n) { return n ? n.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase() : '?'; }
+function toast(m, t='ok') {
+  const ic = { ok:'<polyline points="20 6 9 17 4 12"/>', er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>', in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>' };
+  const c = document.getElementById('tw'), d = document.createElement('div');
+  d.className = `t ${t}`;
+  d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;flex-shrink:0">${ic[t]||ic.in}</svg><span>${e(m)}</span>`;
+  c.appendChild(d); d.onclick = () => d.remove(); setTimeout(() => d.remove(), 4000);
+}
+
+// ── Date label ───────────────────────────────────────────────
+document.getElementById('date-lbl').textContent = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// ── Greet ────────────────────────────────────────────────────
+const hr = new Date().getHours();
+const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+document.querySelector('.ph-t').textContent = `${greet} 👋`;
+
+// ── Apply lecturer profile ────────────────────────────────────
+function applyProfile(lec) {
+  const n = lec.full_name || 'Lecturer';
+  const ig = ini(n);
+  const photoUrl = _buildPhotoUrl(lec);
+  ['sb-ava','prof-av','dd-av','pc-av'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    _setAvatar(el, photoUrl, ig);
+  });
+  document.getElementById('sb-nm').textContent = n;
+  document.getElementById('sb-id').textContent = lec.staff_id || lec.email || '';
+  document.getElementById('prof-nm').textContent = n.split(' ')[0];
+  document.getElementById('dd-nm').textContent = n;
+  document.getElementById('dd-id').textContent = lec.staff_id || '';
+  document.getElementById('dd-dept').textContent = lec.department_name || '';
+  document.getElementById('pc-nm').textContent = n;
+  document.getElementById('pc-id').textContent = '#' + (lec.staff_id || lec.lecturer_id || '—');
+  document.getElementById('pc-dept').textContent = lec.department_name || '—';
+  document.getElementById('pc-inst-tag').textContent = lec.institution_name || '—';
+}
+
+// ── Load me ───────────────────────────────────────────────────
+async function loadMe() {
+  try {
+    const cached = API.getStoredLecturer();
+    if (cached) applyProfile(cached);
+    const data = await API.auth.me();
+    const lec = data.lecturer || data;
+    localStorage.setItem('ec_lecturer', JSON.stringify(lec));
+    applyProfile(lec);
+  } catch(err) {
+    if (err.status === 401) { API.clearLecturerSession(); location.href = '/frontend/login.html'; }
+  }
+}
+
+// ── Load dashboard stats ──────────────────────────────────────
+async function loadStats() {
+  try {
+    const [cls, req, att] = await Promise.all([
+      API.classes.list(),
+      API.override.getPending(),
+      API.attendance.summary({ limit: 1 }),
+    ]);
+    const courses = Array.isArray(cls) ? cls : (cls.classes || cls.data || []);
+    const reqs = Array.isArray(req) ? req : (req.requests || req.data || []);
+    let totalStudents = 0;
+    courses.forEach(c => { totalStudents += parseInt(c.student_count || c.students_count || 0); });
+    document.getElementById('stat-courses').textContent = courses.length;
+    document.getElementById('stat-students').textContent = totalStudents;
+    document.getElementById('stat-req').textContent = reqs.length;
+    document.getElementById('pc-course-count').textContent = courses.length;
+    // Avg rate from summary
+    const summary = att?.summary || att?.data || {};
+    const rate = summary.attendance_rate != null ? Math.round(summary.attendance_rate) + '%' : '—';
+    document.getElementById('stat-rate').textContent = rate;
+    // Req badge
+    if (reqs.length > 0) { document.getElementById('nav-req').textContent = reqs.length > 9 ? '9+' : reqs.length; }
+    return { courses, reqs };
+  } catch { return { courses: [], reqs: [] }; }
+}
+
+// ── Load schedule (today's courses) ──────────────────────────
+async function loadSchedule(courses) {
+  const wrap = document.getElementById('sched-wrap');
+  if (!courses || !courses.length) {
+    wrap.innerHTML = '<p style="font-size:.77rem;color:var(--dim);padding:5px 0">No courses found.</p>'; return;
+  }
+  wrap.innerHTML = courses.slice(0, 5).map(c => `
+    <div class="sched-item">
+      <span class="si-time">${e(c.session_time || '—')}</span>
+      <span class="si-dot"></span>
+      <div style="flex:1;min-width:0">
+        <div class="si-nm">${e(c.course_code || '')} ${e(c.class_name || '')}</div>
+        <div class="si-code">Join: ${e(c.join_code || '—')}</div>
+      </div>
+      <button class="si-act start" onclick="location.href='lec-live.html?class_id=${c.class_id}'">Start →</button>
+    </div>`).join('');
+}
+
+// ── Load pending requests preview ────────────────────────────
+function loadRequests(reqs) {
+  const wrap = document.getElementById('req-wrap');
+  if (!reqs || !reqs.length) {
+    wrap.innerHTML = '<p style="font-size:.77rem;color:var(--dim);padding:5px 0">No pending requests.</p>'; return;
+  }
+  wrap.innerHTML = reqs.slice(0, 4).map(r => `
+    <div class="req-item">
+      <div class="req-av">${ini(r.student_name || '')}</div>
+      <div style="flex:1;min-width:0">
+        <div class="req-nm">${e(r.student_name || '—')}</div>
+        <div class="req-t">Device Reset • ${e(r.requested_at ? new Date(r.requested_at).toLocaleDateString() : '')}</div>
+      </div>
+      <div class="req-act">
+        <button class="act-btn ap" onclick="approveReq(${r.override_id}, this)">✓</button>
+        <button class="act-btn rj" onclick="rejectReq(${r.override_id}, this)">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Live session ──────────────────────────────────────────────
+async function loadLiveSession() {
+  const sec = document.getElementById('live-section');
+  try {
+    const data = await API.sessions.getOpen();
+    const sess = data.session || data;
+    
+    // Hide section if no active session
+    if (!sess || !sess.session_id) {
+      sec.innerHTML = '';
+      return;
+    }
+    
+    const pct = sess.total_students > 0 ? Math.round((sess.total_students_present / sess.total_students) * 100) : 0;
+    sec.innerHTML = `
+      <div class="live-card">
+        <div class="live-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/></svg> LIVE SESSION ACTIVE</div>
+        <div class="live-row">
+          <div class="live-info">
+            <div class="li-course">${e(sess.course_code || '')} — ${e(sess.class_name || 'Active Session')}</div>
+            <div class="li-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${e(sess.location || 'Lecture Hall')}</div>
+          </div>
+          <div class="live-count">
+            <div class="lc-num">${sess.total_students_present ?? 0}<span style="font-size:.9rem;color:var(--sub)"> / ${sess.total_students ?? '?'}</span></div>
+            <div class="lc-lbl">Checked In</div>
+          </div>
+        </div>
+        <div class="live-prog"><div class="live-bar" style="width:${pct}%"></div></div>
+        <div style="margin-top:12px;display:flex;gap:7px">
+          <button class="btn btn-teal" onclick="location.href='lec-live.html?session_id=${sess.session_id}'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><eye/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Live Attendance
+          </button>
+          <button class="btn btn-out" onclick="endSession(${sess.session_id})">End Session</button>
+        </div>
+      </div>`;
+    document.getElementById('nav-live').style.display = 'inline-block';
+  } catch {
+    sec.innerHTML = `
+      <div class="no-sess">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <p>No active session right now.</p>
+        <button class="btn btn-gold" onclick="location.href='lec-live.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start a Session
+        </button>
+      </div>`;
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────
+async function approveReq(id, btn) {
+  try { btn.disabled = true; await API.override.approve(id); toast('Request approved'); btn.closest('.req-item').remove(); }
+  catch(err) { toast(err.message, 'er'); btn.disabled = false; }
+}
+async function rejectReq(id, btn) {
+  try { btn.disabled = true; await API.override.reject(id); toast('Request rejected'); btn.closest('.req-item').remove(); }
+  catch(err) { toast(err.message, 'er'); btn.disabled = false; }
+}
+async function endSession(id) {
+  if (!confirm('End the live session?')) return;
+  try { await API.sessions.close(id); toast('Session ended'); loadLiveSession(); }
+  catch(err) { toast(err.message, 'er'); }
+}
+async function regenCode() {
+  try {
+    const cls = API.getStoredLecturer();
+    const courses = await API.classes.list();
+    const arr = Array.isArray(courses) ? courses : (courses.classes || courses.data || []);
+    if (!arr.length) { toast('No courses found', 'in'); return; }
+    await API.classes.regenCode(arr[0].class_id);
+    toast('Join code regenerated — refresh Courses page');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+// ── Sync heartbeat ────────────────────────────────────────────
+async function checkSync() {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-lbl');
+  try {
+    await fetch(window.location.origin + '/backend/api.php/ping').catch(() => { throw new Error('offline'); });
+    dot.className = 'sync-dot'; lbl.textContent = 'Live';
+  } catch {
+    dot.className = 'sync-dot warn'; lbl.textContent = 'Offline';
+  }
+}
+
+// ── Search (Ctrl+K) ───────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('srch-inp').focus(); }
+});
+
+// ── Boot ──────────────────────────────────────────────────────
+(async () => {
+  await loadMe();
+  const { courses, reqs } = await loadStats();
+  loadSchedule(courses);
+  loadRequests(reqs);
+  await loadLiveSession();
+  checkSync();
+  setInterval(checkSync, 30000);
+})();
+
+// ── Messages unread badge ─────────────────────────────────────────────────
+(function loadMsgBadge(){
+  if(typeof API === 'undefined') return;
+  function refreshMsgBadge(){
+    API.messages ? API.messages.unreadCounts().then(r=>{
+      const total=(r.channels||[]).reduce((s,c)=>s+(c.unread||0),0);
+      const el=document.getElementById('nav-msg');
+      if(el){el.textContent=total>9?'9+':total;el.style.display=total>0?'flex':'none';}
+    }).catch(()=>{}) : null;
+  }
+  refreshMsgBadge();
+  setInterval(refreshMsgBadge,15000);
+})();
+
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>

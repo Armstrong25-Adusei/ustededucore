@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Course Detail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0d0b;--bg2:#161310;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:6px;--r2:10px;--r3:14px;--sb:250px}
+[data-theme="light"]{--bg:#f2ece2;--bg2:#ebe3d8;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ── SIDEBAR ── */
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 13px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:8px}
+.b-ico{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25)}
+.b-ico svg{width:17px;height:17px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:26px;height:26px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center}
+.sb-x svg{width:13px;height:13px;stroke-width:2}
+.role-chip{margin:10px 12px 4px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}
+.role-chip svg{width:10px;height:10px}
+.nav-sect{padding:12px 9px 3px}
+.nav-sect-label{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;font-weight:500;transition:all .15s}
+.ni a svg{width:17px;height:17px;stroke-width:1.75;flex-shrink:0}
+.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}
+.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:9px;color:var(--go2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.pip{width:8px;height:8px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+.sb-ft{padding:13px 14px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;margin-top:auto}
+.ava{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.84rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.68rem;color:var(--dim);font-family:var(--fm)}
+.lg{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lg svg{width:14px;height:14px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.ov.on{display:block}
+
+/* ── TOPBAR ── */
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}
+[data-theme="light"] .tb{background:rgba(242,236,226,.92)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:7px}
+.mbt{display:none;width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center}
+.mbt svg{width:17px;height:17px;stroke-width:2}
+.mbt:hover{color:var(--go2)}
+.ib{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative;flex-shrink:0;cursor:pointer}
+.ib svg{width:17px;height:17px;stroke-width:1.75}
+.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:.82rem}
+.breadcrumb a{color:var(--sub);transition:color .15s}
+.breadcrumb a:hover{color:var(--go2)}
+.breadcrumb svg{width:13px;height:13px;color:var(--dim);flex-shrink:0}
+.breadcrumb span{color:var(--tx);font-weight:500}
+
+/* ── CONTENT ── */
+.cnt{padding:1.75rem clamp(1rem,3vw,2rem);max-width:1080px;width:100%}
+
+/* Course hero */
+.course-hero{background:linear-gradient(135deg,rgba(200,150,60,.08),rgba(200,150,60,.02));border:1px solid rgba(200,150,60,.16);border-radius:var(--r3);padding:20px 22px;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.course-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,60,.07),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.hero-av{width:52px;height:52px;border-radius:var(--r2);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.9rem;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:.04em}
+.hero-info{flex:1;min-width:200px}
+.hero-code{font-family:var(--fm);font-size:.8rem;color:var(--go2);margin-bottom:4px;letter-spacing:.05em}
+.hero-nm{font-family:var(--fh);font-size:1.4rem;color:var(--tx);margin-bottom:6px;line-height:1.2}
+.hero-tags{display:flex;gap:6px;flex-wrap:wrap}
+.htag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.htag svg{width:10px;height:10px;stroke-width:2;flex-shrink:0}
+.htag.gold{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.2);color:var(--go2)}
+.hero-r{margin-left:auto;display:flex;gap:7px;align-items:flex-start;flex-shrink:0}
+.join-code-box{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:10px 14px;text-align:center;min-width:110px}
+.jc-lbl{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.jc-val{font-family:var(--fm);font-size:1.2rem;color:var(--go2);font-weight:700;letter-spacing:.12em}
+.jc-copy{display:block;margin-top:5px;font-size:.68rem;color:var(--sub);cursor:pointer;transition:color .15s}
+.jc-copy:hover{color:var(--go2)}
+
+/* Stat row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;gap:11px;transition:border-color .2s}
+.sc:hover{border-color:rgba(200,150,60,.2)}
+.sc-ico{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-ico svg{width:18px;height:18px;stroke-width:1.75}
+.sc-ico.gold{background:rgba(200,150,60,.12);color:var(--go2)}
+.sc-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}
+.sc-ico.rust{background:rgba(200,88,50,.12);color:var(--ru2)}
+.sc-ico.dim{background:var(--surf2);color:var(--sub)}
+.sc-v{font-family:var(--fh);font-size:1.6rem;color:var(--tx);line-height:1}
+.sc-l{font-size:.78rem;color:var(--sub);margin-top:2px}
+
+/* Tab navigation */
+.tabs{display:flex;gap:2px;margin-bottom:1.25rem;border-bottom:1px solid var(--bdr)}
+.tab{padding:10px 16px;font-size:.875rem;font-weight:500;cursor:pointer;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;display:flex;align-items:center;gap:6px}
+.tab svg{width:14px;height:14px;stroke-width:2;flex-shrink:0}
+.tab:hover{color:var(--go2)}
+.tab.active{color:var(--go2);border-bottom-color:var(--go2);font-weight:600}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* Section header */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sh-t{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap}
+.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3)}
+.btn-teal{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}.btn-teal:hover{background:rgba(45,158,138,.18)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+.btn-rust{background:rgba(200,88,50,.1);border-color:rgba(200,88,50,.3);color:var(--ru2)}.btn-rust:hover{background:rgba(200,88,50,.18)}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Students table */
+.tbl-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:.875rem}
+.tbl th{text-align:left;padding:10px 14px;font-size:.72rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;background:var(--surf2);border-bottom:1px solid var(--bdr2)}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(200,150,60,.03)}
+.s-av{width:30px;height:30px;border-radius:var(--r);background:linear-gradient(135deg,var(--teal),var(--te2));display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;flex-shrink:0;overflow:hidden}
+.s-av img{width:100%;height:100%;object-fit:cover}
+.s-nm{font-size:.875rem;font-weight:600;color:var(--tx)}
+.s-idx{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+.rate-hi{color:var(--te2)}.rate-mid{color:var(--go2)}.rate-lo{color:var(--ru2)}
+.status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:600}
+.status-pill.active{background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.2);color:var(--te2)}
+.status-pill.suspended{background:rgba(200,88,50,.1);border:1px solid rgba(200,88,50,.2);color:var(--ru2)}
+
+/* Sessions table */
+.sess-item{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:13px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
+.sess-item:hover{border-color:rgba(200,150,60,.2)}
+.sess-date{font-family:var(--fm);font-size:.78rem;color:var(--sub);min-width:90px;flex-shrink:0}
+.sess-type{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub);flex-shrink:0}
+.sess-stats{flex:1;display:flex;gap:16px;flex-wrap:wrap}
+.ss-item{font-size:.78rem;color:var(--sub);display:flex;align-items:center;gap:4px}
+.ss-item strong{color:var(--tx)}
+.ss-item svg{width:12px;height:12px;stroke-width:2;flex-shrink:0;color:var(--dim)}
+.sess-status{font-family:var(--fm);font-size:.72rem;font-weight:600;flex-shrink:0}
+.sess-status.open{color:var(--te2)}.sess-status.closed{color:var(--dim)}
+
+/* Attendance overview chart */
+.att-overview{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px;margin-bottom:1rem}
+.att-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.att-label{font-size:.78rem;color:var(--sub);min-width:90px;flex-shrink:0}
+.att-track{flex:1;height:8px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.att-fill{height:100%;border-radius:99px;transition:width .6s var(--ez)}
+.att-fill.present{background:linear-gradient(90deg,var(--teal),var(--te2))}
+.att-fill.absent{background:linear-gradient(90deg,var(--rust),var(--ru2))}
+.att-pct{font-family:var(--fm);font-size:.78rem;min-width:36px;text-align:right;flex-shrink:0}
+
+/* Info card */
+.info-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px 18px;margin-bottom:1rem}
+.info-row{display:flex;gap:8px;padding:9px 0;border-bottom:1px solid var(--bdr2);font-size:.875rem;align-items:flex-start}
+.info-row:last-child{border-bottom:none;padding-bottom:0}
+.info-key{color:var(--sub);min-width:140px;flex-shrink:0;font-weight:500}
+.info-val{color:var(--tx);flex:1;font-family:var(--fm);font-size:.82rem}
+
+/* Empty state */
+.empty{display:flex;flex-direction:column;align-items:center;padding:36px 24px;text-align:center;background:var(--surf);border:1px dashed var(--bdr);border-radius:var(--r2);gap:10px}
+.empty svg{width:32px;height:32px;color:var(--dim);stroke-width:1.5}
+.empty p{font-size:.82rem;color:var(--sub)}
+
+/* Skeleton */
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* Toast */
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.875rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:300px}
+@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.t svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+
+/* Responsive */
+@media(max-width:900px){.stat-row{grid-template-columns:1fr 1fr}.hero-r{width:100%;justify-content:flex-start}}
+@media(max-width:640px){
+  .sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}
+  .main{margin-left:0}.mbt{display:flex}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .cnt{padding:1.25rem 1rem}
+  .tbl th:nth-child(3),.tbl td:nth-child(3){display:none}
+  .tabs{overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+}
+@media(max-width:400px){.stat-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="pg">
+<aside class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div class="b-nm">EduCore</div>
+    </div>
+    <button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>Lecturer</div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Active Ops</div><nav class="nav">
+    <div class="ni"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req" style="display:none">0</span></a></div>
+    <div class="ni"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni on"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+    <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Students</span></a></div>
+    <div class="ni"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Intelligence</div><nav class="nav">
+    <div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">System</div><nav class="nav">
+    <div class="ni"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+
+  <div class="sb-ft">
+    <div class="ava" id="sb-ava">?</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-nm">—</div><div class="ui" id="sb-id">—</div></div>
+    <button class="lg" id="lg-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov"></div>
+
+<div class="main">
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="breadcrumb">
+        <a href="lec-courses.html">Courses</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+        <span id="bc-name">Loading…</span>
+      </div>
+    </div>
+    <div class="tb-r">
+      <div class="ib" id="th-btn">
+        <svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+      </div>
+      <button class="btn btn-gold" id="start-sess-btn" onclick="location.href='lec-live.html?class_id='+classId">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Start Session
+      </button>
+    </div>
+  </header>
+
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+
+      <!-- HERO -->
+      <div class="course-hero" id="course-hero">
+        <div class="hero-top">
+          <div class="sk hero-av" style="width:52px;height:52px"></div>
+          <div class="hero-info">
+            <div class="sk" style="width:80px;height:14px;margin-bottom:6px"></div>
+            <div class="sk" style="width:260px;height:26px;margin-bottom:10px"></div>
+            <div style="display:flex;gap:6px"><div class="sk" style="width:80px;height:22px;border-radius:99px"></div><div class="sk" style="width:100px;height:22px;border-radius:99px"></div></div>
+          </div>
+          <div class="hero-r">
+            <div class="sk" style="width:110px;height:70px;border-radius:var(--r2)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stat-row">
+        <div class="sc"><div class="sc-ico teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="sc-v" id="stat-students"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Students</div></div></div>
+        <div class="sc"><div class="sc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="sc-v" id="stat-sessions"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Sessions</div></div></div>
+        <div class="sc"><div class="sc-ico teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="sc-v" id="stat-rate"><div class="sk" style="width:40px;height:24px"></div></div><div class="sc-l">Avg Attendance</div></div></div>
+        <div class="sc"><div class="sc-ico rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></div><div><div class="sc-v" id="stat-pending"><div class="sk" style="width:30px;height:24px"></div></div><div class="sc-l">Pending Req.</div></div></div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview</button>
+        <button class="tab" data-tab="students"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Students</button>
+        <button class="tab" data-tab="sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Sessions</button>
+        <button class="tab" data-tab="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Course Info</button>
+      </div>
+
+      <!-- OVERVIEW TAB -->
+      <div class="tab-pane active" id="tab-overview">
+        <div class="sh"><span class="sh-t">Attendance Overview</span></div>
+        <div class="att-overview" id="att-overview">
+          <div class="sk" style="height:16px;width:60%;margin-bottom:10px"></div>
+          <div class="sk" style="height:16px;width:80%;margin-bottom:10px"></div>
+          <div class="sk" style="height:16px;width:50%"></div>
+        </div>
+        <div class="sh" style="margin-top:1.25rem"><span class="sh-t">Recent Sessions</span><a href="#" onclick="switchTab('sessions');return false" style="font-size:.82rem;color:var(--go2)">View all →</a></div>
+        <div id="recent-sessions"></div>
+      </div>
+
+      <!-- STUDENTS TAB -->
+      <div class="tab-pane" id="tab-students">
+        <div class="sh">
+          <span class="sh-t">Enrolled Students</span>
+          <div style="display:flex;gap:7px">
+            <button class="btn btn-teal" onclick="location.href='lec-students.html?class_id='+classId+'&add=1'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Add Students
+            </button>
+            <button class="btn btn-out" onclick="location.href='lec-attendance.html?class_id='+classId">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              Attendance
+            </button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="students-tbl">
+            <thead><tr><th>Student</th><th>Index No.</th><th>Program</th><th>Attendance</th><th>Status</th></tr></thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="5"><div class="sk" style="height:36px;margin:8px"></div></td></tr>
+              <tr><td colspan="5"><div class="sk" style="height:36px;margin:8px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SESSIONS TAB -->
+      <div class="tab-pane" id="tab-sessions">
+        <div class="sh">
+          <span class="sh-t">All Sessions</span>
+          <button class="btn btn-gold" onclick="location.href='lec-live.html?class_id='+classId">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            New Session
+          </button>
+        </div>
+        <div id="sessions-list">
+          <div class="sk" style="height:60px;margin-bottom:8px;border-radius:var(--r2)"></div>
+          <div class="sk" style="height:60px;border-radius:var(--r2)"></div>
+        </div>
+      </div>
+
+      <!-- INFO TAB -->
+      <div class="tab-pane" id="tab-info">
+        <div class="sh">
+          <span class="sh-t">Course Details</span>
+          <div style="display:flex;gap:7px">
+            <button class="btn btn-out" id="regen-code-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/></svg>
+              Regen Join Code
+            </button>
+            <button class="btn btn-out" onclick="location.href='lec-messages.html?class_id='+classId">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              Course Chat
+            </button>
+          </div>
+        </div>
+        <div class="info-card" id="info-card">
+          <div class="sk" style="height:200px"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+// ── Theme ─────────────────────────────────────────────────────
+(function(){const t=localStorage.getItem('ec_theme')||'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('ico-dk').style.display=t==='dark'?'block':'none';document.getElementById('ico-lt').style.display=t==='light'?'block':'none';})();
+document.getElementById('th-btn').onclick=()=>{const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('ec_theme',n);document.getElementById('ico-dk').style.display=n==='dark'?'block':'none';document.getElementById('ico-lt').style.display=n==='light'?'block':'none';};
+
+// ── Sidebar ───────────────────────────────────────────────────
+const SB=document.getElementById('sb'),OV=document.getElementById('ov');
+document.getElementById('mbt').onclick=()=>{SB.classList.add('on');OV.classList.add('on');};
+document.getElementById('sb-x').onclick=()=>{SB.classList.remove('on');OV.classList.remove('on');};
+OV.onclick=()=>{SB.classList.remove('on');OV.classList.remove('on');};
+document.getElementById('lg-btn').onclick=async()=>{try{await API.auth.logout();}catch{}API.clearLecturerSession();location.href='/frontend/login.html';};
+
+// ── Helpers ───────────────────────────────────────────────────
+if(!localStorage.getItem('ec_token'))location.href='/frontend/login.html';
+function e(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ini(n){return n?n.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase():'?';}
+function toast(m,t='ok'){const ic={ok:'<polyline points="20 6 9 17 4 12"/>',er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>',in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};const c=document.getElementById('tw'),d=document.createElement('div');d.className=`t ${t}`;d.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${ic[t]||ic.in}</svg><span>${e(m)}</span>`;c.appendChild(d);d.onclick=()=>d.remove();setTimeout(()=>d.remove(),4000);}
+const COLORS=['#2d9e8a','#c8963c','#c85832','#6b48c8','#2d7ec8','#8a9e2d'];
+function chanColor(id){return COLORS[(id||0)%COLORS.length];}
+
+// ── Auth & nav ────────────────────────────────────────────────
+(async()=>{try{const cached=API.getStoredLecturer();if(cached)applyP(cached);const d=await API.auth.me();const lec=d.lecturer||d;localStorage.setItem('ec_lecturer',JSON.stringify(lec));applyP(lec);}catch(err){if(err&&err.status===401){API.clearLecturerSession();location.href='/frontend/login.html';}}})();
+function applyP(lec){const n=lec.full_name||'Lecturer',ig=ini(n);const av=document.getElementById('sb-ava');_setAvatar(av,_buildPhotoUrl(lec),ig);document.getElementById('sb-nm').textContent=n;document.getElementById('sb-id').textContent=lec.staff_id||lec.email||'';}
+API.sessions.getOpen().then(r=>{if(r&&r.session)document.getElementById('nav-live').style.display='inline-block';}).catch(()=>{});
+API.override.getPending().then(r=>{const reqs=Array.isArray(r)?r:(r.requests||r.data||[]);const n=reqs.filter(x=>!x.status||x.status==='pending').length;if(n){const el=document.getElementById('nav-req');el.textContent=n;el.style.display='flex';document.getElementById('stat-pending').textContent=n;}}).catch(()=>{});
+
+// ── Get class ID from URL ─────────────────────────────────────
+const params=new URLSearchParams(location.search);
+let classId=+params.get('id')||+params.get('class_id')||0;
+if(!classId){toast('No course specified','er');setTimeout(()=>location.href='lec-courses.html',1500);}
+
+// ── Tabs ──────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{t.onclick=()=>switchTab(t.dataset.tab);});
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  if(name==='students'&&!studentsLoaded)loadStudents();
+  if(name==='sessions'&&!sessionsLoaded)loadSessions();
+}
+let studentsLoaded=false,sessionsLoaded=false;
+
+// ── Load course detail ────────────────────────────────────────
+async function loadCourse(){
+  try{
+    const res=await API.classes.get(classId);
+    const c=res.class||res.data||res;
+    renderHero(c);
+    document.getElementById('bc-name').textContent=(c.course_code?c.course_code+' — ':'')+c.class_name;
+    document.getElementById('stat-students').textContent=c.student_count||0;
+    document.getElementById('stat-sessions').textContent=c.session_count||0;
+    document.getElementById('stat-rate').textContent=c.attendance_rate!=null?Math.round(c.attendance_rate)+'%':'—';
+    renderInfo(c);
+    renderAttOverview(c);
+    loadRecentSessions();
+  }catch(err){toast('Failed to load course: '+err.message,'er');}
+}
+
+function renderHero(c){
+  const h=document.getElementById('course-hero');
+  const col=chanColor(c.class_id);
+  h.innerHTML=`
+    <div class="hero-top">
+      <div class="hero-av" style="background:${col}">${ini(c.course_code||c.class_name)}</div>
+      <div class="hero-info">
+        <div class="hero-code">${e(c.course_code||'—')}</div>
+        <div class="hero-nm">${e(c.class_name)}</div>
+        <div class="hero-tags">
+          ${c.level?`<span class="htag gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Level ${e(c.level)}</span>`:''}
+          ${c.program?`<span class="htag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>${e(c.program)}</span>`:''}
+          ${c.semester?`<span class="htag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${e(c.semester)}</span>`:''}
+          ${c.academic_year?`<span class="htag">${e(c.academic_year)}</span>`:''}
+        </div>
+      </div>
+      <div class="hero-r">
+        <div class="join-code-box">
+          <div class="jc-lbl">Join Code</div>
+          <div class="jc-val">${e(c.join_code||'—')}</div>
+          <span class="jc-copy" onclick="copyCode('${e(c.join_code||'')}')">Copy ⧉</span>
+        </div>
+        <button class="btn btn-out" onclick="location.href='lec-messages.html?class_id=${c.class_id}'" style="padding:8px 12px;flex-shrink:0" title="Course chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px;height:16px;stroke-width:2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderAttOverview(c){
+  const rate=Math.round(parseFloat(c.attendance_rate||0));
+  const absent=100-rate;
+  document.getElementById('att-overview').innerHTML=`
+    <div class="att-bar-row">
+      <div class="att-label">Present rate</div>
+      <div class="att-track"><div class="att-fill present" style="width:${rate}%"></div></div>
+      <div class="att-pct ${rate>=85?'rate-hi':rate>=70?'rate-mid':'rate-lo'}">${rate}%</div>
+    </div>
+    <div class="att-bar-row">
+      <div class="att-label">Absent rate</div>
+      <div class="att-track"><div class="att-fill absent" style="width:${absent}%"></div></div>
+      <div class="att-pct" style="color:var(--ru2)">${absent}%</div>
+    </div>
+    <div class="att-bar-row">
+      <div class="att-label">Enrolled</div>
+      <div class="att-track"><div class="att-fill present" style="width:100%"></div></div>
+      <div class="att-pct">${e(c.student_count||0)} students</div>
+    </div>`;
+}
+
+function renderInfo(c){
+  document.getElementById('info-card').innerHTML=`
+    <div class="info-row"><div class="info-key">Course Name</div><div class="info-val">${e(c.class_name)}</div></div>
+    <div class="info-row"><div class="info-key">Course Code</div><div class="info-val">${e(c.course_code||'—')}</div></div>
+    <div class="info-row"><div class="info-key">Join Code</div><div class="info-val">${e(c.join_code||'—')} <span onclick="copyCode('${e(c.join_code||'')}');" style="color:var(--go2);cursor:pointer;font-size:.75rem;margin-left:6px">Copy</span></div></div>
+    <div class="info-row"><div class="info-key">Level</div><div class="info-val">${e(c.level||'—')}</div></div>
+    <div class="info-row"><div class="info-key">Programme</div><div class="info-val">${e(c.program||'—')}</div></div>
+    <div class="info-row"><div class="info-key">Semester</div><div class="info-val">${e(c.semester||'—')}</div></div>
+    <div class="info-row"><div class="info-key">Academic Year</div><div class="info-val">${e(c.academic_year||'—')}</div></div>
+    <div class="info-row"><div class="info-key">GPS Location</div><div class="info-val">${c.gps_latitude?c.gps_latitude+', '+c.gps_longitude:'Not set'}</div></div>
+    <div class="info-row"><div class="info-key">Geofence Radius</div><div class="info-val">${e(c.geofence_radius_meters||20)}m</div></div>
+    <div class="info-row"><div class="info-key">Created</div><div class="info-val">${c.created_at?new Date(c.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—'}</div></div>`;
+}
+
+async function loadRecentSessions(){
+  try{
+    const res=await API.sessions.list({class_id:classId,limit:4});
+    const sessions=Array.isArray(res)?res:(res.sessions||res.data||[]);
+    const wrap=document.getElementById('recent-sessions');
+    if(!sessions.length){wrap.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><p>No sessions recorded yet for this course.</p></div>';return;}
+    wrap.innerHTML=sessions.map(s=>renderSessItem(s)).join('');
+  }catch{document.getElementById('recent-sessions').innerHTML='<p style="font-size:.8rem;color:var(--dim)">Could not load sessions.</p>';}
+}
+
+async function loadStudents(){
+  studentsLoaded=true;
+  try{
+    const res=await API.classes.students(classId);
+    const students=Array.isArray(res)?res:(res.students||res.data||[]);
+    const tbody=document.getElementById('students-tbody');
+    if(!students.length){tbody.innerHTML=`<tr><td colspan="5"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>No students enrolled. <a href="lec-students.html?class_id=${classId}&add=1" style="color:var(--go2)">Add students →</a></p></div></td></tr>`;return;}
+    tbody.innerHTML=students.map(s=>{
+      const rate=Math.round(parseFloat(s.attendance_rate||0));
+      const rateClass=rate>=85?'rate-hi':rate>=70?'rate-mid':'rate-lo';
+      return`<tr>
+        <td><div style="display:flex;align-items:center;gap:9px"><div class="s-av">${ini(s.student_name||'')}</div><div><div class="s-nm">${e(s.student_name||'—')}</div><div class="s-idx">${e(s.email||'')}</div></div></div></td>
+        <td><span style="font-family:var(--fm);font-size:.82rem">${e(s.index_number||'—')}</span></td>
+        <td style="font-size:.8rem;color:var(--sub)">${e(s.program||'—')}</td>
+        <td><span class="${rateClass}" style="font-family:var(--fm);font-size:.82rem;font-weight:700">${rate>0?rate+'%':'—'}</span></td>
+        <td><span class="status-pill ${s.account_status||'active'}">${e(s.account_status||'active')}</span></td>
+      </tr>`;
+    }).join('');
+  }catch{document.getElementById('students-tbody').innerHTML='<tr><td colspan="5" style="padding:16px;font-size:.8rem;color:var(--dim)">Failed to load students.</td></tr>';}
+}
+
+async function loadSessions(){
+  sessionsLoaded=true;
+  try{
+    const res=await API.sessions.list({class_id:classId,limit:50});
+    const sessions=Array.isArray(res)?res:(res.sessions||res.data||[]);
+    const wrap=document.getElementById('sessions-list');
+    if(!sessions.length){wrap.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><p>No sessions yet. Start a live session to begin tracking attendance.</p></div>';return;}
+    wrap.innerHTML=sessions.map(s=>renderSessItem(s)).join('');
+  }catch{document.getElementById('sessions-list').innerHTML='<p style="font-size:.8rem;color:var(--dim);padding:1rem">Failed to load sessions.</p>';}
+}
+
+function renderSessItem(s){
+  const dt=s.session_date?new Date(s.session_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-';
+  const pct=s.total_students>0?Math.round((s.total_students_present/s.total_students)*100):0;
+  const isOpen=s.session_status==='open'||s.session_status==='in_progress';
+  return`<div class="sess-item">
+    <div class="sess-date">${e(dt)}<br><span style="font-size:.68rem">${e(s.session_time||'')}</span></div>
+    <span class="sess-type">${e(s.session_type||'class')}</span>
+    <div class="sess-stats">
+      <div class="ss-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><strong>${s.total_students_present||0}</strong>&nbsp;/ ${s.total_students||'?'} present</div>
+      ${pct>0?`<div class="ss-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg><strong>${pct}%</strong></div>`:''}
+    </div>
+    <div class="sess-status ${isOpen?'open':'closed'}">${isOpen?'● LIVE':'Closed'}</div>
+    ${isOpen?`<button class="btn btn-teal" style="padding:5px 10px;font-size:.78rem" onclick="location.href='lec-live.html?session_id=${s.session_id}'">View →</button>`:'<button class="btn btn-out" style="padding:5px 10px;font-size:.78rem" onclick="location.href=\'lec-attendance.html?session_id='+s.session_id+'\'">Records →</button>'}
+  </div>`;
+}
+
+function copyCode(code){if(!code)return;navigator.clipboard.writeText(code).then(()=>toast('Join code copied!')).catch(()=>toast('Copy failed','er'));}
+
+// ── Regen join code ───────────────────────────────────────────
+document.getElementById('regen-code-btn').onclick=async function(){
+  if(!confirm('Regenerate the join code? Students using the old code will need the new one.'))return;
+  this.disabled=true;
+  try{await API.classes.regenCode(classId);toast('Join code regenerated');loadCourse();}
+  catch(err){toast(err.message,'er');}
+  finally{this.disabled=false;}
+};
+
+// ── Messages badge ────────────────────────────────────────────
+(function loadMsgBadge(){
+  if(typeof API === 'undefined') return;
+  function refresh(){API.messages?API.messages.unreadCounts().then(r=>{const total=(r.channels||[]).reduce((s,c)=>s+(c.unread||0),0);const el=document.getElementById('nav-msg');if(el){el.textContent=total>9?'9+':total;el.style.display=total>0?'flex':'none';}}).catch(()=>{}):null;}
+  refresh();setInterval(refresh,15000);
+})();
+
+// ── Boot ──────────────────────────────────────────────────────
+loadCourse();
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>

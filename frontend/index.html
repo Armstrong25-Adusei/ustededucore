@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>EduCore — Geofence-Protected Attendance</title>
+<meta name="description" content="EduCore combines Dynamic QR Codes, Geofencing, Device Binding, and cryptographic SATE integrity into a single auditable attendance platform."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Tiempos+Headline:wght@400;500&family=Styrene+A:wght@400;500;600;700&family=Styrene+B:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────── */
+:root {
+  --cream: #f5f0e8;
+  --cream2: #ede8de;
+  --sand: #e8e0d0;
+  --rust: #c84b31;
+  --rust2: #e05c3a;
+  --coal: #1a1612;
+  --coal2: #2d2620;
+  --ink: #3d3530;
+  --ink2: #5a5048;
+  --stone: #8a7d72;
+  --stone2: #b5a898;
+  --gold: #c4973a;
+  --gold2: #e0b050;
+  --teal: #2a7a6e;
+  --teal2: #3d9e90;
+  --bg: var(--cream);
+  --bg2: var(--cream2);
+  --surf: #fff;
+  --surf2: var(--sand);
+  --border: rgba(58,48,40,0.1);
+  --border2: rgba(58,48,40,0.06);
+  --text: var(--coal);
+  --muted: var(--ink2);
+  --dim: var(--stone);
+  --accent: var(--rust);
+  --accent2: var(--rust2);
+  --ff-h: 'Playfair Display', Georgia, serif;
+  --ff-b: 'DM Sans', system-ui, sans-serif;
+  --ff-m: 'DM Mono', monospace;
+  --r: 4px; --rl: 8px; --rxl: 12px;
+  --maxw: 1200px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16120e;
+    --bg2: #1e1a15;
+    --surf: #24201a;
+    --surf2: #2c271f;
+    --border: rgba(255,240,220,0.09);
+    --border2: rgba(255,240,220,0.05);
+    --text: #f0e8dc;
+    --muted: #a09080;
+    --dim: #6a5c50;
+    --accent: #e06040;
+    --accent2: #f07050;
+    --cream: #16120e;
+    --cream2: #1e1a15;
+    --coal: #f0e8dc;
+    --coal2: #d8cfc4;
+    --ink: #c0b0a0;
+    --ink2: #a09080;
+    --stone: #7a6a5c;
+    --stone2: #9a8878;
+    --gold: #d4a840;
+    --gold2: #e8c060;
+    --teal: #3a9e90;
+    --teal2: #50c0b0;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-b);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+h1,h2,h3,h4 { font-family: var(--ff-h); line-height: 1.1; font-weight: 500; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.4rem, 6vw, 5rem); }
+h2 { font-size: clamp(1.8rem, 4vw, 3.2rem); }
+h3 { font-size: clamp(1.1rem, 2vw, 1.5rem); }
+p { color: var(--muted); line-height: 1.8; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 2.5rem); }
+.section { padding: clamp(72px, 12vh, 128px) 0; }
+
+/* ── GRAIN OVERLAY ─────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ── BUTTONS ────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 0.75rem 1.5rem; border-radius: 3px;
+  font-family: var(--ff-b); font-weight: 500; font-size: 0.88rem;
+  letter-spacing: 0.01em; transition: all 0.22s var(--ease);
+  white-space: nowrap; position: relative; overflow: hidden;
+}
+.btn svg { width: 15px; height: 15px; flex-shrink: 0; stroke-width: 1.75; }
+.btn-primary {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 2px 12px rgba(200,75,49,0.25);
+}
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,75,49,0.35); }
+.btn-secondary {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border); backdrop-filter: blur(8px);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,75,49,0.04); }
+.btn-ghost { color: var(--accent); padding: 0; background: none; font-weight: 600; }
+.btn-ghost:hover { gap: 12px; }
+.btn-sm { padding: 0.55rem 1.1rem; font-size: 0.82rem; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { background: var(--teal2); transform: translateY(-1px); }
+
+/* ── BADGES ─────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 2px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; border: 1px solid;
+  font-family: var(--ff-b);
+}
+.badge-rust  { background: rgba(200,75,49,.08); border-color: rgba(200,75,49,.2); color: var(--accent); }
+.badge-teal  { background: rgba(42,122,110,.08); border-color: rgba(42,122,110,.2); color: var(--teal2); }
+.badge-gold  { background: rgba(196,151,58,.08); border-color: rgba(196,151,58,.2); color: var(--gold); }
+.badge-muted { background: var(--border2); border-color: var(--border); color: var(--dim); }
+.badge-green { background: rgba(42,122,110,.08); border-color: rgba(42,122,110,.2); color: var(--teal2); }
+
+/* ── ICON WELLS ─────────────────────────────────── */
+.iw {
+  width: 48px; height: 48px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 1px solid; position: relative;
+}
+.iw svg { width: 22px; height: 22px; stroke-width: 1.5; }
+.iw.rust  { color: var(--accent);  border-color: rgba(200,75,49,.18);  background: rgba(200,75,49,.06); }
+.iw.teal  { color: var(--teal2);   border-color: rgba(42,122,110,.18); background: rgba(42,122,110,.06); }
+.iw.gold  { color: var(--gold);    border-color: rgba(196,151,58,.18); background: rgba(196,151,58,.06); }
+.iw.green { color: var(--teal2);   border-color: rgba(42,122,110,.18); background: rgba(42,122,110,.06); }
+.iw.accent { color: var(--accent); border-color: rgba(200,75,49,.18);  background: rgba(200,75,49,.06); }
+
+/* ── SEC HEADER ─────────────────────────────────── */
+.sec-head { text-align: center; max-width: 660px; margin: 0 auto clamp(3rem,8vh,5rem); }
+.sec-head h2 { margin-bottom: 14px; }
+.sec-head p  { font-size: 1rem; }
+.sec-ey {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--accent); font-family: var(--ff-b);
+  margin-bottom: 14px; display: block;
+}
+
+/* ── DIVIDER LINE ───────────────────────────────── */
+.divider { width: 40px; height: 1px; background: var(--accent); margin: 20px 0; display: block; }
+
+/* ── SCROLL REVEAL ──────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.active { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; }
+.d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* ════════════════════════════════════════════════
+   NAV
+════════════════════════════════════════════════ */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  transition: all 0.3s var(--ease);
+}
+#nav.scrolled {
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) {
+  #nav.scrolled { background: rgba(22,18,14,0.92); }
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0; gap: 20px;
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.nav-logo {
+  width: 38px; height: 38px; border-radius: 3px;
+  background: var(--accent); display: flex; align-items: center;
+  justify-content: center; font-family: var(--ff-h); font-weight: 700;
+  font-size: 0.85rem; color: #fff; letter-spacing: 0.01em;
+  font-style: italic;
+}
+.nav-name { font-family: var(--ff-h); font-weight: 500; font-size: 1.05rem; font-style: italic; }
+.nav-links { display: flex; align-items: center; gap: 0; }
+.nav-links a {
+  padding: 8px 14px; font-size: 0.84rem; font-weight: 400;
+  color: var(--muted); transition: color 0.2s; letter-spacing: 0.01em;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-acts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nav-mob {
+  display: none; padding: 8px; color: var(--muted);
+  border-radius: 3px; background: var(--border2); border: 1px solid var(--border);
+}
+.nav-mob svg { width: 20px; height: 20px; }
+.mob-menu {
+  display: none; position: fixed; top: 74px; left: 0; right: 0; z-index: 800;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: 12px 0 24px;
+}
+.mob-menu.open { display: block; }
+.mob-menu a { display: block; padding: 12px clamp(1.25rem,5vw,2.5rem); color: var(--muted); font-size: 0.9rem; transition: color 0.2s; }
+.mob-menu a:hover { color: var(--text); }
+.mob-acts { padding: 16px clamp(1.25rem,5vw,2.5rem) 0; display: flex; flex-direction: column; gap: 8px; }
+.mob-acts .btn { width: 100%; justify-content: center; }
+
+/* ════════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════════ */
+#hero {
+  position: relative; padding: clamp(110px,20vh,168px) 0 clamp(72px,12vh,120px);
+  overflow: hidden;
+}
+.hero-rule {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(var(--border2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 20%, transparent 90%);
+}
+.hero-orb {
+  position: absolute; z-index: 0; pointer-events: none; border-radius: 50%;
+  filter: blur(80px); opacity: 0.12;
+}
+.hero-orb-1 { width: 700px; height: 700px; background: var(--accent); top: -200px; right: -100px; }
+.hero-orb-2 { width: 500px; height: 500px; background: var(--teal); bottom: -100px; left: -80px; }
+
+.hero-inner { position: relative; z-index: 2; }
+.hero-kicker {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 32px; flex-wrap: wrap;
+}
+.hero-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; flex-shrink: 0; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,75,49,.7)} 50%{box-shadow:0 0 0 8px rgba(200,75,49,0)} }
+.hero-title {
+  font-size: clamp(2.6rem, 7vw, 5.5rem); font-weight: 400;
+  line-height: 1.04; margin-bottom: 28px; max-width: 820px;
+  letter-spacing: -0.02em;
+}
+.hero-title em { font-style: italic; color: var(--accent); }
+.hero-sub {
+  font-size: clamp(1rem, 2.2vw, 1.15rem); color: var(--muted);
+  line-height: 1.85; margin-bottom: clamp(2rem,5vh,2.75rem); max-width: 580px;
+}
+.hero-acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hero-trust {
+  margin-top: clamp(48px,9vh,80px); padding-top: clamp(32px,5vh,48px);
+  border-top: 1px solid var(--border); display: flex; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+.trust-lbl { font-size: 0.72rem; color: var(--dim); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* Hero card */
+.hero-card-wrap {
+  position: absolute; right: clamp(20px,4vw,48px); top: 50%; transform: translateY(-50%);
+  z-index: 3; width: 300px;
+}
+.live-card {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+}
+.live-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.live-badge { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.live-cls { font-size: 0.75rem; color: var(--dim); }
+.qr-block {
+  background: var(--bg2); border-radius: 6px; padding: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  border: 1px solid var(--border2);
+}
+.qr-wrap { width: 110px; height: 110px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.qr-bar { width: 100%; height: 3px; background: var(--border2); border-radius: 999px; overflow: hidden; }
+.qr-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--teal2)); border-radius: 999px; animation: shrink 15s linear infinite; }
+@keyframes shrink { from{width:100%} to{width:0%} }
+.qr-timer { font-size: 0.68rem; color: var(--dim); font-weight: 500; font-family: var(--ff-m); }
+.qr-code-text { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.2em; color: var(--text); font-family: var(--ff-m); }
+.live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.ls { background: var(--bg2); border-radius: 5px; padding: 10px 12px; border: 1px solid var(--border2); text-align: center; }
+.ls-val { font-size: 1.3rem; font-weight: 700; font-family: var(--ff-h); color: var(--text); line-height: 1; }
+.ls-lbl { font-size: 0.65rem; color: var(--dim); margin-top: 2px; }
+.sate-chip { display: flex; align-items: center; gap: 7px; padding: 8px 11px; background: rgba(42,122,110,.06); border: 1px solid rgba(42,122,110,.15); border-radius: 4px; margin-top: 12px; }
+.sate-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal2); flex-shrink: 0; animation: blink 2s infinite; }
+.sate-chip-txt { font-size: 0.65rem; color: var(--teal2); font-weight: 600; font-family: var(--ff-m); }
+.notif-card {
+  position: absolute; left: -120px; bottom: 60px;
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px; width: 200px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1); animation: fup 4s ease-in-out infinite;
+}
+@keyframes fup { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.notif-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.notif-ico { width: 28px; height: 28px; border-radius: 4px; background: rgba(196,151,58,.1); display: flex; align-items: center; justify-content: center; }
+.notif-ico svg { width: 14px; height: 14px; color: var(--gold); }
+.notif-title { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.notif-body { font-size: 0.68rem; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+.notif-btns { display: flex; gap: 5px; }
+.n-btn { flex: 1; padding: 6px 0; border-radius: 3px; font-size: 0.66rem; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid; transition: all 0.2s; }
+.n-ok  { background: rgba(42,122,110,.08); color: var(--teal2); border-color: rgba(42,122,110,.2); }
+.n-no  { background: var(--border2); color: var(--dim); border-color: var(--border); }
+
+/* ════════════════════════════════════════════════
+   STATS BAR
+════════════════════════════════════════════════ */
+#stats {
+  padding: 0; background: var(--surf);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+.stat {
+  padding: clamp(1.75rem,4vh,2.25rem) clamp(1.25rem,3vw,2rem);
+  border-right: 1px solid var(--border); transition: background 0.2s;
+}
+.stat:last-child { border-right: none; }
+.stat:hover { background: var(--bg2); }
+.stat-val { font-family: var(--ff-h); font-size: clamp(2rem,4vw,2.6rem); font-weight: 400; color: var(--text); line-height: 1; margin-bottom: 6px; }
+.stat-val em { font-style: normal; color: var(--accent); }
+.stat-lbl { font-size: 0.8rem; color: var(--dim); font-weight: 400; }
+
+/* ════════════════════════════════════════════════
+   STUDENT CTA STRIP
+════════════════════════════════════════════════ */
+#student-strip {
+  background: var(--bg2); padding: clamp(3rem,7vh,5rem) 0;
+  border-bottom: 1px solid var(--border);
+}
+.strip-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  flex-wrap: wrap;
+}
+.strip-copy .sec-ey { margin-bottom: 10px; }
+.strip-copy h2 { font-size: clamp(1.6rem,3vw,2.4rem); margin-bottom: 12px; }
+.strip-copy p { max-width: 480px; }
+.strip-acts { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+
+/* ════════════════════════════════════════════════
+   MISSION
+════════════════════════════════════════════════ */
+#mission { background: var(--bg); position: relative; overflow: hidden; }
+.miss-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(3rem,8vw,7rem); align-items: start; }
+.miss-left blockquote {
+  font-family: var(--ff-h); font-size: clamp(1.3rem,2.5vw,1.85rem);
+  font-weight: 400; line-height: 1.5; color: var(--text);
+  border-left: 2px solid var(--accent); padding-left: 24px;
+  margin-bottom: 28px; font-style: italic;
+}
+.miss-left > p { font-size: 0.95rem; line-height: 1.85; margin-bottom: 32px; }
+.miss-pts { display: flex; flex-direction: column; gap: 20px; }
+.mp { display: flex; align-items: flex-start; gap: 14px; }
+.mp-txt { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+.mp-txt strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 3px; }
+.pillars { display: flex; flex-direction: column; gap: 2px; }
+.pillar {
+  padding: 22px 24px; background: var(--surf); border: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 16px;
+  transition: all 0.25s var(--ease); border-radius: 2px;
+}
+.pillar + .pillar { border-top: none; }
+.pillar:hover { background: var(--bg2); border-color: var(--accent); }
+.pillar-body h4 { font-family: var(--ff-b); font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.pillar-body p  { font-size: 0.84rem; color: var(--muted); margin: 0; line-height: 1.6; }
+
+/* ════════════════════════════════════════════════
+   PLATFORM
+════════════════════════════════════════════════ */
+#platform { background: var(--bg2); }
+.bento { display: grid; grid-template-columns: repeat(12,1fr); gap: 2px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.bc {
+  background: var(--surf); padding: clamp(1.75rem,4vw,2.5rem);
+  transition: background 0.25s; position: relative; overflow: hidden;
+}
+.bc:hover { background: var(--bg2); }
+.bc-a { grid-column: span 7; } .bc-b { grid-column: span 5; }
+.bc-c { grid-column: span 5; } .bc-d { grid-column: span 7; }
+.bc .iw { margin-bottom: 18px; }
+.bc h3 { font-family: var(--ff-b); font-size: 1.05rem; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+.bc > p { font-size: 0.87rem; line-height: 1.75; color: var(--muted); }
+.feat-list { margin-top: 18px; display: flex; flex-direction: column; gap: 11px; }
+.fi { display: flex; align-items: flex-start; gap: 10px; font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+.fi-chk { width: 18px; height: 18px; border-radius: 3px; flex-shrink: 0; margin-top: 2px; background: rgba(42,122,110,.08); border: 1px solid rgba(42,122,110,.2); display: flex; align-items: center; justify-content: center; }
+.fi-chk svg { width: 10px; height: 10px; color: var(--teal2); stroke-width: 3; }
+.fi strong { color: var(--text); }
+.tech-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 18px; }
+.sync-rows { margin-top: 18px; display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.sync-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+.sync-row:last-child { border-bottom: none; }
+.sync-lbl { font-size: 0.8rem; color: var(--muted); }
+.sync-val { font-size: 0.8rem; font-weight: 600; color: var(--teal2); font-family: var(--ff-m); }
+
+/* ════════════════════════════════════════════════
+   HOW IT WORKS
+════════════════════════════════════════════════ */
+#how { background: var(--bg); }
+.flow-card {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 4px; padding: clamp(2rem,5vw,3rem);
+  border-top: 2px solid var(--teal2);
+}
+.flow-lbl { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal2); margin-bottom: 10px; font-family: var(--ff-b); }
+.flow-card h3 { font-family: var(--ff-b); font-size: 1.1rem; font-weight: 600; margin-bottom: 28px; color: var(--text); }
+.fstep { display: flex; gap: 16px; align-items: flex-start; padding-bottom: 24px; position: relative; }
+.fstep:last-child { padding-bottom: 0; }
+.fstep:not(:last-child)::after { content: ''; position: absolute; left: 14px; top: 34px; bottom: 0; width: 1px; background: var(--border); }
+.snum {
+  width: 30px; height: 30px; border-radius: 2px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; font-family: var(--ff-m);
+  position: relative; z-index: 1;
+  background: var(--accent); color: #fff;
+}
+.scont { padding-top: 4px; flex: 1; }
+.scont h4 { font-family: var(--ff-b); font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.scont p { font-size: 0.84rem; color: var(--muted); line-height: 1.65; margin: 0; }
+
+/* ════════════════════════════════════════════════
+   OVERRIDE
+════════════════════════════════════════════════ */
+#override { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.ov-inner { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(3rem,8vw,6rem); align-items: center; }
+.ov-content h2 { margin-bottom: 18px; }
+.ov-body p { font-size: 0.93rem; line-height: 1.85; margin-bottom: 14px; }
+.ov-audit { display: flex; align-items: flex-start; gap: 14px; padding: 16px; border-radius: 4px; background: rgba(196,151,58,.05); border: 1px solid rgba(196,151,58,.15); margin-top: 20px; }
+.ov-audit-txt { font-size: 0.84rem; color: var(--muted); line-height: 1.7; }
+.ov-audit-txt strong { color: var(--text); font-weight: 600; }
+.ov-mock { background: var(--surf); border: 1px solid var(--border); border-radius: 6px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,.06); }
+.ov-mock-hdr { font-size: 0.68rem; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+.ov-req { background: var(--bg2); border: 1px solid rgba(196,151,58,.18); border-radius: 5px; padding: 16px; }
+.ov-req-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ov-av { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; }
+.ov-sname { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.ov-sid { font-size: 0.72rem; color: var(--dim); margin-top: 2px; }
+.ov-dets { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.ov-drow { display: flex; justify-content: space-between; font-size: 0.8rem; padding-bottom: 8px; border-bottom: 1px solid var(--border2); }
+.ov-drow:last-child { border-bottom: none; padding-bottom: 0; }
+.ov-drow span:first-child { color: var(--dim); }
+.ov-drow span:last-child  { color: var(--text); font-weight: 600; font-family: var(--ff-m); font-size: 0.76rem; }
+.ov-drow .pass { color: var(--teal2); } .ov-drow .fail { color: var(--accent); }
+.ov-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ov-btn { padding: 10px 0; border-radius: 3px; text-align: center; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid; }
+.ov-ok { background: rgba(42,122,110,.08); color: var(--teal2); border-color: rgba(42,122,110,.2); }
+.ov-ok:hover { background: rgba(42,122,110,.15); }
+.ov-no { background: rgba(200,75,49,.06); color: var(--accent); border-color: rgba(200,75,49,.18); }
+.ov-no:hover { background: rgba(200,75,49,.12); }
+.ov-note { font-size: 0.68rem; color: var(--dim); margin-top: 12px; text-align: center; line-height: 1.5; }
+
+/* ════════════════════════════════════════════════
+   SECURITY
+════════════════════════════════════════════════ */
+#security { background: var(--bg); }
+.sec-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 2px; }
+.sec-grid-bot { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.sec-card { background: var(--surf); padding: clamp(1.5rem,4vw,2rem) clamp(1.25rem,3vw,1.75rem); transition: background 0.25s; position: relative; }
+.sec-card:hover { background: var(--bg2); }
+.sec-num { font-family: var(--ff-m); font-size: 0.68rem; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 16px; }
+.sec-card .iw { margin-bottom: 12px; }
+.sec-card h4 { font-family: var(--ff-b); font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.sec-card p  { font-size: 0.84rem; color: var(--muted); line-height: 1.7; margin: 0; }
+.sate-mono { font-family: var(--ff-m); font-size: 0.66rem; color: var(--teal2); background: rgba(42,122,110,.06); border: 1px solid rgba(42,122,110,.15); border-radius: 4px; padding: 10px 12px; margin-top: 12px; line-height: 1.8; word-break: break-all; }
+.sate-card { border-top: 2px solid var(--teal2) !important; }
+
+/* ════════════════════════════════════════════════
+   FAQ
+════════════════════════════════════════════════ */
+#faq { border-top: 1px solid var(--border); background: var(--bg2); }
+.faq-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: clamp(2rem,8vw,6rem); align-items: start; }
+.faq-side h2 { font-size: clamp(1.6rem,3.5vw,2.5rem); margin-bottom: 14px; }
+.faq-side p  { font-size: 0.93rem; line-height: 1.85; margin-bottom: 24px; }
+.faq-list { display: flex; flex-direction: column; }
+.faq-item { border-bottom: 1px solid var(--border); overflow: hidden; }
+.faq-item:first-child { border-top: 1px solid var(--border); }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  padding: 22px 0; cursor: pointer; font-weight: 500; font-size: 0.95rem;
+  color: var(--text); font-family: var(--ff-b); transition: color 0.2s; user-select: none;
+}
+.faq-q:hover { color: var(--accent); }
+.faq-arr { width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.3s var(--ease); }
+.faq-arr svg { width: 13px; height: 13px; color: var(--muted); stroke-width: 2.5; }
+.faq-item.open .faq-arr { transform: rotate(180deg); border-color: var(--accent); }
+.faq-item.open .faq-arr svg { color: var(--accent); }
+.faq-item.open .faq-q { color: var(--accent); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease); font-size: 0.9rem; color: var(--muted); line-height: 1.85; }
+.faq-a-in { padding: 0 0 22px; }
+
+/* ════════════════════════════════════════════════
+   CTA
+════════════════════════════════════════════════ */
+#cta {
+  position: relative; overflow: hidden;
+  border-top: 1px solid var(--border); background: var(--bg);
+}
+.cta-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(200,75,49,.05), transparent 70%); }
+.cta-inner { position: relative; z-index: 2; text-align: center; max-width: 680px; margin: 0 auto; }
+.cta-inner h2 { margin-bottom: 18px; }
+.cta-inner > p { font-size: 1.05rem; max-width: 520px; margin: 0 auto 36px; }
+.cta-acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-note { margin-top: 18px; font-size: 0.78rem; color: var(--dim); }
+
+/* ════════════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════════════ */
+#footer { background: var(--surf); border-top: 1px solid var(--border); padding: 56px 0 32px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: clamp(2rem,5vw,3.5rem); padding-bottom: clamp(2rem,5vh,3rem); border-bottom: 1px solid var(--border); }
+.footer-brand > p { font-size: 0.87rem; color: var(--muted); line-height: 1.85; max-width: 320px; margin-top: 16px; }
+.footer-logo-row { display: flex; align-items: center; gap: 10px; }
+.footer-logo { width: 34px; height: 34px; border-radius: 3px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--ff-h); font-weight: 700; font-size: 0.8rem; color: #fff; font-style: italic; }
+.footer-name { font-family: var(--ff-h); font-size: 1rem; font-weight: 500; font-style: italic; }
+.social { display: flex; gap: 8px; margin-top: 18px; }
+.sl { width: 34px; height: 34px; border-radius: 3px; background: var(--border2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--dim); transition: all 0.2s; }
+.sl:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,75,49,.06); }
+.sl svg { width: 15px; height: 15px; }
+.fcol h5 { font-family: var(--ff-b); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); margin-bottom: 16px; }
+.fcol ul { display: flex; flex-direction: column; gap: 10px; }
+.fcol li a { font-size: 0.87rem; color: var(--muted); transition: color 0.2s; }
+.fcol li a:hover { color: var(--accent); }
+.footer-btm { padding-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-btm p { font-size: 0.78rem; color: var(--dim); margin: 0; }
+.fver { font-size: 0.68rem; font-weight: 600; color: var(--accent); background: rgba(200,75,49,.08); border: 1px solid rgba(200,75,49,.18); padding: 4px 10px; border-radius: 2px; font-family: var(--ff-m); }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+@media(max-width:1100px){
+  .hero-card-wrap { display: none; }
+  .bc-a,.bc-b,.bc-c,.bc-d { grid-column: span 12; }
+  .ov-inner { grid-template-columns: 1fr; }
+  .miss-inner { grid-template-columns: 1fr; }
+  .sec-grid { grid-template-columns: repeat(2,1fr); }
+  .sec-grid-bot { grid-template-columns: repeat(2,1fr); }
+}
+@media(max-width:900px){
+  .nav-links { display: none; }
+  .nav-mob { display: flex; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .stat { border-bottom: 1px solid var(--border); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .faq-grid { grid-template-columns: 1fr; }
+  .strip-inner { flex-direction: column; }
+}
+@media(max-width:640px){
+  .hero-acts .btn { width: 100%; justify-content: center; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .sec-grid,.sec-grid-bot { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-btm { flex-direction: column; align-items: flex-start; }
+  .cta-acts { flex-direction: column; }
+  .cta-acts .btn { width: 100%; justify-content: center; }
+  .bento { grid-template-columns: 1fr !important; }
+  .bc-a,.bc-b,.bc-c,.bc-d { grid-column: span 1; }
+}
+@media(max-width:480px){
+  .nav-acts .btn-secondary { display: none; }
+  .hero-trust { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html">
+        <div class="nav-logo">EC</div>
+        <div class="nav-name">EduCore</div>
+      </a>
+      <div class="nav-links">
+        <a href="#platform">Platform</a>
+        <a href="#how">How it works</a>
+        <a href="#override">Override</a>
+        <a href="#security">Security</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-acts">
+        <a href="student-login.html" class="btn btn-secondary btn-sm">Student Login</a>
+        <a href="login.html" class="btn btn-secondary btn-sm">Sign In</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">
+          Get Started
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <button class="nav-mob" id="menu-btn" aria-label="Menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mob-menu" id="mob-menu">
+    <a href="#platform">Platform</a>
+    <a href="#how">How it works</a>
+    <a href="#override">Lecturer Override</a>
+    <a href="#security">Security</a>
+    <a href="#faq">FAQ</a>
+    <div class="mob-acts">
+      <a href="student-login.html" class="btn btn-secondary">Student Login</a>
+      <a href="login.html" class="btn btn-secondary">Sign In</a>
+      <a href="signup.html" class="btn btn-primary">Get Started →</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-rule"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+
+  <div class="hero-card-wrap" aria-hidden="true">
+    <div class="notif-card">
+      <div class="notif-hdr">
+        <div class="notif-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="notif-title">Override Request</div>
+      </div>
+      <div class="notif-body">3 failed attempts — inside geofence — device verified</div>
+      <div class="notif-btns">
+        <div class="n-btn n-ok">✓ Approve</div>
+        <div class="n-btn n-no">Reject</div>
+      </div>
+    </div>
+    <div class="live-card">
+      <div class="live-hdr">
+        <div class="live-badge"><span class="live-dot"></span> Live Session</div>
+        <div class="live-cls">Active Class</div>
+      </div>
+      <div class="qr-block">
+        <div class="qr-wrap">
+          <svg viewBox="0 0 96 96" fill="none">
+            <rect x="6" y="6" width="26" height="26" rx="3" fill="#f5f0e8"/><rect x="10" y="10" width="18" height="18" rx="2" fill="#c84b31" opacity=".9"/>
+            <rect x="64" y="6" width="26" height="26" rx="3" fill="#f5f0e8"/><rect x="68" y="10" width="18" height="18" rx="2" fill="#c84b31" opacity=".9"/>
+            <rect x="6" y="64" width="26" height="26" rx="3" fill="#f5f0e8"/><rect x="10" y="68" width="18" height="18" rx="2" fill="#c84b31" opacity=".9"/>
+            <rect x="38" y="6" width="6" height="6" rx="1" fill="#3d3530" opacity=".8"/><rect x="46" y="6" width="6" height="6" rx="1" fill="#3d3530" opacity=".5"/>
+            <rect x="38" y="14" width="6" height="6" rx="1" fill="#3d3530" opacity=".6"/><rect x="46" y="14" width="6" height="6" rx="1" fill="#3d3530"/>
+            <rect x="38" y="38" width="6" height="6" rx="1" fill="#3d3530"/><rect x="46" y="38" width="6" height="6" rx="1" fill="#3d3530" opacity=".6"/>
+            <rect x="38" y="46" width="6" height="6" rx="1" fill="#3d3530" opacity=".5"/><rect x="46" y="46" width="6" height="6" rx="1" fill="#3d3530"/>
+            <rect x="64" y="38" width="6" height="6" rx="1" fill="#3d3530"/><rect x="38" y="64" width="6" height="6" rx="1" fill="#3d3530" opacity=".9"/>
+            <rect x="46" y="64" width="6" height="6" rx="1" fill="#3d3530" opacity=".5"/><rect x="54" y="64" width="6" height="6" rx="1" fill="#3d3530"/>
+          </svg>
+        </div>
+        <div class="qr-bar"><div class="qr-fill"></div></div>
+        <div class="qr-timer" id="qr-cd">Expires in 00:15</div>
+        <div style="height:1px;background:var(--border);width:100%"></div>
+        <div style="font-size:.6rem;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.1em">Manual Code</div>
+        <div class="qr-code-text" id="mc">——————</div>
+      </div>
+      <div class="live-stats">
+        <div class="ls"><div class="ls-val" style="color:var(--teal2)">—</div><div class="ls-lbl">Present</div></div>
+        <div class="ls"><div class="ls-val">—</div><div class="ls-lbl">Enrolled</div></div>
+      </div>
+      <div class="sate-chip">
+        <span class="sate-chip-dot"></span>
+        <span class="sate-chip-txt">SATE integrity verified</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-kicker reveal">
+        <span class="hero-pulse"></span>
+        <span class="badge badge-rust">v5 — SATE + Device Binding</span>
+        <span class="badge badge-muted">Tertiary Institutions</span>
+      </div>
+      <h1 class="hero-title reveal d1">
+        Eliminate<br><em>proxy attendance.</em>
+      </h1>
+      <p class="hero-sub reveal d2">Seven-layer cryptographically-verified attendance. Dynamic QR, geofencing, device hardware binding, and SATE SHA-256 integrity tokens make proxy attendance technically impossible.</p>
+      <div class="hero-acts reveal d3">
+        <a href="signup.html" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Create Educator Account
+        </a>
+        <a href="#platform" class="btn btn-secondary">Explore Platform</a>
+      </div>
+      <div class="hero-trust reveal d4">
+        <span class="trust-lbl">Built for</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge badge-muted">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            Tertiary Institutions
+          </span>
+          <span class="badge badge-gold">Made in Ghana 🇬🇭</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat reveal"><div class="stat-val"><em>&lt;</em>30s</div><div class="stat-lbl">Check-in time per student</div></div>
+      <div class="stat reveal d1"><div class="stat-val">7<em>×</em></div><div class="stat-lbl">Independent verification layers</div></div>
+      <div class="stat reveal d2"><div class="stat-val">100<em>%</em></div><div class="stat-lbl">Web-based, zero hardware</div></div>
+      <div class="stat reveal d3"><div class="stat-val">0</div><div class="stat-lbl">Admin interference required</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STUDENT STRIP -->
+<section id="student-strip">
+  <div class="wrap">
+    <div class="strip-inner reveal">
+      <div class="strip-copy">
+        <span class="sec-ey">For Students</span>
+        <h2>Join EduLink today</h2>
+        <p>Create a student account and mark attendance with location-verified QR scanning. Fast, fair, and fraud-proof.</p>
+      </div>
+      <div class="strip-acts">
+        <a href="student-signup.html" class="btn btn-teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Student Sign Up
+        </a>
+        <a href="student-login.html" class="btn btn-secondary">Student Login</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section id="mission" class="section">
+  <div class="wrap">
+    <div class="miss-inner">
+      <div class="reveal">
+        <span class="sec-ey">Our Mission</span>
+        <blockquote>Every student deserves fair credit for showing up.</blockquote>
+        <p>EduCore was built to solve proxy attendance in Ghanaian universities. Using location-aware verification, dynamic QR codes, device hardware binding, and cryptographic SATE tokens, we make proxy attendance technically impossible.</p>
+        <div class="miss-pts">
+          <div class="mp">
+            <div class="iw rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="mp-txt"><strong>Educator-owned platform</strong>Every record belongs to the lecturer. No vendor lock-in, no data sharing without consent.</div>
+          </div>
+          <div class="mp">
+            <div class="iw teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="mp-txt"><strong>Zero-hardware setup</strong>Any laptop or tablet becomes your attendance gateway. No scanners, no terminals.</div>
+          </div>
+          <div class="mp">
+            <div class="iw gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+            <div class="mp-txt"><strong>Master List validation</strong>Student registration is validated against your institutional Master List. No unauthorised IDs.</div>
+          </div>
+        </div>
+      </div>
+      <div class="pillars reveal d2">
+        <div class="pillar">
+          <div class="iw gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div class="pillar-body">
+            <h4>Geofence Protection</h4>
+            <p>Attendance only works within your defined lecture hall coordinates. GPS location is validated before any scan is accepted.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="iw teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18M3 15h18M15 3v18"/></svg></div>
+          <div class="pillar-body">
+            <h4>Dynamic QR + Device Binding</h4>
+            <p>QR codes rotate every 15 seconds. Device UUID is bound on first login — attendance must come from the student's own registered device.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="iw green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+          <div class="pillar-body">
+            <h4>SATE Cryptographic Integrity</h4>
+            <p>Every attendance record is SHA-256 hashed. Tamper with any field and the hash fails instantly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM -->
+<section id="platform" class="section">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-ey">The Platform</span>
+      <h2>EduCore Web-Terminal &amp; Student Check-In</h2>
+      <p>A web-based attendance platform combining the Lecturer Web-Terminal and the Student Check-in App. No hardware required.</p>
+    </div>
+    <div class="bento">
+      <div class="bc bc-a reveal d1">
+        <div class="iw rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/></svg></div>
+        <h3>EduCore Web-Terminal</h3>
+        <p>A solo lecturer dashboard. Create courses, set geofence coordinates, display rotating QR codes, manage overrides, and reset student device bindings — all from your laptop or tablet.</p>
+        <div class="tech-tags">
+          <span class="badge badge-muted">Web-based</span>
+          <span class="badge badge-muted">Zero-hardware</span>
+          <span class="badge badge-muted">Auto-export</span>
+          <span class="badge badge-teal">SATE verified</span>
+        </div>
+        <div class="sync-rows" style="margin-top:18px">
+          <div class="sync-row"><span class="sync-lbl">Device binding reset</span><span class="sync-val">Lecturer-controlled</span></div>
+          <div class="sync-row"><span class="sync-lbl">SATE token audit</span><span class="sync-val">Per-record hash</span></div>
+          <div class="sync-row"><span class="sync-lbl">System Admin tier</span><span class="sync-val">Institution-wide</span></div>
+        </div>
+      </div>
+      <div class="bc bc-b reveal">
+        <div class="iw teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+        <h3>Dynamic QR Engine</h3>
+        <p>Time-sensitive codes that rotate every 15 seconds. Students cannot reuse screenshots — each code expires after first scan or timeout.</p>
+        <div class="sync-rows">
+          <div class="sync-row"><span class="sync-lbl">Rotation rate</span><span class="sync-val">Every 15s</span></div>
+          <div class="sync-row"><span class="sync-lbl">Fallback method</span><span class="sync-val">6-char code</span></div>
+          <div class="sync-row"><span class="sync-lbl">Screenshot immunity</span><span class="sync-val">100% ✓</span></div>
+        </div>
+      </div>
+      <div class="bc bc-c reveal">
+        <div class="iw gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Geofence Engine</h3>
+        <p>Haversine-formula location validation ensures students are physically inside the lecture hall before any check-in is accepted.</p>
+        <div class="sync-rows">
+          <div class="sync-row"><span class="sync-lbl">Algorithm</span><span class="sync-val">Haversine</span></div>
+          <div class="sync-row"><span class="sync-lbl">Accuracy</span><span class="sync-val">&lt;5m radius</span></div>
+          <div class="sync-row"><span class="sync-lbl">GPS required</span><span class="sync-val">Student device</span></div>
+        </div>
+      </div>
+      <div class="bc bc-d reveal d1">
+        <div class="iw green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <h3>Master List Validation</h3>
+        <p>Student registration is strictly validated against your institutional Master List. No unauthorised registrations, no fake IDs — just verified academic records.</p>
+        <div class="feat-list">
+          <div class="fi"><span class="fi-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>Academic Record Verification</strong> — Only registered students can create accounts</span></div>
+          <div class="fi"><span class="fi-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>Fraud Prevention</strong> — Identity validated at registration. No duplicates.</span></div>
+          <div class="fi"><span class="fi-chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span><span><strong>Lecturer Control</strong> — You manage the Master List; students cannot bypass validation</span></div>
+        </div>
+        <div class="tech-tags"><span class="badge badge-teal">Secure Onboarding</span><span class="badge badge-teal">No Fake IDs</span><span class="badge badge-teal">Institutional Trust</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="section">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-ey">How It Works</span>
+      <h2>Student-Led Attendance Check-in</h2>
+      <p>Students scan a rotating QR code or enter a manual code, confirm their location, confirm their device, and check in — all in under 30 seconds.</p>
+    </div>
+    <div class="flow-card reveal" style="max-width:660px;margin:0 auto">
+      <div class="flow-lbl">EduCore Flow — 7-Layer Security Stack</div>
+      <h3>Step-by-step check-in process</h3>
+      <div class="flow-steps">
+        <div class="fstep"><div class="snum">01</div><div class="scont"><h4>Master List gate</h4><p>Only students whose ID appears on the institution's Master List can register and access the system.</p></div></div>
+        <div class="fstep"><div class="snum">02</div><div class="scont"><h4>Identity — Profile Discovery</h4><p>Student profile is loaded and verified. Account must be email-verified and active.</p></div></div>
+        <div class="fstep"><div class="snum">03</div><div class="scont"><h4>Device — Hardware UUID binding</h4><p>The student's device UUID is checked. Attendance from an unregistered device is rejected.</p></div></div>
+        <div class="fstep"><div class="snum">04</div><div class="scont"><h4>Location — Haversine Geofence</h4><p>EduLink verifies the student is inside the lecture hall radius before proceeding.</p></div></div>
+        <div class="fstep"><div class="snum">05</div><div class="scont"><h4>Presence — Dynamic QR / Manual Code</h4><p>The student scans the rotating QR or enters the 6-character manual code on the projector.</p></div></div>
+        <div class="fstep"><div class="snum">06</div><div class="scont"><h4>Knowledge — Password confirmation</h4><p>After scanning, the student confirms their EduCore password. Shared codes are rendered useless.</p></div></div>
+        <div class="fstep"><div class="snum">07</div><div class="scont"><h4>Integrity — SATE token generated</h4><p>A SHA-256 SATE hash is computed over all six factors and stored on the record. Tamper-detection is built in.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERRIDE -->
+<section id="override" class="section">
+  <div class="wrap">
+    <div class="ov-inner">
+      <div class="ov-content reveal">
+        <span class="badge badge-gold" style="margin-bottom:18px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          v5 Feature
+        </span>
+        <h2>Lecturer Manual Override — <em style="font-style:italic;color:var(--gold)">Controlled &amp; Audited</em></h2>
+        <div class="ov-body">
+          <p>When a student fails to check in after the configured number of attempts, EduLink submits an override request — not a bypass. The lecturer sees everything before deciding.</p>
+          <p>Each request contains the student's profile, geofence result with distance, attempt count, QR token validity, and exact timestamp.</p>
+        </div>
+        <div class="ov-audit">
+          <div class="iw gold" style="width:38px;height:38px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:18px;height:18px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <div class="ov-audit-txt">Approved records are stored with <strong>verification_method = 'manual_override'</strong> and a full immutable audit trail — who approved, when, from which device.</div>
+        </div>
+      </div>
+      <div class="ov-mock reveal d2">
+        <div class="ov-mock-hdr">Override Request — Live Preview</div>
+        <div class="ov-req">
+          <div class="ov-req-top">
+            <div class="ov-av">S</div>
+            <div><div class="ov-sname">Student Name</div><div class="ov-sid">Index · Class Code</div></div>
+          </div>
+          <div class="ov-dets">
+            <div class="ov-drow"><span>Check-in attempts</span><span>3 / 3 failed</span></div>
+            <div class="ov-drow"><span>Geofence</span><span class="pass">✓ Inside radius</span></div>
+            <div class="ov-drow"><span>Device UUID</span><span class="pass">✓ Bound match</span></div>
+            <div class="ov-drow"><span>QR token</span><span class="pass">✓ Valid at scan time</span></div>
+          </div>
+          <div class="ov-acts">
+            <div class="ov-btn ov-ok">✓ Approve</div>
+            <div class="ov-btn ov-no">✕ Reject</div>
+          </div>
+        </div>
+        <div class="ov-note">All decisions are logged to the immutable audit trail with full actor + device context.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security" class="section">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="sec-ey">Security Architecture — v5</span>
+      <h2>Seven independent proofs.<br>One attendance record.</h2>
+      <p>Every valid EduCore attendance record must satisfy all seven layers simultaneously. Removing any one makes the record invalid or cryptographically detectable.</p>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-card reveal">
+        <div class="sec-num">01 / Authorization</div>
+        <div class="iw rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></div>
+        <h4>Master List Gate</h4>
+        <p>Only students whose index number is on the institution's Master List can register and access the system.</p>
+      </div>
+      <div class="sec-card reveal d1">
+        <div class="sec-num">02 / Identity</div>
+        <div class="iw rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+        <h4>Profile Verification</h4>
+        <p>Student account validated and email-verified. Profile is confirmed on every check-in against the enrolled list.</p>
+      </div>
+      <div class="sec-card reveal d2">
+        <div class="sec-num">03 / Device</div>
+        <div class="iw gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <h4>Hardware UUID Binding</h4>
+        <p>Student's hardware UUID is bound on first login. Attendance from any other device is rejected outright.</p>
+      </div>
+      <div class="sec-card reveal d3">
+        <div class="sec-num">04 / Location</div>
+        <div class="iw gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h4>Haversine Geofence</h4>
+        <p>Geofence confirms physical presence inside the lecture hall. Students outside the radius cannot check in.</p>
+      </div>
+    </div>
+    <div class="sec-grid-bot">
+      <div class="sec-card reveal">
+        <div class="sec-num">05 / Presence</div>
+        <div class="iw teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h4>Dynamic QR / Code</h4>
+        <p>Codes rotate every 15 seconds and expire immediately after first use. Shared codes are automatically invalid.</p>
+      </div>
+      <div class="sec-card reveal d1">
+        <div class="sec-num">06 / Knowledge</div>
+        <div class="iw teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h4>Password Confirmation</h4>
+        <p>After scanning, the student confirms their EduCore password. Even a shared QR code is useless without it.</p>
+      </div>
+      <div class="sec-card sate-card reveal d2">
+        <div class="sec-num">07 / Integrity</div>
+        <div class="iw green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+        <h4>SATE Cryptographic Hash</h4>
+        <p>SHA-256 token stored on every record. Hash covers student_id, session_id, qr_token, GPS, device_uuid, and timestamp.</p>
+        <div class="sate-mono">SHA256(student_id | session_id | qr_token | lat | lng | device_uuid | timestamp)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section">
+  <div class="wrap">
+    <div class="faq-grid">
+      <div class="faq-side reveal">
+        <span class="sec-ey">FAQ</span>
+        <h2>Common questions</h2>
+        <p>Can't find your answer? Reach out and we'll respond promptly.</p>
+        <a href="#cta" class="btn btn-secondary btn-sm">Contact Support</a>
+      </div>
+      <div class="faq-list reveal d1">
+        <div class="faq-item">
+          <div class="faq-q" tabindex="0"><span>What prevents a student from sharing their QR token?</span><span class="faq-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+          <div class="faq-a"><div class="faq-a-in">EduCore v5 uses seven locks: Master List verification, identity confirmation, device UUID binding, GPS geofence, dynamic QR (rotates every 15s), password confirmation, and a SATE SHA-256 integrity hash. A student can share their QR code, but it expires in seconds, only works from their bound device, only works inside the geofence, and still requires their password.</div></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" tabindex="0"><span>What is Device Binding and how does it work?</span><span class="faq-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+          <div class="faq-a"><div class="faq-a-in">On a student's first login, EduCore captures and stores a hardware UUID for their device. Every subsequent check-in validates against that stored UUID. If a student changes devices, the lecturer can reset the binding from the web terminal — the action is logged in the audit trail.</div></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" tabindex="0"><span>What is SATE and what does it prove?</span><span class="faq-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+          <div class="faq-a"><div class="faq-a-in">SATE (Secure Attendance Token Engine) generates a SHA-256 hash from six inputs: student ID, session ID, QR token, GPS latitude, GPS longitude, device UUID, and timestamp. Any tamper with any of those fields produces a different hash — equivalent to a digital signature on the record.</div></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" tabindex="0"><span>Is the Lecturer Override a security loophole?</span><span class="faq-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+          <div class="faq-a"><div class="faq-a-in">No — it's a controlled, audited exception. Override requests still require the student to have a valid QR token and be inside the geofence. Every approval is written to the immutable audit log with actor, device, and timestamp. It cannot be abused silently.</div></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" tabindex="0"><span>Who owns the attendance data?</span><span class="faq-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+          <div class="faq-a"><div class="faq-a-in">The educator does. EduCore is built on an educator-owned data model — every record, class, and student is linked to the lecturer's account. Data is not shared, sold, or used for any purpose outside the platform without explicit consent.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="section">
+  <div class="cta-bg"></div>
+  <div class="wrap">
+    <div class="cta-inner reveal">
+      <span class="sec-ey" style="margin-bottom:16px">Get Started as Educator</span>
+      <h2>Ready to end proxy attendance?</h2>
+      <p>Create an educator account in minutes and start your first session today.</p>
+      <div class="cta-acts" id="cta-acts">
+        <a href="signup.html" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Lecturer Portal
+        </a>
+        <a href="student-signup.html" class="btn btn-teal">Student Sign Up</a>
+      </div>
+      <p class="cta-note">No credit card required. Educator-owned data model.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo-row">
+          <div class="footer-logo">EC</div>
+          <div class="footer-name">EduCore</div>
+        </div>
+        <p>Geofence-protected, cryptographically-verified attendance built for tertiary institutions. One educator-owned platform.</p>
+        <p style="margin-top:8px;font-size:.82rem;color:var(--dim)">Built by <strong style="color:var(--muted)">Armstrong Amoah Adusei</strong></p>
+        <div class="social">
+          <a href="#" class="sl" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+          <a href="#" class="sl" aria-label="Twitter/X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        </div>
+      </div>
+      <div class="fcol">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#platform">Web-Terminal</a></li>
+          <li><a href="#platform">Student Check-In</a></li>
+          <li><a href="#how">Session Flows</a></li>
+          <li><a href="#override">Lecturer Override</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h5>Security</h5>
+        <ul>
+          <li><a href="#security">7-Layer Stack</a></li>
+          <li><a href="#security">Device Binding</a></li>
+          <li><a href="#security">SATE Integrity</a></li>
+          <li><a href="#security">Audit Trail</a></li>
+        </ul>
+      </div>
+      <div class="fcol">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#mission">Our Mission</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-btm">
+      <p>© <span id="fy"></span> Armstrong Amoah Adusei — EduCore. All rights reserved. &nbsp;·&nbsp; Made with ❤️ in Ghana 🇬🇭</p>
+      <span class="fver">v5</span>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script src="assets/js/api.js"></script>
+<script>
+document.getElementById('fy').textContent = new Date().getFullYear();
+
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20), {passive:true});
+
+// Mobile menu
+const mb = document.getElementById('menu-btn'), mm = document.getElementById('mob-menu');
+mb.addEventListener('click', () => { const o = mm.classList.toggle('open'); mb.setAttribute('aria-expanded', o); });
+mm.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mm.classList.remove('open'); mb.setAttribute('aria-expanded','false'); }));
+
+// Scroll reveal
+const obs = new IntersectionObserver(e => e.forEach(en => {
+  if(en.isIntersecting){ en.target.classList.add('active'); obs.unobserve(en.target); }
+}), {threshold:.08, rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
+
+// QR countdown
+const cd = document.getElementById('qr-cd');
+let secs = 15;
+const pad = n => String(n).padStart(2,'0');
+setInterval(() => {
+  secs--;
+  if(secs <= 0) secs = 15;
+  if(cd) cd.textContent = 'Expires in 00:' + pad(secs);
+}, 1000);
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.closest('.faq-item'), ans = item.querySelector('.faq-a'), inner = item.querySelector('.faq-a-in'), isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(o => { o.classList.remove('open'); o.querySelector('.faq-a').style.maxHeight = '0'; });
+    if(!isOpen){ item.classList.add('open'); ans.style.maxHeight = inner.scrollHeight + 'px'; }
+  });
+  q.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); q.click(); } });
+});
+
+// If user is already logged in, add dashboard shortcut
+(function(){
+  const lecturerToken = localStorage.getItem('ec_token');
+  const studentToken = localStorage.getItem('ec_student_token');
+  let dashboardUrl = null;
+  
+  if(lecturerToken){
+    dashboardUrl = 'assets/pages/lecturer/lec-dashboard.html';
+  } else if(studentToken){
+    dashboardUrl = 'assets/pages/students/stu-dashboard.html';
+  }
+  
+  if(dashboardUrl){
+    const acts = document.getElementById('cta-acts');
+    if(acts){
+      const b = document.createElement('a');
+      b.href = dashboardUrl;
+      b.className = 'btn btn-primary';
+      b.textContent = 'Go to Dashboard →';
+      acts.prepend(b);
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#f5f0e8"/>
+<title>EduCore — Student Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS — identical palette to login.html ──────────────────── */
+:root {
+  --cream:#f5f0e8; --cream2:#ede8de; --sand:#e8e0d0;
+  --rust:#c84b31;  --rust2:#e05c3a;
+  --coal:#1a1612;  --coal2:#2d2620;
+  --ink:#3d3530;   --ink2:#5a5048;
+  --stone:#8a7d72; --stone2:#b5a898;
+  --gold:#c4973a;  --gold2:#e0b050;
+  --teal:#2a7a6e;  --teal2:#3d9e90;
+  --bg:var(--cream);   --bg2:var(--cream2);
+  --surf:#fff;         --surf2:var(--sand);
+  --border:rgba(58,48,40,0.1); --border2:rgba(58,48,40,0.06);
+  --text:var(--coal);  --muted:var(--ink2); --dim:var(--stone);
+  --accent:var(--teal);  --accent2:var(--teal2);
+  --ff-h:'Playfair Display',Georgia,serif;
+  --ff-b:'DM Sans',system-ui,sans-serif;
+  --ff-m:'DM Mono',monospace;
+  --r:4px; --rl:8px;
+  --ease:cubic-bezier(0.23,1,0.32,1);
+  --sh:0 4px 24px rgba(0,0,0,0.08); --sh-lg:0 16px 48px rgba(0,0,0,0.12);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1a18; --bg2:#152420; --surf:#1c2a26; --surf2:#22302c;
+    --border:rgba(200,240,230,0.09); --border2:rgba(200,240,230,0.05);
+    --text:#e0f0ec; --muted:#7a9e98; --dim:#4a7068;
+    --accent:#3d9e90; --accent2:#50c0b0;
+    --teal:#3d9e90; --teal2:#50c0b0;
+    --gold:#d4a840; --gold2:#e8c060;
+    --rust:#e06040; --rust2:#f07050;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--ff-b);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+h1,h2,h3,h4{font-family:var(--ff-h);line-height:1.1;font-weight:500;letter-spacing:-0.01em}
+p{color:var(--muted);line-height:1.8}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+
+/* orbs — teal palette for student side */
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.11}
+.orb1{width:620px;height:620px;background:var(--teal);top:-180px;left:-120px;animation:drift 22s ease-in-out infinite}
+.orb2{width:480px;height:480px;background:var(--gold);bottom:-140px;right:-80px;animation:drift 18s ease-in-out infinite reverse}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,26px)}}
+
+.page{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* nav */
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:clamp(16px,3vh,22px) clamp(1.25rem,5vw,2.5rem);border-bottom:1px solid var(--border);background:rgba(245,240,232,0.82);backdrop-filter:blur(14px)}
+@media(prefers-color-scheme:dark){.nav-top{background:rgba(14,26,24,0.88)}}
+.nav-brand{display:flex;align-items:center;gap:11px}
+.nav-logo{width:38px;height:38px;border-radius:3px;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(42,122,110,.3)}
+.nav-logo svg{width:18px;height:18px;color:#fff;stroke-width:2.5}
+.nav-name{font-family:var(--ff-h);font-weight:500;font-size:1.05rem;font-style:italic;display:flex;align-items:center;gap:8px}
+.nav-badge{font-size:.63rem;font-weight:600;font-style:normal;font-family:var(--ff-b);color:var(--teal2);background:rgba(42,122,110,.1);border:1px solid rgba(42,122,110,.2);padding:2px 9px;border-radius:99px}
+.nav-right{display:flex;align-items:center;gap:10px;font-size:.84rem;color:var(--muted)}
+.nav-link{color:var(--muted);transition:color .2s}
+.nav-link:hover{color:var(--text)}
+.nav-link.btn{padding:6px 14px;border-radius:3px;background:rgba(42,122,110,.08);border:1px solid rgba(42,122,110,.18);font-weight:600;font-size:.82rem;color:var(--teal);transition:all .2s}
+.nav-link.btn:hover{background:rgba(42,122,110,.14)}
+
+/* split layout */
+.auth-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+
+/* feature panel — dark teal */
+.feat-panel{background:#0a1f1c;padding:clamp(3rem,8vh,5rem) clamp(2rem,6vw,4rem);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.feat-panel::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 30%,transparent 90%)}
+.feat-panel::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal2),var(--gold2))}
+.fp-orb{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+.fp-orb1{width:380px;height:380px;background:var(--teal2);opacity:.12;top:-80px;right:-60px}
+.fp-orb2{width:260px;height:260px;background:var(--gold);opacity:.07;bottom:-60px;left:-40px}
+.fp-inner{position:relative;z-index:1}
+.fp-eyebrow{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--teal2);margin-bottom:16px;display:flex;align-items:center;gap:8px;font-family:var(--ff-b)}
+.fp-eyebrow::before{content:'';width:20px;height:1px;background:var(--teal2);display:inline-block}
+.fp-title{font-family:var(--ff-h);font-size:clamp(1.6rem,3.2vw,2.4rem);font-weight:400;line-height:1.12;color:#d8f0ea;margin-bottom:16px;letter-spacing:-.02em}
+.fp-title em{font-style:italic;color:var(--teal2)}
+.fp-sub{font-size:.9rem;color:rgba(190,230,220,.5);line-height:1.85;margin-bottom:2.5rem;max-width:400px}
+
+/* Steps visual */
+.steps-visual{display:flex;flex-direction:column;gap:0;border:1px solid rgba(200,240,230,.07);border-radius:4px;overflow:hidden;margin-bottom:1.75rem}
+.sv-step{display:flex;align-items:flex-start;gap:13px;padding:15px 18px;border-bottom:1px solid rgba(200,240,230,.05);transition:background .2s}
+.sv-step:last-child{border-bottom:none}
+.sv-step:hover{background:rgba(255,255,255,.03)}
+.sv-num{width:24px;height:24px;border-radius:2px;background:rgba(61,158,144,.2);border:1px solid rgba(61,158,144,.3);display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:700;color:var(--teal2);font-family:var(--ff-m);flex-shrink:0}
+.sv-body h4{font-family:var(--ff-b);font-size:.86rem;font-weight:600;color:#d8f0ea;margin-bottom:3px;line-height:1.3}
+.sv-body p{font-size:.78rem;color:rgba(190,230,220,.45);line-height:1.6;margin:0}
+.device-chip{display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(61,158,144,.08);border:1px solid rgba(61,158,144,.18);border-radius:4px}
+.device-chip-ico{width:30px;height:30px;border-radius:3px;background:rgba(61,158,144,.12);border:1px solid rgba(61,158,144,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.device-chip-ico svg{width:15px;height:15px;color:var(--teal2);stroke-width:1.5}
+.device-chip-txt .l1{font-size:.77rem;font-weight:600;color:var(--teal2)}
+.device-chip-txt .l2{font-size:.69rem;color:rgba(190,230,220,.45);font-family:var(--ff-m)}
+
+/* form side */
+.auth-side{display:flex;align-items:center;justify-content:center;padding:clamp(2rem,5vw,3rem) clamp(1.25rem,5vw,3rem);overflow-y:auto}
+.auth-box{width:100%;max-width:440px}
+
+.auth-brand{text-align:center;margin-bottom:clamp(1.25rem,4vh,1.75rem)}
+.brand-ico{width:54px;height:54px;border-radius:6px;background:var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 11px;box-shadow:0 2px 16px rgba(42,122,110,.32);color:#fff}
+.brand-ico svg{width:24px;height:24px;stroke-width:1.75}
+.brand-name{font-family:var(--ff-h);font-size:1.35rem;font-weight:500;color:var(--text);margin-bottom:3px;font-style:italic}
+.brand-tag{font-size:.74rem;color:var(--dim)}
+
+.auth-head{text-align:center;margin-bottom:clamp(1.1rem,3.5vh,1.6rem)}
+.auth-title{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:400;color:var(--text);margin-bottom:8px;letter-spacing:-.01em}
+.auth-sub{font-size:.88rem;color:var(--muted);line-height:1.8}
+
+.role-note{display:flex;align-items:center;gap:9px;padding:11px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:1.25rem;font-size:.8rem;color:var(--muted);line-height:1.5}
+.role-note svg{width:15px;height:15px;flex-shrink:0;color:var(--teal2)}
+.role-note a{color:var(--rust);font-weight:600;transition:color .2s;margin-left:3px}
+.role-note a:hover{color:var(--rust2)}
+
+/* form */
+.auth-form{display:flex;flex-direction:column;gap:clamp(.9rem,2.5vh,1rem)}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--ff-b);display:flex;align-items:center;gap:5px}
+.fl svg{width:11px;height:11px;opacity:.65}
+.fi-w{position:relative}
+.fi{width:100%;background:rgba(255,255,255,.5);border:1px solid var(--border);border-radius:3px;padding:.8rem 1rem;color:var(--text);font-size:.9rem;transition:all .2s;outline:none;-webkit-appearance:none;appearance:none}
+.fi::placeholder{color:var(--dim)}
+.fi:focus{border-color:var(--teal2);background:rgba(42,122,110,.04);box-shadow:0 0 0 3px rgba(42,122,110,.09)}
+.fi.err{border-color:var(--rust)!important}
+.fi-r{padding-right:2.8rem}
+.fi-act{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--dim);padding:4px;border-radius:3px;transition:color .2s;background:none;border:none;cursor:pointer;display:flex;align-items:center}
+.fi-act:hover{color:var(--text)}
+.fi-act svg{width:17px;height:17px}
+.fe{font-size:.73rem;color:var(--rust);min-height:16px}
+.forgot{display:block;text-align:right;font-size:.78rem;color:var(--teal2);margin-top:4px;transition:color .2s;font-weight:500}
+.forgot:hover{color:var(--teal)}
+.form-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chk-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;color:var(--muted)}
+.chk-label input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+
+.btn-submit{width:100%;padding:clamp(.8rem,2.5vh,.95rem);border-radius:3px;font-family:var(--ff-b);font-weight:600;font-size:.9rem;color:#fff;background:var(--teal);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .22s var(--ease);box-shadow:0 2px 12px rgba(42,122,110,.28)}
+.btn-submit:hover:not(:disabled){transform:translateY(-1px);background:var(--teal2);box-shadow:0 6px 20px rgba(42,122,110,.38)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-submit svg{width:15px;height:15px;stroke-width:1.75}
+.auth-foot{text-align:center;margin-top:clamp(1rem,3vh,1.5rem);font-size:.84rem;color:var(--muted)}
+.auth-foot a{color:var(--teal);font-weight:600;transition:color .2s}
+.auth-foot a:hover{color:var(--teal2)}
+
+/* banners */
+#banner-wrap .banner{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:4px;margin-bottom:.75rem;border:1px solid;font-size:.8rem;line-height:1.6}
+#banner-wrap .banner.success{background:rgba(42,122,110,.08);border-color:rgba(42,122,110,.2);color:var(--teal)}
+#banner-wrap .banner.error{background:rgba(200,75,49,.08);border-color:rgba(200,75,49,.2);color:var(--rust)}
+#banner-wrap .banner svg{width:15px;height:15px;flex-shrink:0;margin-top:1px}
+
+/* spinner */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* forgot modal */
+.modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-card{background:var(--surf);border:1px solid var(--border);border-radius:6px;padding:clamp(1.5rem,4vw,2.25rem);max-width:420px;width:100%;box-shadow:var(--sh-lg);position:relative;animation:slideUp .3s var(--ease)}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.modal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal2),var(--gold2));border-radius:6px 6px 0 0}
+.modal-close{position:absolute;top:1rem;right:1rem;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:.85rem}
+.modal-close:hover{color:var(--text);background:rgba(0,0,0,.04)}
+.modal-icon{width:48px;height:48px;border-radius:50%;background:rgba(42,122,110,.08);border:1px solid rgba(42,122,110,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--teal2)}
+.modal-icon svg{width:22px;height:22px;stroke-width:1.5}
+#fp-status .banner{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border-radius:4px;margin-bottom:.75rem;border:1px solid;font-size:.79rem;line-height:1.6}
+#fp-status .banner.success{background:rgba(42,122,110,.08);border-color:rgba(42,122,110,.2);color:var(--teal)}
+#fp-status .banner.error{background:rgba(200,75,49,.08);border-color:rgba(200,75,49,.2);color:var(--rust)}
+
+@media(max-width:900px){.auth-grid{grid-template-columns:1fr}.feat-panel{display:none}}
+@media(max-width:480px){.nav-top{padding:14px 1rem}.auth-side{padding:1.5rem 1rem}.auth-box{max-width:100%}.nav-badge{display:none}}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+</div>
+
+<div class="page">
+  <nav class="nav-top">
+    <a class="nav-brand" href="index.html">
+      <div class="nav-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <div class="nav-name">EduCore <span class="nav-badge">Student</span></div>
+    </a>
+    <div class="nav-right">
+      <a href="login.html" class="nav-link">Lecturer Portal</a>
+      <a href="student-signup.html" class="nav-link btn">Create Account →</a>
+    </div>
+  </nav>
+
+  <div class="auth-grid">
+
+    <!-- Feature panel -->
+    <div class="feat-panel">
+      <div class="fp-orb fp-orb1"></div>
+      <div class="fp-orb fp-orb2"></div>
+      <div class="fp-inner">
+        <div class="fp-eyebrow">Student Check-In</div>
+        <h1 class="fp-title">Mark attendance<br>the <em>smart way.</em></h1>
+        <p class="fp-sub">Open EduCore on your phone, scan the QR code on the projector, confirm your location — done in under 30 seconds.</p>
+
+        <div class="steps-visual">
+          <div class="sv-step">
+            <div class="sv-num">1</div>
+            <div class="sv-body"><h4>Sign in on your device</h4><p>Use your index number or email and password to access your account.</p></div>
+          </div>
+          <div class="sv-step">
+            <div class="sv-num">2</div>
+            <div class="sv-body"><h4>Device fingerprint verified</h4><p>EduCore checks your registered device — attendance must come from your own phone.</p></div>
+          </div>
+          <div class="sv-step">
+            <div class="sv-num">3</div>
+            <div class="sv-body"><h4>Scan QR or enter code</h4><p>Scan the rotating QR on the projector, or enter the 6-character backup code.</p></div>
+          </div>
+          <div class="sv-step">
+            <div class="sv-num">4</div>
+            <div class="sv-body"><h4>Location confirmed, you're in</h4><p>GPS confirms you're inside the lecture hall. Your attendance is sealed and tamper-proof.</p></div>
+          </div>
+        </div>
+
+        <div class="device-chip">
+          <div class="device-chip-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="device-chip-txt">
+            <div class="l1">Device Fingerprint Active</div>
+            <div class="l2">SHA-256 locked on first sign-in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form side -->
+    <div class="auth-side">
+      <div class="auth-box">
+        <div class="auth-brand">
+          <div class="brand-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </div>
+          <div class="brand-name">EduCore</div>
+          <div class="brand-tag">Student Attendance Portal</div>
+        </div>
+
+        <div id="banner-wrap"></div>
+
+        <div class="auth-head">
+          <h2 class="auth-title">Welcome back</h2>
+          <p class="auth-sub">Sign in to mark your attendance</p>
+        </div>
+
+        <div class="role-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Student portal. Lecturer? <a href="login.html">Lecturer Sign In →</a>
+        </div>
+
+        <form class="auth-form" id="login-form" novalidate>
+          <div class="fg">
+            <label class="fl" for="sid">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Index Number or Email
+            </label>
+            <input type="text" id="sid" name="sid" class="fi" placeholder="e.g. 5230100620 or student@email.com" autocomplete="username" required/>
+            <span class="fe" id="sid-err"></span>
+          </div>
+
+          <div class="fg">
+            <label class="fl" for="password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              Password
+            </label>
+            <div class="fi-w">
+              <input type="password" id="password" name="password" class="fi fi-r" placeholder="Enter your password" autocomplete="current-password" required/>
+              <button type="button" class="fi-act" id="toggle-pw" aria-label="Show/hide password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <a href="#" class="forgot" id="forgot-link">Forgot password?</a>
+            <span class="fe" id="pw-err"></span>
+          </div>
+
+          <div class="form-row">
+            <label class="chk-label">
+              <input type="checkbox" id="remember" name="remember"/>
+              Keep me signed in
+            </label>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign In to EduCore
+          </button>
+        </form>
+
+        <div class="auth-foot">
+          New student? <a href="student-signup.html">Create your account →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="fp-modal" style="display:none">
+  <div class="modal-card">
+    <button class="modal-close" id="fp-close" aria-label="Close">✕</button>
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <h3 style="font-family:var(--ff-h);font-size:1.2rem;font-weight:400;color:var(--text);margin-bottom:6px;text-align:center">Reset your password</h3>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem;text-align:center;line-height:1.7">Enter your student email and we'll send a reset link.</p>
+    <div id="fp-status"></div>
+    <div class="fg" style="margin-bottom:1rem">
+      <label class="fl" for="fp-email">Email address</label>
+      <input type="email" id="fp-email" class="fi" placeholder="your.student@email.com"/>
+      <span class="fe" id="fp-err"></span>
+    </div>
+    <button class="btn-submit" id="fp-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Send Reset Link
+    </button>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/student-api.js"></script>
+<script>
+/* ── Helpers (mirrors login.html pattern) ─────────────── */
+function showBanner(cid,type,msg){const w=document.getElementById(cid);if(!w)return;const icons={success:'<polyline points="20 6 9 17 4 12"/>',error:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>'};w.innerHTML=`<div class="banner ${type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${icons[type]||icons.error}</svg><span>${msg}</span></div>`;}
+function clearBanner(cid){const w=document.getElementById(cid);if(w)w.innerHTML='';}
+function setFieldError(id,msg){const e=document.getElementById(id);if(e)e.textContent=msg;}
+function clearFieldErrors(ids){ids.forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='';const i=document.getElementById(id.replace('-err',''));if(i)i.classList.remove('err');});}
+function markFieldInvalid(id){const e=document.getElementById(id);if(e)e.classList.add('err');}
+function setBtnLoading(btn,loading,msg){if(loading){btn.disabled=true;btn.dataset.og=btn.innerHTML;btn.innerHTML=`<div class="spinner"></div> ${msg||'Signing in…'}`;}else{btn.disabled=false;if(btn.dataset.og)btn.innerHTML=btn.dataset.og;}}
+function esc(s){const d=document.createElement('div');d.innerText=s;return d.innerHTML;}
+
+/* ── Eye toggle ────────────────────────────────────────── */
+document.getElementById('toggle-pw').addEventListener('click',()=>{
+  const inp=document.getElementById('password');
+  inp.type=inp.type==='password'?'text':'password';
+});
+
+/* ── Redirect if already logged in ────────────────────── */
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('logout')==='1'){['ec_student_token','ec_student','ec_student_id','ec_device_hash'].forEach(k=>localStorage.removeItem(k));window.history.replaceState({},document.title,window.location.pathname);}
+})();
+if(typeof StudentAPI!=='undefined'&&StudentAPI.store.getToken()){location.href='assets/pages/students/stu-dashboard.html';}
+
+/* ── URL banners ───────────────────────────────────────── */
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('verified')==='1') showBanner('banner-wrap','success','<strong>Email verified!</strong> Sign in below to start marking attendance.');
+  if(p.get('reset')==='1')    showBanner('banner-wrap','success','<strong>Password updated.</strong> Sign in with your new password.');
+  if(p.get('expired')==='1')  showBanner('banner-wrap','error','<strong>Session expired.</strong> Please sign in again.');
+})();
+
+/* ── Login form ────────────────────────────────────────── */
+const form=document.getElementById('login-form');
+const sBtn=document.getElementById('submit-btn');
+
+form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  clearFieldErrors(['sid-err','pw-err']);
+  clearBanner('banner-wrap');
+  const sid=document.getElementById('sid').value.trim();
+  const pw=document.getElementById('password').value;
+  let ok=true;
+  if(!sid){setFieldError('sid-err','Index number or email is required.');markFieldInvalid('sid');ok=false;}
+  if(!pw){setFieldError('pw-err','Password is required.');markFieldInvalid('password');ok=false;}
+  if(!ok)return;
+  setBtnLoading(sBtn,true,'Signing in…');
+  try{
+    await StudentAPI.auth.login(sid,pw);
+    location.href='assets/pages/students/stu-dashboard.html';
+  }catch(err){
+    showBanner('banner-wrap','error',esc(err.message||'Sign in failed. Please try again.'));
+    setBtnLoading(sBtn,false);
+  }
+});
+
+/* ── Forgot password modal ─────────────────────────────── */
+const fpModal=document.getElementById('fp-modal');
+document.getElementById('forgot-link').addEventListener('click',e=>{e.preventDefault();fpModal.style.display='flex';});
+document.getElementById('fp-close').addEventListener('click',()=>fpModal.style.display='none');
+fpModal.addEventListener('click',e=>{if(e.target===e.currentTarget)fpModal.style.display='none';});
+document.getElementById('fp-btn').addEventListener('click',async()=>{
+  const email=document.getElementById('fp-email').value.trim();
+  const err=document.getElementById('fp-err');
+  err.textContent='';
+  if(!email){err.textContent='Email is required.';return;}
+  const btn=document.getElementById('fp-btn');
+  btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Sending…';
+  try{
+    await StudentAPI.auth.forgotPassword(email);
+    document.getElementById('fp-status').innerHTML='<div class="banner success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span><strong>Reset link sent!</strong> Check your inbox (and spam folder).</span></div>';
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg> Sent';
+  }catch(e){
+    document.getElementById('fp-status').innerHTML=`<div class="banner error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/></svg><span>${esc(e.message)}</span></div>`;
+    btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Send Reset Link';
+  }
+});
+</script>
+</body>
+</html>

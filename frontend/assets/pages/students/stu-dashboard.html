@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EduCore — Dashboard</title>
+<link rel="stylesheet" href="../../css/stu-styles.css">
+<style>
+/* ════════════════════════════════════════════
+   DASHBOARD PREMIUM REDESIGN
+   Tokens from stu-styles.css:
+   --bg --surf --surf2 --surf3
+   --bdr --bdr2 --tx --sub --dim
+   --indigo --in2  (student accent)
+   --gold --go2    (warm)
+   --rust --ru2    (danger)
+   --teal --te2    (success)
+   --fh --fb --fm  (fonts)
+   --r --r2 --r3   (radii)
+════════════════════════════════════════════ */
+
+/* ── HERO ─────────────────────────────────── */
+.hero{
+  position:relative;
+  background:linear-gradient(135deg,rgba(91,107,212,.16) 0%,rgba(91,107,212,.05) 50%,rgba(45,158,138,.05) 100%);
+  border:1px solid rgba(91,107,212,.22);
+  border-radius:var(--r3);
+  padding:26px 28px 22px;
+  margin-bottom:1.1rem;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(91,107,212,.11),transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-50px;left:25%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,158,138,.07),transparent 70%);
+  pointer-events:none;
+}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.hero-greeting{font-family:var(--fh);font-size:clamp(1.5rem,3.2vw,2rem);font-style:italic;color:var(--tx);line-height:1.15;margin-bottom:6px}
+.hero-greeting em{color:var(--in2);font-style:inherit}
+.hero-meta{font-size:.78rem;color:var(--sub);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.hero-dot{width:3px;height:3px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.hero-clock{font-family:var(--fm);font-size:.75rem;color:var(--in2);background:rgba(91,107,212,.1);border:1px solid rgba(91,107,212,.2);border-radius:99px;padding:4px 12px;white-space:nowrap;flex-shrink:0;letter-spacing:.05em}
+
+/* hero quick chips */
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+.hchip{
+  display:flex;align-items:center;gap:7px;
+  padding:9px 16px;border-radius:var(--r2);
+  border:1px solid var(--bdr);background:rgba(255,255,255,.02);
+  cursor:pointer;transition:all .18s;
+  font-size:.8rem;font-weight:600;color:var(--sub);white-space:nowrap;
+}
+.hchip svg{width:14px;height:14px;stroke-width:2;flex-shrink:0}
+.hchip:hover{background:rgba(91,107,212,.1);border-color:rgba(91,107,212,.32);color:var(--in2)}
+.hchip.live{background:rgba(45,158,138,.12);border-color:rgba(45,158,138,.35);color:var(--te2)}
+
+/* ── TODAY'S FOCUS ─────────────────────────── */
+.focus{
+  border-radius:var(--r2);padding:18px 20px;
+  margin-bottom:1.1rem;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  position:relative;overflow:hidden;
+  transition:background .3s,border-color .3s;
+}
+.focus::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  transition:background .3s;
+}
+/* live */
+.focus.live{background:linear-gradient(135deg,rgba(45,158,138,.12),rgba(45,158,138,.04));border:1px solid rgba(45,158,138,.35)}
+.focus.live::before{background:linear-gradient(90deg,var(--te2),var(--teal))}
+/* risk — urgent red */
+.focus.risk{background:linear-gradient(135deg,rgba(200,88,50,.14),rgba(200,88,50,.04));border:2px solid rgba(200,88,50,.5)}
+.focus.risk::before{background:linear-gradient(90deg,var(--rust),var(--ru2),var(--rust));animation:riskbar 2s linear infinite;background-size:200% 100%}
+@keyframes riskbar{0%{background-position:0 0}100%{background-position:200% 0}}
+/* clear */
+.focus.clear{background:rgba(255,255,255,.015);border:1px solid var(--bdr)}
+.focus.clear::before{background:var(--bdr)}
+
+.focus-ico{
+  width:48px;height:48px;border-radius:var(--r2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .3s;
+}
+.focus-ico svg{width:22px;height:22px;stroke-width:1.75}
+.focus.live .focus-ico{background:rgba(45,158,138,.15);color:var(--te2)}
+.focus.risk .focus-ico{background:rgba(200,88,50,.15);color:var(--rust)}
+.focus.clear .focus-ico{background:var(--surf2);color:var(--sub)}
+
+.focus-body{flex:1;min-width:0}
+.focus-badge{
+  font-size:.62rem;font-weight:800;letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:5px;
+}
+.focus.live .focus-badge{color:var(--te2)}
+.focus.risk .focus-badge{color:var(--rust)}
+.focus.clear .focus-badge{color:var(--dim)}
+
+.focus-title{font-family:var(--fh);font-size:1.05rem;color:var(--tx);margin-bottom:3px;font-style:italic}
+.focus.risk .focus-title{color:var(--ru2);font-weight:700}
+.focus-sub{font-size:.76rem;color:var(--sub)}
+.focus-cta{flex-shrink:0}
+
+/* live pulsing dot */
+.ldot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--te2);animation:lpulse 1.6s infinite}
+@keyframes lpulse{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.55)}65%{box-shadow:0 0 0 7px rgba(69,188,165,0)}}
+
+/* risk pills */
+.risk-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.rpill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:99px;
+  background:rgba(200,88,50,.12);border:1px solid rgba(200,88,50,.3);
+  font-size:.68rem;font-weight:700;color:var(--rust);
+}
+.rpill svg{width:9px;height:9px;stroke-width:2.5}
+
+/* btn-rust (danger CTA) */
+.btn-rust{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--r);border:none;cursor:pointer;
+  background:var(--rust);color:#fff;font-size:.8rem;font-weight:700;
+  transition:all .18s;text-decoration:none;
+}
+.btn-rust:hover{background:var(--ru2);transform:scale(1.03)}
+.btn-rust svg{width:14px;height:14px;stroke-width:2}
+
+/* ── STAT CARDS ─────────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.1rem}
+.sc{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:16px 16px 14px;position:relative;overflow:hidden;
+  transition:transform .18s,border-color .18s;
+}
+.sc:hover{transform:translateY(-2px);border-color:rgba(91,107,212,.25)}
+.sc-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.sc-ico{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-ico svg{width:17px;height:17px;stroke-width:1.75}
+.sc-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}
+.sc-ico.indigo{background:rgba(91,107,212,.12);color:var(--in2)}
+.sc-ico.gold{background:rgba(200,150,60,.12);color:var(--go2)}
+.sc-ico.rust{background:rgba(200,88,50,.1);color:var(--ru2)}
+/* attendance dot visualiser */
+.att-dots{display:flex;gap:3px;flex-wrap:wrap;max-width:76px}
+.adot{width:7px;height:7px;border-radius:50%;background:var(--surf3);transition:background .4s}
+.adot.on{background:var(--te2);box-shadow:0 0 4px rgba(69,188,165,.3)}
+.sc-v{font-family:var(--fh);font-size:2rem;color:var(--tx);line-height:1;margin-bottom:3px}
+.sc-l{font-size:.73rem;color:var(--sub);margin-bottom:4px}
+.sc-ch{font-size:.67rem}
+.sc-ch.ok{color:var(--te2)}.sc-ch.warn{color:var(--go2)}.sc-ch.bad{color:var(--rust)}.sc-ch.dim{color:var(--dim)}
+
+/* ── STREAK STRIP ─────────────────────────── */
+.streak{
+  position:relative;overflow:hidden;
+  background:linear-gradient(120deg,rgba(200,150,60,.13) 0%,rgba(200,88,50,.08) 55%,rgba(200,150,60,.07) 100%);
+  border:1px solid rgba(200,150,60,.3);border-radius:var(--r2);
+  padding:18px 22px;margin-bottom:1.1rem;
+  display:flex;align-items:center;gap:20px;
+}
+.streak::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--go2),var(--rust),var(--go2),var(--gold));
+  background-size:300% 100%;animation:streakbar 3s linear infinite;
+}
+@keyframes streakbar{0%{background-position:0 0}100%{background-position:300% 0}}
+.streak-flame{font-size:2.8rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(200,150,60,.55));animation:flamebob 2.2s ease-in-out infinite}
+@keyframes flamebob{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.1) rotate(4deg)}}
+.streak-body{flex:1;min-width:0}
+.streak-count{font-family:var(--fh);font-size:1.75rem;color:var(--go2);font-style:italic;line-height:1;margin-bottom:5px}
+.streak-count b{font-size:2.2rem}
+.streak-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 12px;border-radius:99px;
+  background:rgba(200,150,60,.15);border:1px solid rgba(200,150,60,.3);
+  font-size:.7rem;font-weight:800;color:var(--go2);
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.streak-next{font-size:.73rem;color:var(--sub);margin-top:6px}
+/* 7-day dot history */
+.streak-hist{display:flex;gap:7px;align-items:center;flex-shrink:0}
+.sday{display:flex;flex-direction:column;align-items:center;gap:5px}
+.sdot{width:11px;height:11px;border-radius:50%;background:var(--surf3);border:1px solid var(--bdr);transition:all .25s}
+.sdot.attended{background:var(--go2);border-color:var(--gold);box-shadow:0 0 8px rgba(200,150,60,.45)}
+.sdot.today-ring{border:2px solid var(--go2)}
+.slbl{font-size:.58rem;color:var(--dim);font-family:var(--fm)}
+
+/* ── MAIN GRID ─────────────────────────────── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh-t{font-family:var(--fh);font-size:.95rem;font-style:italic;color:var(--tx)}
+.sh-a{font-size:.8rem;color:var(--in2);cursor:pointer;transition:opacity .15s;text-decoration:none}
+.sh-a:hover{opacity:.7}
+
+/* ── COURSE CARDS with SVG rings ───────────── */
+.ccard{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:13px 15px;display:flex;align-items:center;gap:13px;
+  cursor:pointer;transition:all .18s;margin-bottom:9px;
+}
+.ccard:hover{border-color:rgba(91,107,212,.3);transform:translateX(3px)}
+.ccard:last-child{margin-bottom:0}
+.ccard.risk-border{border-color:rgba(200,88,50,.28)}
+.ccard.risk-border:hover{border-color:rgba(200,88,50,.5)}
+.ring-wrap{position:relative;width:46px;height:46px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.rtrack{fill:none;stroke:var(--surf3);stroke-width:4}
+.rfill{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.34,1.2,.64,1)}
+.rfill.teal{stroke:var(--te2)}.rfill.gold{stroke:var(--go2)}.rfill.rust{stroke:var(--rust)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.6rem;font-weight:700;color:var(--tx)}
+.ccard-info{flex:1;min-width:0}
+.ccard-nm{font-size:.875rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ccard-cd{font-size:.68rem;color:var(--dim);font-family:var(--fm);margin-top:1px}
+.ccard-lec{font-size:.7rem;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.risk-tag{
+  display:inline-flex;align-items:center;gap:3px;margin-top:4px;
+  padding:2px 8px;border-radius:99px;
+  background:rgba(200,88,50,.12);border:1px solid rgba(200,88,50,.25);
+  font-size:.6rem;font-weight:800;color:var(--rust);letter-spacing:.06em;text-transform:uppercase;
+}
+.risk-tag svg{width:8px;height:8px;stroke-width:2.5}
+.join-crd{
+  border:1px dashed var(--bdr);border-radius:var(--r2);padding:15px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;transition:all .18s;color:var(--sub);font-size:.82rem;margin-top:9px;
+}
+.join-crd:hover{border-color:rgba(91,107,212,.38);color:var(--in2);background:rgba(91,107,212,.04)}
+.join-crd svg{width:14px;height:14px;stroke-width:2}
+
+/* ── RIGHT COLUMN ─────────────────────────── */
+.right-col{display:flex;flex-direction:column;gap:14px}
+
+/* weekly pill chart */
+.chart-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px}
+.chart-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.week-bars{display:flex;gap:7px;align-items:flex-end;height:80px;margin-bottom:10px}
+.wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.wbar{
+  width:100%;border-radius:99px 99px 5px 5px;
+  min-height:7px;transition:height .6s cubic-bezier(.34,1.2,.64,1);
+}
+.wbar.present{background:linear-gradient(180deg,var(--te2) 0%,rgba(45,158,138,.6) 100%)}
+.wbar.late{background:linear-gradient(180deg,var(--go2) 0%,rgba(200,150,60,.6) 100%)}
+.wbar.absent{background:rgba(200,88,50,.38);border:1px solid rgba(200,88,50,.22)}
+.wbar.none{background:var(--surf3)}
+.wbar.future{background:var(--surf3);border:1px dashed var(--bdr);opacity:.6}
+.wbar.today-hl{box-shadow:0 0 12px rgba(91,107,212,.35)}
+.wbar-lbl{font-size:.6rem;font-family:var(--fm);color:var(--dim);text-align:center}
+.wbar-lbl.today-hl{color:var(--in2);font-weight:700}
+.week-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.wleg{display:flex;gap:10px;flex-wrap:wrap}
+.wleg-i{display:flex;align-items:center;gap:4px;font-size:.63rem;color:var(--sub)}
+.wleg-dot{width:8px;height:8px;border-radius:99px;flex-shrink:0}
+.wleg-dot.present{background:var(--te2)}.wleg-dot.late{background:var(--go2)}
+.wleg-dot.absent{background:rgba(200,88,50,.5)}.wleg-dot.none{background:var(--surf3);border:1px solid var(--bdr)}
+.week-stat{font-size:.72rem;color:var(--sub)}
+.week-stat strong{color:var(--tx)}
+
+/* activity feed */
+.act-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.act-inner{padding:0 14px}
+.feed-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--bdr2)}
+.feed-item:last-child{border-bottom:none}
+.feed-ico{width:30px;height:30px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.feed-ico svg{width:13px;height:13px;stroke-width:2}
+.feed-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}
+.feed-ico.gold{background:rgba(200,150,60,.1);color:var(--go2)}
+.feed-ico.rust{background:rgba(200,88,50,.1);color:var(--rust)}
+.feed-t{font-size:.82rem;font-weight:600;color:var(--tx);margin-bottom:1px}
+.feed-s{font-size:.7rem;color:var(--sub)}
+.feed-time{font-size:.6rem;color:var(--dim);font-family:var(--fm);margin-left:auto;white-space:nowrap;flex-shrink:0;padding-top:2px}
+
+/* ── SKELETONS ───────────────────────────── */
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.sk-line{height:13px;display:block}.sk-line.sm{height:10px}.sk-line.lg{height:24px}
+.sk-block{border-radius:var(--r2);display:block}
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media(max-width:960px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){
+  .dash-grid{grid-template-columns:1fr}
+  .streak-hist{display:none}
+  .hero{padding:18px 16px 16px}
+  .hero-greeting{font-size:1.4rem}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .hchip{padding:7px 11px;font-size:.76rem}
+  .streak{padding:14px 16px}
+  .streak-flame{font-size:2.2rem}
+}
+
+@keyframes pageExit{to{opacity:0;transform:translateY(-8px)}}
+.page-exit{animation:pageExit .2s cubic-bezier(.23,1,.32,1) forwards!important}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div class="b-nm">EduCore</div>
+    </div>
+    <button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Student</div>
+  <div class="nav-sect"><div class="nav-sect-label">My Space</div><nav class="nav">
+    <div class="ni on"><a href="stu-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="stu-checkin.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Check-in</span><div class="pip" id="pip-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="stu-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span class="nl">Override Requests</span><span class="nb" id="nav-req" style="display:none"></span></a></div>
+    <div class="ni"><a href="stu-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none"></span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="stu-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">My Courses</span></a></div>
+    <div class="ni"><a href="stu-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Account</div><nav class="nav">
+    <div class="ni"><a href="stu-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+  <div class="sb-ft">
+    <div class="ava" id="sb-av" onclick="location.href='stu-settings.html'" title="Profile">…</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-name">&nbsp;</div><div class="ui" id="sb-idx">&nbsp;</div></div>
+    <button class="lg" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov" onclick="closeSb()"></div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="tb">
+    <div class="tb-l">
+      <button class="mbt" onclick="openSb()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Dashboard</span>
+    </div>
+    <div class="tb-r">
+      <div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search courses, sessions…"><span class="kbd">⌘K</span></div>
+      <button class="ib" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="nbd" id="notif-count" style="display:none"></span></button>
+      <div class="prof-wrap">
+        <div class="prof-btn" id="prof-btn" onclick="toggleProf()">
+          <div class="prof-av" id="prof-av">…</div>
+          <span class="prof-nm" id="prof-nm">…</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="prof-dd" id="prof-dd">
+          <div class="dd-head"><div class="dd-av" id="dd-av">…</div><div><div class="dd-nm" id="dd-nm">Loading…</div><div class="dd-id" id="dd-idx"></div><div class="dd-dept" id="dd-dept"></div></div></div>
+          <div class="dd-items">
+            <div class="dd-item" onclick="location.href='stu-settings.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>View Profile</div>
+            <div class="dd-sep"></div>
+            <div class="dd-item" onclick="toggleTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><span id="theme-lbl">Light Mode</span></div>
+            <div class="dd-sep"></div>
+            <div class="dd-item danger" id="btn-logout2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cnt">
+
+    <!-- ══ 1. HERO ══ -->
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-greeting" id="hero-greeting">
+            <span class="sk sk-line" style="width:260px">&nbsp;</span>
+          </div>
+          <div class="hero-meta" id="hero-meta">
+            <span class="sk sk-line sm" style="width:190px;margin-top:6px">&nbsp;</span>
+          </div>
+        </div>
+        <div class="hero-clock" id="hero-clock">--:--</div>
+      </div>
+      <div class="hero-chips">
+        <div class="hchip" id="chip-checkin" onclick="location.href='stu-checkin.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Check In
+        </div>
+        <div class="hchip" onclick="location.href='stu-attendance.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Attendance
+        </div>
+        <div class="hchip" id="chip-msgs" onclick="location.href='stu-messages.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages
+        </div>
+        <div class="hchip" onclick="location.href='stu-courses.html'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>My Courses
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2. TODAY'S FOCUS ══ -->
+    <div class="focus clear" id="focus">
+      <div class="focus-ico" id="focus-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="focus-body">
+        <div class="focus-badge" id="focus-badge">Today's Focus</div>
+        <div class="focus-title" id="focus-title">Checking schedule…</div>
+        <div class="focus-sub" id="focus-sub"></div>
+        <div id="focus-extra"></div>
+      </div>
+      <div id="focus-cta"></div>
+    </div>
+
+    <!-- ══ 3. STAT CARDS ══ -->
+    <div class="stats-row">
+      <div class="sc">
+        <div class="sc-hd">
+          <div class="sc-ico teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="att-dots" id="att-dots"></div>
+        </div>
+        <div class="sc-v" id="stat-att"><span class="sk sk-line lg" style="width:56px">&nbsp;</span></div>
+        <div class="sc-l">Overall attendance</div>
+        <div class="sc-ch" id="stat-att-sub"></div>
+      </div>
+      <div class="sc">
+        <div class="sc-hd"><div class="sc-ico indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div></div>
+        <div class="sc-v" id="stat-courses"><span class="sk sk-line lg" style="width:32px">&nbsp;</span></div>
+        <div class="sc-l">Courses enrolled</div>
+        <div class="sc-ch dim" id="stat-courses-sub"></div>
+      </div>
+      <div class="sc">
+        <div class="sc-hd"><div class="sc-ico gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg></div></div>
+        <div class="sc-v" id="stat-req"><span class="sk sk-line lg" style="width:32px">&nbsp;</span></div>
+        <div class="sc-l">Pending overrides</div>
+        <div class="sc-ch" id="stat-req-sub"></div>
+      </div>
+      <div class="sc">
+        <div class="sc-hd"><div class="sc-ico rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div>
+        <div class="sc-v" id="stat-msg"><span class="sk sk-line lg" style="width:32px">&nbsp;</span></div>
+        <div class="sc-l">Unread messages</div>
+        <div class="sc-ch" id="stat-msg-sub"></div>
+      </div>
+    </div>
+
+    <!-- ══ 4. STREAK CARD ══ -->
+    <div class="streak" id="streak-card" style="display:none">
+      <div class="streak-flame" id="streak-flame">🔥</div>
+      <div class="streak-body">
+        <div class="streak-count" id="streak-count"><b>—</b> day streak</div>
+        <div class="streak-badge" id="streak-badge"></div>
+        <div class="streak-next" id="streak-next"></div>
+      </div>
+      <div class="streak-hist" id="streak-hist"></div>
+    </div>
+
+    <!-- ══ 5. MAIN GRID ══ -->
+    <div class="dash-grid">
+
+      <!-- LEFT: Courses -->
+      <div>
+        <div class="sh">
+          <div class="sh-t">My Courses</div>
+          <a href="stu-courses.html" class="sh-a">View all →</a>
+        </div>
+        <div id="courses-list">
+          <div class="sk sk-block" style="height:74px;margin-bottom:9px"></div>
+          <div class="sk sk-block" style="height:74px"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Chart + Activity -->
+      <div class="right-col">
+
+        <!-- Weekly pill chart -->
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="sh-t">This Week</div>
+            <div class="week-stat" id="week-stat"></div>
+          </div>
+          <div class="week-bars" id="week-bars">
+            <!-- skeleton bars -->
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:42px;border-radius:99px"></div><div class="wbar-lbl">M</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:60px;border-radius:99px"></div><div class="wbar-lbl">T</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:28px;border-radius:99px"></div><div class="wbar-lbl">W</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:52px;border-radius:99px"></div><div class="wbar-lbl">T</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:36px;border-radius:99px"></div><div class="wbar-lbl">F</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:14px;border-radius:99px"></div><div class="wbar-lbl">S</div></div>
+            <div class="wbar-col"><div class="sk sk-block" style="width:100%;height:14px;border-radius:99px"></div><div class="wbar-lbl">S</div></div>
+          </div>
+          <div class="week-foot">
+            <div class="wleg">
+              <div class="wleg-i"><div class="wleg-dot present"></div>Present</div>
+              <div class="wleg-i"><div class="wleg-dot late"></div>Late</div>
+              <div class="wleg-i"><div class="wleg-dot absent"></div>Absent</div>
+              <div class="wleg-i"><div class="wleg-dot none"></div>No class</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="act-card">
+          <div class="sh" style="padding:14px 14px 0"><div class="sh-t">Recent Activity</div></div>
+          <div class="act-inner" id="activity-list">
+            <div class="feed-item"><span class="sk sk-block" style="width:30px;height:30px;flex-shrink:0"></span><div style="flex:1;margin-left:2px"><span class="sk sk-line" style="width:62%;margin-bottom:5px">&nbsp;</span><span class="sk sk-line sm" style="width:38%">&nbsp;</span></div></div>
+            <div class="feed-item"><span class="sk sk-block" style="width:30px;height:30px;flex-shrink:0"></span><div style="flex:1;margin-left:2px"><span class="sk sk-line" style="width:55%;margin-bottom:5px">&nbsp;</span><span class="sk sk-line sm" style="width:32%">&nbsp;</span></div></div>
+            <div class="feed-item"><span class="sk sk-block" style="width:30px;height:30px;flex-shrink:0"></span><div style="flex:1;margin-left:2px"><span class="sk sk-line" style="width:58%;margin-bottom:5px">&nbsp;</span><span class="sk sk-line sm" style="width:30%">&nbsp;</span></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="tw" id="tw"></div>
+<script src="../../js/student-api.js"></script>
+<script>
+if(!StudentAPI.auth.requireAuth('/frontend/student-login.html')){}
+
+/* ── Smooth navigation ── */
+function navTo(url){document.querySelector('.cnt')?.classList.add('page-exit');setTimeout(()=>location.href=url,190);}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.ni a').forEach(a=>{
+    if(a.href){a.addEventListener('click',function(e){
+      if(e.ctrlKey||e.metaKey||e.shiftKey)return;
+      const url=this.getAttribute('href');
+      if(url&&!url.startsWith('javascript')){e.preventDefault();navTo(url);}
+    });}
+  });
+});
+
+
+/* ═══ HELPERS ═══ */
+const $=id=>document.getElementById(id);
+function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML}
+function initials(n){return n?n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase():'?'}
+function setAv(el,src,name){el.innerHTML=src?`<img src="${esc(src)}" alt="">`:`${initials(name)}`}
+function openSb(){$('sb').classList.add('on');$('ov').classList.add('on')}
+function closeSb(){$('sb').classList.remove('on');$('ov').classList.remove('on')}
+function toggleProf(){$('prof-btn').classList.toggle('open');$('prof-dd').classList.toggle('open')}
+document.addEventListener('click',e=>{const w=document.querySelector('.prof-wrap');if(w&&!w.contains(e.target)){$('prof-btn').classList.remove('open');$('prof-dd').classList.remove('open')}});
+function toggleTheme(){const h=document.documentElement,t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);$('theme-lbl').textContent=t==='dark'?'Light Mode':'Dark Mode';localStorage.setItem('edu-theme',t)}
+function doLogout(){StudentAPI.auth.logout();}
+$('btn-logout').onclick=doLogout;$('btn-logout2').onclick=doLogout;
+(()=>{const t=localStorage.getItem('edu-theme');if(t){document.documentElement.setAttribute('data-theme',t);if(t==='light')$('theme-lbl').textContent='Dark Mode'}})();
+function toast(msg,type='ok'){
+  const t=document.createElement('div');t.className='t '+type;
+  const ic={ok:'<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};
+  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${ic[type]||ic.ok}</svg>${msg}`;
+  $('tw').appendChild(t);t.onclick=()=>t.remove();setTimeout(()=>t.remove(),3500);
+}
+
+/* ═══ CLOCK ═══ */
+function tick(){$('hero-clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+tick();setInterval(tick,1000);
+
+/* ═══ PROFILE ═══ */
+async function loadProfile(){
+  try{
+    const d=await StudentAPI.profile.getMe();
+    const name=d.student_name||'Student', photo=d.profile_photo||'', first=name.split(' ')[0];
+    /* Sidebar */
+    setAv($('sb-av'),photo,name);$('sb-name').textContent=name.split(' ').slice(0,2).join(' ');$('sb-idx').textContent=d.index_number||'—';
+    /* Topbar */
+    setAv($('prof-av'),photo,name);$('prof-nm').textContent=first;
+    setAv($('dd-av'),photo,name);$('dd-nm').textContent=name;$('dd-idx').textContent=d.index_number||'—';$('dd-dept').textContent=`${d.program||'—'} · Level ${d.level||'—'}`;
+    /* Hero greeting */
+    const h=new Date().getHours();
+    const greeting=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+    $('hero-greeting').innerHTML=`${greeting}, <em>${esc(first)}</em> 👋`;
+    /* Hero meta */
+    const parts=[];
+    const dayStr=new Date().toLocaleDateString([],{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    parts.push(esc(dayStr));
+    if(d.semester)parts.push(esc(d.semester));
+    if(d.institution_name)parts.push(esc(d.institution_name));
+    $('hero-meta').innerHTML=parts.join('<span class="hero-dot"></span>');
+  }catch{toast('Could not load profile','er');}
+}
+
+/* ═══ STATS ═══ */
+let _riskCourses=[];
+async function loadStats(){
+  try{
+    const [attRes,clsRes,ovRes,unreadRes]=await Promise.all([
+      StudentAPI.attendance.stats(),
+      StudentAPI.classes.list(),
+      StudentAPI.override.history({limit:100}),
+      StudentAPI.notifications.unreadCount(),
+    ]);
+    const pct=Math.round(attRes.rate??0);
+    const classes=Array.isArray(clsRes)?clsRes:(clsRes.classes||clsRes.data||[]);
+    const reqs=Array.isArray(ovRes)?ovRes:(ovRes.requests||ovRes.records||ovRes.data||[]);
+    const unread=Number(unreadRes.count||0);
+    _riskCourses=classes.filter(c=>parseFloat(c.attendance_rate??100)<70);
+
+    /* Attendance */
+    $('stat-att').textContent=pct+'%';
+    const as=$('stat-att-sub');
+    if(pct>=75){as.textContent='Good standing';as.className='sc-ch ok';}
+    else if(pct>0){as.textContent='Below 75% threshold';as.className='sc-ch warn';}
+    else{as.textContent='No records yet';as.className='sc-ch bad';}
+    /* dot visualiser */
+    const dd=$('att-dots');dd.innerHTML='';
+    const filled=Math.round(pct/10);
+    for(let i=0;i<10;i++){const d=document.createElement('div');d.className='adot'+(i<filled?' on':'');dd.appendChild(d);}
+
+    /* Courses */
+    $('stat-courses').textContent=classes.length;
+    $('stat-courses-sub').textContent='Active this semester';
+
+    /* Overrides */
+    const pend=reqs.filter(r=>(r.status||'').toLowerCase()==='pending').length;
+    $('stat-req').textContent=pend;
+    const rs=$('stat-req-sub');
+    if(pend>0){rs.textContent=`${pend} awaiting review`;rs.className='sc-ch warn';$('nav-req').textContent=pend;$('nav-req').style.display='';}
+    else{rs.textContent='No disputes open';rs.className='sc-ch ok';}
+
+    /* Messages */
+    $('stat-msg').textContent=unread;
+    const ms=$('stat-msg-sub');
+    if(unread>0){ms.textContent=`${unread} unread`;ms.className='sc-ch warn';$('nav-msg').textContent=unread;$('nav-msg').style.display='';$('notif-count').textContent=unread;$('notif-count').style.display='';}
+    else{ms.textContent='All caught up';ms.className='sc-ch ok';}
+
+    return {pct,classes,pend,unread};
+  }catch{toast('Could not load stats','er');return {};}
+}
+
+/* ═══ TODAY'S FOCUS ═══ */
+let _countdownTimer=null;
+async function loadFocus(){
+  const card=$('focus');
+  const setIco=(svg)=>{$('focus-ico').innerHTML=svg};
+  try{
+    const d=await StudentAPI.session.getActive();
+    const s=(d&&d.session)?d.session:d;
+    if(s&&s.session_id){
+      /* ── STATE A: LIVE SESSION ── */
+      card.className='focus live';
+      setIco(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`);
+      $('focus-badge').innerHTML=`<span class="ldot"></span> Live Session`;
+      $('focus-title').innerHTML=`${esc(s.class_name||'Session')} &mdash; ${esc(s.course_code||'')}`;
+      $('focus-sub').textContent=s.lecturer_name?`Lecturer: ${s.lecturer_name}`:'Check in while the session is open';
+      $('focus-extra').innerHTML='';
+      $('focus-cta').innerHTML=`<a href="stu-checkin.html" class="btn btn-teal btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Check In Now</a>`;
+      $('pip-live').style.display='';
+      $('chip-checkin').classList.add('live');
+      /* running timer */
+      if(s.session_time){
+        const base=`${s.session_date||new Date().toISOString().split('T')[0]}T${s.session_time}`;
+        const start=new Date(base).getTime();
+        if(_countdownTimer)clearInterval(_countdownTimer);
+        const tickTimer=()=>{
+          const elapsed=Math.floor((Date.now()-start)/1000);
+          if(elapsed>=0){
+            const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+            const sc=(elapsed%60).toString().padStart(2,'0');
+            $('focus-sub').textContent=`Running for ${m}:${sc}${s.lecturer_name?' · '+s.lecturer_name:''}`;
+          }
+        };
+        tickTimer();_countdownTimer=setInterval(tickTimer,1000);
+      }
+      return;
+    }
+  }catch(_){}
+
+  /* ── STATE B: RISK ALERT (urgent) ── */
+  if(_riskCourses.length>0){
+    card.className='focus risk';
+    setIco(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`);
+    $('focus-badge').innerHTML=`⚠ ATTENDANCE RISK — ACTION REQUIRED`;
+    $('focus-title').textContent=`${_riskCourses.length} course${_riskCourses.length>1?'s are':' is'} below 70% — you may be barred from exams`;
+    $('focus-sub').textContent='';
+    const pills=_riskCourses.map(c=>`<div class="rpill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>${esc(c.course_code||c.class_name)} · ${Math.round(parseFloat(c.attendance_rate??0))}%</div>`).join('');
+    $('focus-extra').innerHTML=`<div class="risk-pills">${pills}</div>`;
+    $('focus-cta').innerHTML=`<a href="stu-attendance.html" class="btn-rust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>View Records</a>`;
+    return;
+  }
+
+  /* ── STATE C: ALL CLEAR ── */
+  card.className='focus clear';
+  setIco(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`);
+  $('focus-badge').textContent='Today\'s Focus';
+  $('focus-title').textContent='All clear — no active session right now';
+  $('focus-sub').textContent='Your lecturer will start a session when class begins. Stay ready.';
+  $('focus-extra').innerHTML='';
+  $('focus-cta').innerHTML='';
+}
+
+/* ═══ COURSES — SVG rings ═══ */
+function ringCol(pct){return pct>=75?'teal':pct>=50?'gold':'rust';}
+function buildRing(pct,col){
+  const r=18,C=2*Math.PI*r;
+  const offset=C-(C*Math.min(pct,100)/100);
+  return `<svg width="46" height="46" viewBox="0 0 46 46"><circle class="rtrack" cx="23" cy="23" r="${r}"/><circle class="rfill ${col}" cx="23" cy="23" r="${r}" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/></svg>`;
+}
+async function loadCourses(){
+  try{
+    const res=await StudentAPI.classes.list();
+    const list=Array.isArray(res)?res:(res.classes||res.data||[]);
+    const el=$('courses-list');el.innerHTML='';
+    if(!list.length){
+      el.innerHTML=`<div class="join-crd" onclick="location.href='stu-courses.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>No courses yet — join one</div>`;
+      return;
+    }
+    list.forEach(c=>{
+      const pct=Math.round(parseFloat(c.attendance_rate??0));
+      const col=ringCol(pct);
+      const risk=pct<70;
+      const div=document.createElement('div');
+      div.className='ccard'+(risk?' risk-border':'');
+      div.onclick=()=>location.href='stu-attendance.html?class='+c.class_id;
+      div.innerHTML=`
+        <div class="ring-wrap">${buildRing(pct,col)}<div class="ring-pct">${pct}%</div></div>
+        <div class="ccard-info">
+          <div class="ccard-nm">${esc(c.class_name||'Class')}</div>
+          <div class="ccard-cd">${esc(c.course_code||'—')}</div>
+          <div class="ccard-lec">${esc(c.lecturer_name||'')}</div>
+          ${risk?`<div class="risk-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>At risk</div>`:''}
+        </div>`;
+      el.appendChild(div);
+    });
+    const add=document.createElement('div');add.className='join-crd';add.onclick=()=>location.href='stu-courses.html';
+    add.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Join another course`;
+    el.appendChild(add);
+  }catch{$('courses-list').innerHTML=`<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--dim)">Could not load courses</div>`;}
+}
+
+/* ═══ HISTORY — drives chart + streak + feed ═══ */
+async function loadHistory(){
+  try{
+    const r=await StudentAPI.checkin.getHistory({limit:30});
+    const items=Array.isArray(r)?r:(r.records||r.data||[]);
+    renderWeekChart(items);
+    renderStreak(items);
+    renderActivity(items.slice(0,5));
+  }catch{
+    renderWeekChart([]);renderStreak([]);
+    $('activity-list').innerHTML=`<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--dim)">Could not load activity</div>`;
+  }
+}
+
+/* ═══ WEEKLY PILL CHART ═══ */
+function renderWeekChart(items){
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayMon=(today.getDay()+6)%7; /* Mon=0…Sun=6 */
+  /* date→best-status map */
+  const dmap={};
+  const rank={present:3,late:2,absent:1};
+  items.forEach(it=>{
+    if(!it.check_in_time)return;
+    const d=new Date(it.check_in_time);d.setHours(0,0,0,0);
+    const k=d.getTime();
+    const s=(it.status||'present').toLowerCase();
+    if(!dmap[k]||rank[s]>rank[dmap[k]])dmap[k]=s;
+  });
+  const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MAX_H=75;
+  const HEIGHT={present:MAX_H,late:Math.round(MAX_H*.65),absent:Math.round(MAX_H*.25),none:8,future:8};
+  let attended=0,pastDays=0;
+  const barsEl=$('week-bars');barsEl.innerHTML='';
+  for(let i=0;i<7;i++){
+    const d=new Date(today);d.setDate(today.getDate()+(i-todayMon));d.setHours(0,0,0,0);
+    const isFuture=d>today;
+    const isToday=d.getTime()===today.getTime();
+    const status=dmap[d.getTime()];
+    let cls,h;
+    if(isFuture){cls='future';h=HEIGHT.future;}
+    else if(!status){cls='none';h=HEIGHT.none;pastDays++;}
+    else{cls=status;h=HEIGHT[status]||HEIGHT.none;pastDays++;if(cls==='present'||cls==='late')attended++;}
+    const col=document.createElement('div');col.className='wbar-col';
+    const bar=document.createElement('div');
+    bar.className='wbar '+cls+(isToday?' today-hl':'');
+    bar.style.height=h+'px';
+    /* Animate in */
+    bar.style.transition='height .6s cubic-bezier(.34,1.2,.64,1)';
+    const lbl=document.createElement('div');
+    lbl.className='wbar-lbl'+(isToday?' today-hl':'');
+    lbl.textContent=DAYS[i];
+    col.appendChild(bar);col.appendChild(lbl);
+    barsEl.appendChild(col);
+  }
+  if(pastDays>0)$('week-stat').innerHTML=`<strong>${attended}</strong>/${pastDays} days attended`;
+}
+
+/* ═══ STREAK ═══ */
+function renderStreak(items){
+  const today=new Date();today.setHours(0,0,0,0);
+  const attended=new Set(items.map(it=>{
+    if(!it.check_in_time)return null;
+    const d=new Date(it.check_in_time);d.setHours(0,0,0,0);return d.getTime();
+  }).filter(Boolean));
+  let streak=0,cur=new Date(today);
+  if(!attended.has(cur.getTime()))cur.setDate(cur.getDate()-1);
+  while(attended.has(cur.getTime())){streak++;cur.setDate(cur.getDate()-1);}
+  if(streak<1)return;
+  $('streak-card').style.display='flex';
+  $('streak-count').innerHTML=`<b>${streak}</b> day streak`;
+  /* milestones */
+  const ms=[
+    {d:30,icon:'🏆',label:'Elite',next:null},
+    {d:14,icon:'⚡',label:'Unstoppable',next:'16 more days for Elite'},
+    {d:7, icon:'🚀',label:'On a Roll',next:`${14-streak} more for Unstoppable`},
+    {d:3, icon:'✨',label:'Getting Started',next:`${7-streak} more for On a Roll`},
+    {d:1, icon:'🌱',label:'Day One',next:`${3-streak} more for Getting Started`},
+  ];
+  const m=ms.find(x=>streak>=x.d)||ms[ms.length-1];
+  $('streak-flame').textContent=m.icon;
+  $('streak-badge').textContent=`${m.icon} ${m.label}`;
+  $('streak-next').textContent=m.next&&streak<30?`Keep going — ${m.next}`:'';
+  /* 7-day history dots */
+  const hist=$('streak-hist');hist.innerHTML='';
+  const DLBL=['M','T','W','T','F','S','S'];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);d.setHours(0,0,0,0);
+    const dow=(d.getDay()+6)%7;
+    const hit=attended.has(d.getTime());
+    const isToday=i===0;
+    const wrap=document.createElement('div');wrap.className='sday';
+    const dot=document.createElement('div');
+    dot.className='sdot'+(hit?' attended':'')+(isToday?' today-ring':'');
+    const lbl=document.createElement('div');lbl.className='slbl';lbl.textContent=DLBL[dow];
+    wrap.appendChild(dot);wrap.appendChild(lbl);hist.appendChild(wrap);
+  }
+}
+
+/* ═══ ACTIVITY FEED ═══ */
+function renderActivity(items){
+  const el=$('activity-list');el.innerHTML='';
+  if(!items.length){el.innerHTML=`<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--dim)">No recent check-ins yet</div>`;return;}
+  const icoC={present:'teal',late:'gold',absent:'rust'};
+  const icoS={
+    present:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+    late:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    absent:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  };
+  items.forEach(it=>{
+    const st=(it.status||'present').toLowerCase();
+    const col=icoC[st]||'teal';
+    const svg=icoS[st]||icoS.present;
+    const method=(it.verification_method||'').replace(/_/g,' ');
+    const when=it.check_in_time?new Date(it.check_in_time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    const row=document.createElement('div');row.className='feed-item';
+    row.innerHTML=`<div class="feed-ico ${col}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${svg}</svg></div><div style="flex:1;min-width:0"><div class="feed-t">${esc(it.class_name||'Check-in')}</div><div class="feed-s">${esc(st.toUpperCase())}${method?' · '+esc(method):''}</div></div><div class="feed-time">${esc(when)}</div>`;
+    el.appendChild(row);
+  });
+}
+
+/* ═══ BOOT ═══ */
+async function boot(){
+  loadProfile();
+  const [stats]=await Promise.all([loadStats(),loadCourses()]);
+  /* Focus needs risk data from stats — run after */
+  loadFocus();
+  /* History drives chart + streak + feed — independent */
+  loadHistory();
+}
+boot();
+</script>
+<script src="../../js/stu-transition.js"></script>
+</body>
+</html>

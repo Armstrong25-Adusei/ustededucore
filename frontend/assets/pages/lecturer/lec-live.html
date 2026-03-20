@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Live Session</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0f0d0b;--bg2:#161310;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;
+  --bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);
+  --tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;
+  --gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;
+  --rust:#c85832;--ru2:#e06843;
+  --teal:#2d9e8a;--te2:#45bca5;
+  --fh:'Playfair Display',Georgia,serif;
+  --fb:'DM Sans',system-ui,sans-serif;
+  --fm:'DM Mono',monospace;
+  --ez:cubic-bezier(.23,1,.32,1);
+  --r:6px;--r2:10px;--r3:14px;--sb:250px;
+}
+[data-theme="light"]{
+  --bg:#f2ece2;--bg2:#ebe3d8;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;
+  --bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);
+  --tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;
+  --gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s,color .25s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes ci-in{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+
+/* ── PAGE SHELL ─────────────────────────────────────────────────────────── */
+.pg{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ────────────────────────────────────────────────────────────── */
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 13px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:8px}
+.b-ico{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25)}
+.b-ico svg{width:17px;height:17px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:26px;height:26px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center;transition:color .15s}
+.sb-x:hover{color:var(--tx)}
+.sb-x svg{width:13px;height:13px;stroke-width:2}
+.role-chip{margin:10px 12px 4px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}
+.role-chip svg{width:10px;height:10px}
+.nav-sect{padding:12px 9px 3px}
+.nav-sect-label{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;font-weight:500;transition:all .15s}
+.ni a svg{width:17px;height:17px;stroke-width:1.75;flex-shrink:0}
+.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}
+.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:9px;color:var(--go2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.pip{width:8px;height:8px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}
+.sb-ft{padding:13px 14px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;margin-top:auto}
+.ava{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.84rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.68rem;color:var(--dim);font-family:var(--fm)}
+.lg{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.lg svg{width:14px;height:14px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.ov.on{display:block}
+
+/* ── TOPBAR ─────────────────────────────────────────────────────────────── */
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}
+[data-theme="light"] .tb{background:rgba(242,236,226,.92)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:8px}
+.mbt{display:none;width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center;transition:color .15s}
+.mbt svg{width:17px;height:17px;stroke-width:2}
+.mbt:hover{color:var(--go2)}
+.pgt{font-family:var(--fh);font-size:1.1rem;font-style:italic;color:var(--tx)}
+.ib{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative;flex-shrink:0;cursor:pointer}
+.ib svg{width:17px;height:17px;stroke-width:1.75}
+.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+
+/* ── SHARED UTILITIES ───────────────────────────────────────────────────── */
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.875rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:300px}
+.t svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap}
+.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3)}
+.btn-rust{background:rgba(200,88,50,.1);border-color:rgba(200,88,50,.3);color:var(--ru2)}.btn-rust:hover{background:rgba(200,88,50,.2)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{color:var(--tx);border-color:rgba(200,150,60,.3)}
+.btn-teal{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}.btn-teal:hover{background:rgba(45,158,138,.2)}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.cnt{padding:1.75rem clamp(1rem,3vw,2rem);width:100%;max-width:1080px}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIEW 1 — SESSION SETUP FORM
+   Default visible. Hidden the moment a session becomes active.
+   ══════════════════════════════════════════════════════════════════════════ */
+#view-setup{display:block}
+
+.setup-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0}
+.start-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);padding:28px;max-width:560px;width:100%}
+.sc-t{font-family:var(--fh);font-size:1.3rem;color:var(--tx);margin-bottom:4px}
+.sc-s{font-size:.875rem;color:var(--sub);margin-bottom:1.6rem}
+.steps-row{display:flex;gap:6px;margin-bottom:1.6rem}
+.step{flex:1;text-align:center;padding:9px 4px;border-radius:var(--r);background:var(--surf2);border:1px solid var(--bdr)}
+.step.on{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.25)}
+.step-n{font-size:.68rem;font-weight:700;color:var(--dim);margin-bottom:2px}
+.step.on .step-n{color:var(--go2)}
+.step-l{font-size:.78rem;color:var(--sub)}
+.step.on .step-l{color:var(--tx)}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.fl{font-size:.78rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
+.fi{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:.75rem 1rem;color:var(--tx);font-size:.9rem;outline:none;font-family:var(--fb);transition:border-color .2s}
+.fi:focus{border-color:rgba(200,150,60,.45)}
+.fi::placeholder{color:var(--dim)}
+select.fi{cursor:pointer}
+.gps-row{display:flex;align-items:center;gap:10px}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.gps-dot.ok{background:var(--te2);animation:pp 2s infinite}
+.gps-val{font-family:var(--fm);font-size:.8rem;color:var(--sub);flex:1}
+
+/* Map preview in setup form */
+.setup-map-wrap{
+  margin-top:4px;margin-bottom:.5rem;
+  border-radius:var(--r2);overflow:hidden;
+  border:1px solid var(--bdr);
+  height:180px;position:relative;background:var(--surf2);
+  display:none;
+}
+.setup-map-wrap iframe{width:100%;height:100%;border:none;display:block}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIEW 2 — SECURED LIVE CONSOLE
+   Hidden by default, revealed by showConsole().
+   Once shown, the setup form is gone — this IS the page until session ends.
+   ══════════════════════════════════════════════════════════════════════════ */
+#view-console{display:none}
+
+/* ── SECURE-PAGE TOP BANNER ─────────────────────────────────────────────── */
+/* Gold lock banner at the very top of the console to make it visually clear
+   this is a protected, session-active view. */
+.secure-banner{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 18px;
+  background:rgba(200,150,60,.06);
+  border:1px solid rgba(200,150,60,.2);
+  border-radius:var(--r2);
+  margin-bottom:1.4rem;
+}
+.sb-lock-ico{
+  width:32px;height:32px;border-radius:var(--r);
+  background:rgba(200,150,60,.12);border:1px solid rgba(200,150,60,.22);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-lock-ico svg{width:15px;height:15px;color:var(--go2);stroke-width:2}
+.sb-banner-title{font-size:.9rem;font-weight:600;color:var(--go2);margin-bottom:1px}
+.sb-banner-sub{font-size:.78rem;color:var(--sub)}
+.sb-banner-r{margin-left:auto;flex-shrink:0;text-align:right}
+.session-elapsed{font-family:var(--fm);font-size:.78rem;color:var(--dim)}
+
+/* ── CONSOLE HEADER ─────────────────────────────────────────────────────── */
+.console-hd{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 0 14px;
+  border-bottom:1px solid var(--bdr);
+  margin-bottom:1.4rem;
+  flex-wrap:wrap;gap:12px;
+}
+.console-hd-l{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.live-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:99px;
+  background:rgba(45,158,138,.12);border:1px solid rgba(45,158,138,.3);
+  color:var(--te2);font-size:.75rem;font-weight:700;letter-spacing:.05em;
+  flex-shrink:0;
+}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--te2);animation:pp 1.8s infinite}
+.console-course{font-family:var(--fh);font-size:1.3rem;color:var(--tx)}
+.console-meta{font-size:.8rem;color:var(--sub);margin-top:1px}
+
+/* ── STAT STRIP ─────────────────────────────────────────────────────────── */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.4rem}
+.ss-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px 16px;text-align:center;transition:border-color .2s}
+.ss-card:hover{border-color:rgba(200,150,60,.2)}
+.ss-v{font-family:var(--fh);font-size:1.75rem;color:var(--tx);line-height:1}
+.ss-v.hi{color:var(--te2)}.ss-v.warn{color:var(--go2)}
+.ss-l{font-size:.78rem;color:var(--sub);margin-top:3px}
+.att-bar{height:5px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-bottom:1.4rem}
+.att-inner{height:100%;background:linear-gradient(90deg,var(--teal),var(--te2));border-radius:99px;transition:width .5s var(--ez)}
+
+/* ── MAIN TWO-COLUMN ─────────────────────────────────────────────────────── */
+.console-cols{display:grid;grid-template-columns:300px 1fr;gap:16px;margin-bottom:1.4rem}
+
+/* ── QR PANEL ───────────────────────────────────────────────────────────── */
+/* This is the centrepiece of the secured page — large, prominent, trusted. */
+.qr-panel{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);
+  padding:22px 18px 18px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+}
+/* Teal top-edge accent */
+.qr-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--te2),var(--teal),transparent);
+}
+.qr-panel-lbl{
+  font-size:.68rem;font-weight:700;color:var(--sub);
+  text-transform:uppercase;letter-spacing:.12em;
+  align-self:flex-start;
+}
+
+/* QR code image area */
+.qr-outer{position:relative;display:flex;align-items:center;justify-content:center}
+.qr-box{
+  width:216px;height:216px;
+  background:#ffffff;
+  border-radius:var(--r2);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  box-shadow:0 0 0 6px rgba(255,255,255,.05),0 4px 24px rgba(0,0,0,.25);
+}
+.qr-box img{width:100%;height:100%;display:block;object-fit:contain}
+/* Loading placeholder inside the white box */
+.qr-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px}
+.qr-placeholder svg{width:48px;height:48px;color:#bbb;stroke-width:1.25}
+.qr-placeholder span{font-size:.75rem;color:#999;font-family:var(--fm)}
+/* Slow-rotating outer ring — signals the code is live & rotating */
+.qr-ring{
+  position:absolute;inset:-7px;border-radius:calc(var(--r2) + 5px);
+  border:2px solid transparent;
+  border-top-color:rgba(69,188,165,.45);
+  border-right-color:rgba(69,188,165,.15);
+  animation:qr-rotate 4s linear infinite;
+  pointer-events:none;
+}
+@keyframes qr-rotate{to{transform:rotate(360deg)}}
+
+/* Manual code box */
+.mc-box{
+  width:100%;
+  background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:12px 16px;text-align:center;
+}
+.mc-lbl{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:.14em;margin-bottom:5px}
+.mc-val{
+  font-family:var(--fm);font-size:1.85rem;color:var(--go2);
+  font-weight:700;letter-spacing:.2em;line-height:1;
+}
+
+/* Refresh countdown bar */
+.qr-countdown{width:100%}
+.qr-timer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.qr-timer-txt{font-size:.75rem;color:var(--sub);font-family:var(--fm)}
+.qr-updated{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+.qr-bar-track{height:4px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.qr-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--te2));border-radius:99px;transition:width .8s linear}
+
+/* QR action row */
+.qr-acts{display:flex;gap:8px;width:100%}
+.qr-acts .btn{flex:1;justify-content:center;font-size:.82rem;padding:8px 12px}
+
+/* ── CHECK-IN LIST PANEL ─────────────────────────────────────────────────── */
+.ci-panel{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.ci-hd{
+  padding:14px 18px;border-bottom:1px solid var(--bdr2);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.ci-hd-title{font-size:.92rem;font-weight:600;color:var(--tx)}
+.ci-hd-count{font-size:.78rem;color:var(--dim);font-family:var(--fm)}
+.ci-list{overflow-y:auto;scrollbar-width:thin;flex:1}
+.ci-list::-webkit-scrollbar{width:3px}
+.ci-list::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:99px}
+.ci-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;border-bottom:1px solid var(--bdr2);
+  animation:ci-in .26s var(--ez);
+  transition:background .12s;
+}
+.ci-item:last-child{border-bottom:none}
+.ci-item:hover{background:rgba(200,150,60,.03)}
+/* Avatar — 44px circle with photo ring on new check-in */
+.ci-av{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--teal),var(--te2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;
+  overflow:hidden;
+  box-shadow:0 0 0 2px var(--surf),0 0 0 4px rgba(45,158,138,.25);
+  transition:box-shadow .3s;
+}
+.ci-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ci-av.fresh{box-shadow:0 0 0 2px var(--surf),0 0 0 4px var(--te2)}
+/* Info block */
+.ci-info{flex:1;min-width:0}
+.ci-nm{font-size:.88rem;font-weight:600;color:var(--tx);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-sub{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap}
+.ci-idx{font-size:.68rem;color:var(--dim);font-family:var(--fm)}
+.ci-dot{width:3px;height:3px;border-radius:50%;background:var(--dim);flex-shrink:0}
+.ci-prog{font-size:.68rem;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+/* Right meta */
+.ci-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.ci-time{font-family:var(--fm);font-size:.72rem;color:var(--sub)}
+.ci-meth{font-size:.62rem;padding:2px 7px;border-radius:99px;font-weight:600;flex-shrink:0}
+.ci-meth.qr{background:rgba(45,158,138,.1);color:var(--te2);border:1px solid rgba(45,158,138,.2)}
+.ci-meth.manual{background:rgba(200,150,60,.1);color:var(--go2);border:1px solid rgba(200,150,60,.2)}
+.ci-meth.override{background:rgba(200,88,50,.1);color:var(--ru2);border:1px solid rgba(200,88,50,.2)}
+.ci-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 18px;gap:10px;text-align:center;color:var(--dim);
+}
+.ci-empty svg{width:30px;height:30px;opacity:.3;stroke-width:1.5}
+.ci-empty p{font-size:.82rem}
+/* NEW: "just arrived" flash strip at top of list */
+.ci-new-flash{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;
+  background:rgba(45,158,138,.07);
+  border-bottom:1px solid rgba(45,158,138,.15);
+  font-size:.75rem;color:var(--te2);font-weight:600;
+  animation:ci-in .22s var(--ez);
+}
+.ci-new-flash svg{width:12px;height:12px;stroke-width:2.5;flex-shrink:0}
+
+/* ── LOCATION MAP ────────────────────────────────────────────────────────── */
+.map-panel{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);overflow:hidden;margin-bottom:1.4rem}
+.map-hd{padding:12px 18px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.map-hd-title{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600;color:var(--tx)}
+.map-hd-title svg{width:16px;height:16px;color:var(--go2);stroke-width:2}
+.map-hd-sub{font-size:.75rem;color:var(--sub);font-family:var(--fm)}
+.geo-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;background:rgba(200,150,60,.08);border:1px solid rgba(200,150,60,.22);color:var(--go2);font-size:.7rem;font-weight:600;font-family:var(--fm)}
+.geo-pill svg{width:11px;height:11px;stroke-width:2}
+.map-body{position:relative;height:260px;background:var(--surf2)}
+.map-body iframe{width:100%;height:100%;border:none;display:block}
+.map-overlay{position:absolute;bottom:12px;left:12px;background:rgba(15,13,11,.85);backdrop-filter:blur(8px);border:1px solid var(--bdr);border-radius:var(--r2);padding:8px 12px;display:flex;align-items:center;gap:8px;pointer-events:none;z-index:10}
+[data-theme="light"] .map-overlay{background:rgba(242,236,226,.88)}
+.map-pin-dot{width:8px;height:8px;border-radius:50%;background:var(--te2);flex-shrink:0;box-shadow:0 0 0 3px rgba(69,188,165,.25);animation:pp 2s infinite}
+.map-coords{font-family:var(--fm);font-size:.7rem;color:var(--sub)}
+.map-place{font-size:.74rem;font-weight:600;color:var(--tx)}
+.map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--dim)}
+.map-empty svg{width:34px;height:34px;opacity:.4;stroke-width:1.5}
+.map-empty p{font-size:.82rem}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FULLSCREEN PROJECTOR OVERLAY
+   ══════════════════════════════════════════════════════════════════════════ */
+#proj-overlay{
+  position:fixed;inset:0;z-index:990;
+  background:#050505;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+#proj-overlay.on{display:flex}
+.proj-hd{position:absolute;top:0;left:0;right:0;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);z-index:2}
+.proj-course-txt{font-family:var(--fh);font-size:clamp(1rem,2.2vw,1.6rem);color:#f0e8d8;letter-spacing:-.01em}
+.proj-live-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:99px;background:rgba(45,158,138,.18);border:1px solid rgba(69,188,165,.35);color:#45bca5;font-size:.72rem;font-weight:700;letter-spacing:.06em}
+.proj-live-dot{width:7px;height:7px;border-radius:50%;background:#45bca5;animation:pp 1.8s infinite}
+.proj-layout{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;max-height:100vh}
+.proj-left{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(20px,4vw,60px);border-right:1px solid rgba(255,255,255,.06);gap:clamp(12px,2.5vh,28px)}
+.proj-right{display:flex;flex-direction:column;padding:clamp(16px,3vw,40px);overflow:hidden;gap:clamp(10px,1.8vh,20px)}
+/* QR */
+.proj-qr-wrap{position:relative}
+.proj-qr{width:clamp(180px,28vh,340px);height:clamp(180px,28vh,340px);background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 8px rgba(255,255,255,.06),0 0 80px rgba(200,150,60,.12)}
+.proj-qr img{width:100%;height:100%;object-fit:contain}
+.proj-qr-ring{position:absolute;inset:-10px;border-radius:24px;border:2px solid rgba(200,150,60,.25);animation:proj-ring 2.5s linear infinite;pointer-events:none}
+@keyframes proj-ring{0%{opacity:.6}50%{opacity:.12}100%{opacity:.6}}
+/* Code box */
+.proj-code-box{text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 28px;width:100%;max-width:clamp(180px,28vh,340px)}
+.proj-code-lbl{font-size:.62rem;color:#5e4e3e;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.proj-code{font-family:var(--fm);font-size:clamp(1.8rem,5vw,3.4rem);color:#e0ae50;letter-spacing:.3em;font-weight:700;line-height:1}
+/* Countdown bar */
+.proj-bar-wrap{width:100%;max-width:clamp(180px,28vh,340px)}
+.proj-bar-track{height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.proj-bar-fill{height:100%;background:linear-gradient(90deg,#2d9e8a,#45bca5);border-radius:99px;transition:width .8s linear}
+.proj-bar-txt{font-size:.65rem;color:#5e4e3e;text-align:center;margin-top:4px;font-family:var(--fm)}
+/* Count */
+.proj-count-row{display:flex;align-items:baseline;gap:10px;padding:clamp(10px,2vh,20px) 0 clamp(8px,1.5vh,16px);border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.proj-big-num{font-family:var(--fh);font-size:clamp(2.4rem,8vw,6rem);color:#45bca5;line-height:1}
+.proj-sep{font-family:var(--fh);font-size:clamp(1.8rem,5vw,4rem);color:rgba(255,255,255,.12)}
+.proj-big-total{font-family:var(--fh);font-size:clamp(1.8rem,5vw,4rem);color:rgba(255,255,255,.25)}
+.proj-count-lbl{font-size:.8rem;color:#5e4e3e;letter-spacing:.06em;margin-left:6px;align-self:center}
+.proj-att-track{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:clamp(10px,2vh,22px);flex-shrink:0}
+.proj-att-fill{height:100%;background:linear-gradient(90deg,#2d9e8a,#45bca5);border-radius:99px;transition:width .6s var(--ez)}
+/* Feed */
+.proj-feed-hd{font-size:.62rem;color:#5e4e3e;letter-spacing:.12em;text-transform:uppercase;margin-bottom:clamp(6px,1vh,12px);flex-shrink:0}
+.proj-feed{flex:1;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:4px}
+.proj-feed::-webkit-scrollbar{display:none}
+.proj-ci-row{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);animation:ci-in .3s var(--ez)}
+.proj-ci-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(45,158,138,.25);color:#45bca5;font-size:.68rem;font-weight:700;font-family:var(--fh);font-style:italic;overflow:hidden;box-shadow:0 0 0 2px rgba(45,158,138,.3)}
+.proj-ci-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.proj-ci-name{font-size:.8rem;color:#e8dfc8;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-ci-idx{font-size:.62rem;color:#5e4e3e;font-family:var(--fm);flex-shrink:0}
+.proj-ci-time{font-size:.62rem;color:#5e4e3e;font-family:var(--fm);flex-shrink:0}
+.proj-ci-meth{font-size:.58rem;padding:1px 6px;border-radius:99px;font-weight:600;flex-shrink:0}
+.proj-ci-meth.qr{background:rgba(45,158,138,.15);color:#45bca5;border:1px solid rgba(45,158,138,.25)}
+.proj-ci-meth.manual{background:rgba(200,150,60,.12);color:#e0ae50;border:1px solid rgba(200,150,60,.22)}
+.proj-ci-meth.override{background:rgba(200,88,50,.12);color:#e06843;border:1px solid rgba(200,88,50,.22)}
+.proj-feed-empty{color:#3e3228;font-size:.8rem;text-align:center;padding:20px 0}
+/* Controls */
+.proj-controls{position:absolute;bottom:0;left:0;right:0;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);z-index:2}
+.pctrl{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid;font-family:var(--fb)}
+.pctrl.exit{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.45);background:transparent}
+.pctrl.exit:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06)}
+.pctrl.end-s{border-color:rgba(200,88,50,.35);color:#e06843;background:rgba(200,88,50,.1)}
+.pctrl.end-s:hover{background:rgba(200,88,50,.2)}
+.pctrl.fstog{border-color:rgba(200,150,60,.25);color:#e0ae50;background:rgba(200,150,60,.08)}
+.pctrl.fstog:hover{background:rgba(200,150,60,.15)}
+.pctrl svg{width:13px;height:13px;stroke-width:2}
+@media(max-width:768px){.proj-layout{grid-template-columns:1fr}.proj-right{display:none}.proj-left{padding:24px;border-right:none}}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media(max-width:900px){.console-cols{grid-template-columns:260px 1fr}}
+@media(max-width:760px){.console-cols{grid-template-columns:1fr}.stat-strip{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:640px){
+  .sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}
+  .main{margin-left:0}.mbt{display:flex}
+  .stat-strip{grid-template-columns:1fr 1fr}
+  .cnt{padding:1.25rem 1rem}
+  .tb{height:54px;padding:0 1rem}
+}
+@media(max-width:380px){.stat-strip{grid-template-columns:1fr}}
+@media(min-width:1440px){:root{--sb:270px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<!-- ══════════════════════════════ SIDEBAR ══════════════════════════════ -->
+<aside class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="brand">
+      <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div class="b-nm">EduCore</div>
+    </div>
+    <button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>Lecturer</div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Active Ops</div><nav class="nav">
+    <div class="ni"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni on"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req" style="display:none">0</span></a></div>
+    <div class="ni"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+    <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Students</span></a></div>
+    <div class="ni"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">Intelligence</div><nav class="nav">
+    <div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div>
+  </nav></div>
+
+  <div class="nav-sect"><div class="nav-sect-label">System</div><nav class="nav">
+    <div class="ni"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+
+  <div class="sb-ft">
+    <div class="ava" id="sb-ava">?</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-nm">—</div><div class="ui" id="sb-id">—</div></div>
+    <button class="lg" id="lg-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov"></div>
+
+<!-- ══════════════════════════════ MAIN ══════════════════════════════════ -->
+<div class="main">
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt" id="tb-title">Live Session</span>
+    </div>
+    <div class="tb-r">
+      <div class="ib" id="th-btn">
+        <svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>
+      </div>
+      <button class="btn btn-out" id="proj-btn" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Projector Mode
+      </button>
+    </div>
+  </header>
+
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+
+      <!-- ════════════════════════════════════════════════════════════════
+           VIEW 1 — SETUP FORM
+           Visible by default. Completely replaced once session is active.
+           ════════════════════════════════════════════════════════════════ -->
+      <div id="view-setup">
+        <div class="setup-wrap">
+          <div class="start-card">
+            <div class="sc-t">Launch Attendance Session</div>
+            <div class="sc-s">Configure your session — the SATE engine handles everything else.</div>
+            <div class="steps-row">
+              <div class="step on"><div class="step-n">Step 1</div><div class="step-l">Select Course</div></div>
+              <div class="step"><div class="step-n">Step 2</div><div class="step-l">Pin Geofence</div></div>
+              <div class="step"><div class="step-n">Step 3</div><div class="step-l">Broadcast QR</div></div>
+            </div>
+            <div class="fg">
+              <label class="fl">Course *</label>
+              <select class="fi" id="f-course"><option value="">— Select a course —</option></select>
+            </div>
+            <div class="fg">
+              <label class="fl">Session Type</label>
+              <select class="fi" id="f-type">
+                <option value="class">Regular Class</option>
+                <option value="practical">Practical / Lab</option>
+                <option value="exam">Exam</option>
+                <option value="assembly">Assembly</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl">Geofence Radius</label>
+              <select class="fi" id="f-radius">
+                <option value="20">20m — Strict (Single Room)</option>
+                <option value="30" selected>30m — Standard (Lecture Hall)</option>
+                <option value="50">50m — Building Level</option>
+                <option value="100">100m — Campus Wide</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label class="fl">GPS Location</label>
+              <div class="gps-row">
+                <span class="gps-dot" id="gps-dot"></span>
+                <span class="gps-val" id="gps-val">Acquiring location…</span>
+                <button class="btn btn-out" style="padding:6px 12px;font-size:.8rem" onclick="getGPS()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                  Re-pin
+                </button>
+              </div>
+            </div>
+            <!-- Live GPS map preview inside setup form -->
+            <div class="setup-map-wrap" id="setup-map-wrap">
+              <div id="setup-map-inner" style="width:100%;height:100%"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-gold" id="start-btn" style="flex:1" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Start Session
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           VIEW 2 — SECURED LIVE CONSOLE
+           Hidden until a session becomes active. Completely takes over
+           the screen. The only exit is ending the session.
+           ════════════════════════════════════════════════════════════════ -->
+      <div id="view-console">
+
+        <!-- ── SECURE BANNER ────────────────────────────────────────── -->
+        <div class="secure-banner">
+          <div class="sb-lock-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div>
+            <div class="sb-banner-title">Secured Session View</div>
+            <div class="sb-banner-sub">QR code &amp; manual code are only visible here. End the session to return to setup.</div>
+          </div>
+          <div class="sb-banner-r">
+            <div class="session-elapsed" id="session-elapsed">—</div>
+          </div>
+        </div>
+
+        <!-- ── CONSOLE HEADER: LIVE badge + course + End btn ─────────── -->
+        <div class="console-hd">
+          <div class="console-hd-l">
+            <div class="live-badge">
+              <div class="live-dot"></div>LIVE
+            </div>
+            <div>
+              <div class="console-course" id="lc-course">—</div>
+              <div class="console-meta" id="lc-type-time">—</div>
+            </div>
+          </div>
+          <button class="btn btn-rust" id="end-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            End Session
+          </button>
+        </div>
+
+        <!-- ── STAT STRIP ─────────────────────────────────────────────── -->
+        <div class="stat-strip">
+          <div class="ss-card"><div class="ss-v hi" id="lc-present">0</div><div class="ss-l">Checked In</div></div>
+          <div class="ss-card"><div class="ss-v warn" id="lc-total">—</div><div class="ss-l">Total Enrolled</div></div>
+          <div class="ss-card"><div class="ss-v" id="lc-rate">—</div><div class="ss-l">Attendance Rate</div></div>
+        </div>
+        <div class="att-bar"><div class="att-inner" id="att-inner" style="width:0%"></div></div>
+
+        <!-- ── LOCATION MAP ───────────────────────────────────────────── -->
+        <div class="map-panel" id="map-panel" style="display:none">
+          <div class="map-hd">
+            <div>
+              <div class="map-hd-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Session Location
+              </div>
+              <div class="map-hd-sub" id="map-location-txt">—</div>
+            </div>
+            <span class="geo-pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+              <span id="map-radius-val">30</span>m geofence
+            </span>
+          </div>
+          <div class="map-body" id="map-body">
+            <div class="map-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <p>No GPS coordinates pinned</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MAIN COLS: QR + Check-in list ─────────────────────────── -->
+        <div class="console-cols">
+
+          <!-- QR PANEL -->
+          <div class="qr-panel">
+            <div class="qr-panel-lbl">Scan to Check In</div>
+
+            <div class="qr-outer">
+              <div class="qr-box" id="qr-box">
+                <div class="qr-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14"/></svg>
+                  <span>QR Loading…</span>
+                </div>
+              </div>
+              <div class="qr-ring"></div>
+            </div>
+
+            <div class="mc-box">
+              <div class="mc-lbl">Manual Code</div>
+              <div class="mc-val" id="manual-code">——</div>
+            </div>
+
+            <div class="qr-countdown">
+              <div class="qr-timer-row">
+                <span class="qr-timer-txt" id="qr-timer">Refreshing in 15s</span>
+                <span class="qr-updated" id="qr-updated"></span>
+              </div>
+              <div class="qr-bar-track"><div class="qr-bar-fill" id="qr-bar" style="width:100%"></div></div>
+            </div>
+
+            <div class="qr-acts">
+              <button class="btn btn-out" onclick="issueManualCode()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+                Rotate Code
+              </button>
+              <button class="btn btn-teal" onclick="forcePresent()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+                Force Present
+              </button>
+            </div>
+          </div>
+
+          <!-- CHECK-IN LIST -->
+          <div class="ci-panel">
+            <div class="ci-hd">
+              <span class="ci-hd-title">Live Check-Ins</span>
+              <span class="ci-hd-count" id="cp-cnt">0 students</span>
+            </div>
+            <div class="ci-list" id="ci-list">
+              <div class="ci-empty">Waiting for students to check in…</div>
+            </div>
+          </div>
+
+        </div><!-- .console-cols -->
+      </div><!-- #view-console -->
+
+    </div><!-- .cnt -->
+  </main>
+</div><!-- .main -->
+</div><!-- .pg -->
+
+<!-- ══════════════════════════ PROJECTOR OVERLAY ══════════════════════════ -->
+<div id="proj-overlay">
+  <div class="proj-hd">
+    <div class="proj-course-txt" id="proj-course">—</div>
+    <div class="proj-live-badge"><div class="proj-live-dot"></div>LIVE SESSION</div>
+  </div>
+  <div class="proj-layout">
+    <div class="proj-left">
+      <div class="proj-qr-wrap">
+        <div class="proj-qr" id="proj-qr">
+          <div style="color:#555;font-size:.85rem;text-align:center;padding:20px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:40px;height:40px;color:#444;display:block;margin:0 auto 10px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14"/></svg>
+            QR Loading…
+          </div>
+        </div>
+        <div class="proj-qr-ring"></div>
+      </div>
+      <div class="proj-code-box">
+        <div class="proj-code-lbl">Manual Code</div>
+        <div class="proj-code" id="proj-code">——</div>
+      </div>
+      <div class="proj-bar-wrap">
+        <div class="proj-bar-track"><div class="proj-bar-fill" id="proj-bar" style="width:100%"></div></div>
+        <div class="proj-bar-txt" id="proj-bar-txt">Refreshing in 15s</div>
+      </div>
+    </div>
+    <div class="proj-right">
+      <div class="proj-count-row">
+        <div class="proj-big-num" id="proj-cnt">0</div>
+        <div class="proj-sep">/</div>
+        <div class="proj-big-total" id="proj-total">?</div>
+        <div class="proj-count-lbl">students checked in</div>
+      </div>
+      <div class="proj-att-track"><div class="proj-att-fill" id="proj-att-fill" style="width:0%"></div></div>
+      <div class="proj-feed-hd">Live Check-Ins</div>
+      <div class="proj-feed" id="proj-feed">
+        <div class="proj-feed-empty">Waiting for students to check in…</div>
+      </div>
+    </div>
+  </div>
+  <div class="proj-controls">
+    <div style="display:flex;gap:8px">
+      <button class="pctrl exit" id="proj-exit-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Exit Projector
+      </button>
+      <button class="pctrl fstog" id="proj-fs-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" id="proj-fs-ico"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+        Fullscreen
+      </button>
+    </div>
+    <button class="pctrl end-s" id="proj-end-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      End Session
+    </button>
+  </div>
+</div>
+
+<div class="tw" id="tw"></div>
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   lec-live.html — page controller
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// ── Auth guard ────────────────────────────────────────────────────────────
+if (!localStorage.getItem('ec_token')) location.href = '/frontend/login.html';
+
+// ── Theme ─────────────────────────────────────────────────────────────────
+(function () {
+  const t = localStorage.getItem('ec_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('ico-dk').style.display = t === 'dark' ? 'block' : 'none';
+  document.getElementById('ico-lt').style.display = t === 'light' ? 'block' : 'none';
+})();
+document.getElementById('th-btn').onclick = () => {
+  const c = document.documentElement.getAttribute('data-theme');
+  const n = c === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('ec_theme', n);
+  document.getElementById('ico-dk').style.display = n === 'dark' ? 'block' : 'none';
+  document.getElementById('ico-lt').style.display = n === 'light' ? 'block' : 'none';
+};
+
+// ── Sidebar ───────────────────────────────────────────────────────────────
+const SB = document.getElementById('sb'), OV = document.getElementById('ov');
+document.getElementById('mbt').onclick  = () => { SB.classList.add('on'); OV.classList.add('on'); };
+document.getElementById('sb-x').onclick = () => { SB.classList.remove('on'); OV.classList.remove('on'); };
+OV.onclick = () => { SB.classList.remove('on'); OV.classList.remove('on'); };
+document.getElementById('lg-btn').onclick = async () => {
+  try { await API.auth.logout(); } catch {}
+  API.clearLecturerSession(); location.href = '/frontend/login.html';
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function e(s) {
+  return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function ini(n) {
+  return n ? n.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase() : '?';
+}
+function toast(m, t = 'ok') {
+  const ic = { ok: '<polyline points="20 6 9 17 4 12"/>', er: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>', in: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>' };
+  const tw = document.getElementById('tw'), d = document.createElement('div');
+  d.className = `t ${t}`;
+  d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;flex-shrink:0">${ic[t]||ic.in}</svg><span>${e(m)}</span>`;
+  tw.appendChild(d); d.onclick = () => d.remove(); setTimeout(() => d.remove(), 4000);
+}
+
+// ── Sidebar profile ───────────────────────────────────────────────────────
+(async () => {
+  try {
+    const cached = API.getStoredLecturer();
+    if (cached) _apP(cached);
+    const d = await API.auth.me();
+    const lec = d.lecturer || d;
+    localStorage.setItem('ec_lecturer', JSON.stringify(lec));
+    _apP(lec);
+  } catch (err) {
+    if (err && err.status === 401) { API.clearLecturerSession(); location.href = '/frontend/login.html'; }
+  }
+})();
+function _apP(lec) {
+  const n = lec.full_name || 'Lecturer', ig = ini(n);
+  const av = document.getElementById('sb-ava');
+  _setAvatar(av, _buildPhotoUrl(lec), ig);
+  document.getElementById('sb-nm').textContent = n;
+  document.getElementById('sb-id').textContent = lec.staff_id || lec.email || '';
+}
+
+// Nav badges
+API.override.getPending().then(r => {
+  const reqs = Array.isArray(r) ? r : (r.requests || r.data || []);
+  const n = reqs.filter(x => !x.status || x.status === 'pending').length;
+  if (n) { const el = document.getElementById('nav-req'); el.textContent = n; el.style.display = 'flex'; }
+}).catch(() => {});
+if (API.messages) {
+  API.messages.unreadCounts().then(r => {
+    const total = (r.channels || []).reduce((s, c) => s + (c.unread || 0), 0);
+    if (total) { const el = document.getElementById('nav-msg'); el.textContent = total > 9 ? '9+' : total; el.style.display = 'flex'; }
+  }).catch(() => {});
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let activeSession   = null;
+let pollInterval    = null;
+let qrCountdown     = 15;
+let qrTimerIv       = null;
+let elapsedIv       = null;
+let sessionStart    = null;
+let gpsLat          = null;
+let gpsLng          = null;
+
+// ── GPS ───────────────────────────────────────────────────────────────────
+function getGPS() {
+  const dot = document.getElementById('gps-dot'), val = document.getElementById('gps-val');
+  dot.className = 'gps-dot'; val.textContent = 'Acquiring…';
+  if (!navigator.geolocation) { val.textContent = 'GPS not available'; return; }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      gpsLat = pos.coords.latitude; gpsLng = pos.coords.longitude;
+      val.textContent = gpsLat.toFixed(5) + ', ' + gpsLng.toFixed(5);
+      dot.className = 'gps-dot ok';
+      checkReady();
+      // Show mini map preview in setup
+      const r = parseInt(document.getElementById('f-radius').value || '30');
+      _renderMapInto('setup-map-inner', gpsLat, gpsLng, r, 'Current Location', 180);
+      document.getElementById('setup-map-wrap').style.display = 'block';
+    },
+    () => {
+      val.textContent = 'GPS denied — session will start without geofence';
+      dot.className = 'gps-dot'; checkReady();
+    },
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+}
+getGPS();
+
+document.getElementById('f-radius').onchange = function () {
+  if (gpsLat !== null) _renderMapInto('setup-map-inner', gpsLat, gpsLng, parseInt(this.value), 'Current Location', 180);
+};
+
+function checkReady() {
+  document.getElementById('start-btn').disabled = !document.getElementById('f-course').value;
+}
+document.getElementById('f-course').onchange = checkReady;
+
+// ── Load courses ──────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const res = await API.classes.list();
+    const cls = Array.isArray(res) ? res : (res.classes || res.data || []);
+    const sel = document.getElementById('f-course');
+    cls.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.class_id;
+      o.textContent = (c.course_code ? c.course_code + ' — ' : '') + c.class_name;
+      sel.appendChild(o);
+    });
+    const urlCls = new URLSearchParams(location.search).get('class_id');
+    if (urlCls) sel.value = urlCls;
+    checkReady();
+  } catch { toast('Failed to load courses', 'er'); }
+})();
+
+// ── Check for existing open session on page load ──────────────────────────
+(async () => {
+  try {
+    const data = await API.sessions.getOpen();
+    activeSession = data.session || data;
+    if (activeSession && activeSession.session_id) showConsole();
+  } catch {}
+})();
+
+// ── Start session ─────────────────────────────────────────────────────────
+async function startSession() {
+  const btn = document.getElementById('start-btn');
+  const classId = document.getElementById('f-course').value;
+  if (!classId) { toast('Select a course', 'in'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0"></div> Starting…';
+  try {
+    const body = {
+      class_id: parseInt(classId),
+      session_type: document.getElementById('f-type').value,
+      geofence_radius_meters: parseInt(document.getElementById('f-radius').value),
+    };
+    if (gpsLat !== null) { body.latitude = gpsLat; body.longitude = gpsLng; }
+    const data = await API.sessions.open(body);
+    activeSession = data.session || data;
+    toast('Session started!');
+    showConsole();
+  } catch (err) {
+    toast(err.message, 'er');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Session';
+  }
+}
+document.getElementById('start-btn').onclick = startSession;
+
+// ══════════════════════════════════════════════════════════════════════════
+//  showConsole()
+//  THE key transition function.
+//  Hides View 1 (setup), reveals View 2 (secured console).
+//  Once called, the only way out is ending the session.
+// ══════════════════════════════════════════════════════════════════════════
+function showConsole() {
+  // ── Swap views ──────────────────────────────────────────────────────────
+  document.getElementById('view-setup').style.display   = 'none';
+  document.getElementById('view-console').style.display = 'block';
+
+  // ── Topbar changes ───────────────────────────────────────────────────────
+  document.getElementById('tb-title').textContent       = 'Live Session — Secured';
+  document.getElementById('proj-btn').style.display     = 'inline-flex';
+  document.getElementById('nav-live').style.display     = 'inline-block';
+
+  // ── Location map ─────────────────────────────────────────────────────────
+  const lat    = (activeSession.latitude)  || gpsLat;
+  const lng    = (activeSession.longitude) || gpsLng;
+  const radius = activeSession.geofence_radius_meters || activeSession.radius || 30;
+  if (lat && lng) {
+    const label = activeSession.location || 'Session Location';
+    document.getElementById('map-panel').style.display = 'block';
+    document.getElementById('map-radius-val').textContent = radius;
+    document.getElementById('map-location-txt').textContent = label;
+    _renderMapInto('map-body', parseFloat(lat), parseFloat(lng), parseInt(radius), label, 260);
+  }
+
+  // ── Elapsed timer ────────────────────────────────────────────────────────
+  sessionStart = activeSession.created_at ? new Date(activeSession.created_at) : new Date();
+  _tickElapsed();
+  elapsedIv = setInterval(_tickElapsed, 10000);
+
+  // ── Data pump ────────────────────────────────────────────────────────────
+  updateConsole();
+  pollInterval = setInterval(updateConsole, 8000);
+  startQRCountdown();
+}
+
+function _tickElapsed() {
+  const sec = Math.floor((Date.now() - sessionStart) / 1000);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  const lbl = h > 0 ? `${h}h ${m}m elapsed` : m > 0 ? `${m}m ${s}s elapsed` : `${s}s elapsed`;
+  const el = document.getElementById('session-elapsed');
+  if (el) el.textContent = lbl;
+}
+
+// ── updateConsole — main data pump, called every 8s ────────────────────────
+async function updateConsole() {
+  if (!activeSession) return;
+  const sid = activeSession.session_id;
+  try {
+    const [stats, checkins, qr] = await Promise.all([
+      API.sessions.liveStats(sid),
+      API.sessions.recentCheckins(sid),
+      API.sessions.currentCode(sid).catch(() => null),
+    ]);
+
+    const present = stats.total_students_present ?? stats.present ?? 0;
+    const total   = stats.total_students ?? stats.total ?? 0;
+    const pct     = total > 0 ? Math.round((present / total) * 100) : 0;
+
+    // Console header
+    document.getElementById('lc-course').textContent =
+      (activeSession.course_code ? activeSession.course_code + ' — ' : '') +
+      (activeSession.class_name || 'Session');
+    document.getElementById('lc-type-time').textContent =
+      (activeSession.session_type || 'class') + ' • Started ' +
+      new Date(activeSession.session_time || activeSession.created_at || Date.now())
+        .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    // Stats
+    document.getElementById('lc-present').textContent = present;
+    document.getElementById('lc-total').textContent   = total || '—';
+    document.getElementById('lc-rate').textContent    = total > 0 ? pct + '%' : '—';
+    document.getElementById('att-inner').style.width  = pct + '%';
+
+    // Projector counts
+    document.getElementById('proj-cnt').textContent   = present;
+    document.getElementById('proj-total').textContent = total || '?';
+    document.getElementById('proj-course').textContent = activeSession.class_name || 'Session';
+
+    // QR + manual code
+    if (qr) {
+      renderQR(
+        qr.qr_code_value || qr.qr_value || '',
+        qr.manual_code_value || qr.manual_code || '——'
+      );
+    }
+
+    // Check-in list
+    if (checkins) {
+      const recs = Array.isArray(checkins) ? checkins : (checkins.checkins || checkins.data || []);
+      renderCheckins(recs, present);
+    }
+
+    // Sync projector if open
+    if (document.getElementById('proj-overlay').classList.contains('on')) {
+      _syncProjectorFeed();
+      const paf = document.getElementById('proj-att-fill');
+      if (paf) paf.style.width = pct + '%';
+    }
+
+  } catch {}
+}
+
+// ── renderQR — places the QR image and sets the manual code ────────────────
+function renderQR(qrVal, manualCode) {
+  // Dashboard panel
+  const box  = document.getElementById('qr-box');
+  const mcEl = document.getElementById('manual-code');
+  if (mcEl) mcEl.textContent = manualCode;
+
+  // Projector panel
+  const pCode = document.getElementById('proj-code');
+  const pQr   = document.getElementById('proj-qr');
+  if (pCode) pCode.textContent = manualCode;
+
+  if (qrVal) {
+    const url200 = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrVal);
+    const url400 = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(qrVal);
+    if (box)  box.innerHTML  = '<img src="' + url200 + '" alt="QR Code" style="width:100%;height:100%;object-fit:contain">';
+    if (pQr)  pQr.innerHTML  = '<img src="' + url400 + '" alt="QR Code" style="width:100%;height:100%;object-fit:contain">';
+
+    const upd = document.getElementById('qr-updated');
+    if (upd) upd.textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }
+}
+
+// ── renderCheckins — upgraded with photos + full details ──────────────────
+// Tracks seen IDs to detect new arrivals and flash them
+let _seenCheckinIds = new Set();
+
+function renderCheckins(recs, count) {
+  document.getElementById('cp-cnt').textContent = count + ' student' + (count !== 1 ? 's' : '');
+  const list = document.getElementById('ci-list');
+
+  if (!recs.length) {
+    _seenCheckinIds.clear();
+    list.innerHTML = `<div class="ci-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <p>Waiting for students to check in…</p>
+    </div>`;
+    return;
+  }
+
+  // Detect newly arrived students since last render
+  const newIds = recs
+    .map(r => String(r.attendance_id || r.student_id || r.student_name))
+    .filter(id => !_seenCheckinIds.has(id));
+
+  // Build the list with DOM elements for safety and photo support
+  list.innerHTML = '';
+
+  // Flash banner if someone just arrived
+  if (newIds.length > 0 && _seenCheckinIds.size > 0) {
+    const flash = document.createElement('div');
+    flash.className = 'ci-new-flash';
+    flash.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+      ${newIds.length} new check-in${newIds.length !== 1 ? 's' : ''} just arrived`;
+    list.appendChild(flash);
+    setTimeout(() => { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 3500);
+  }
+
+  // Update seen set
+  recs.forEach(r => {
+    const id = String(r.attendance_id || r.student_id || r.student_name);
+    _seenCheckinIds.add(id);
+  });
+
+  recs.forEach(r => {
+    const meth  = r.verification_method || 'qr_code';
+    const mlbl  = meth === 'qr_code' ? 'QR' : meth === 'manual_code' ? 'Manual' : 'Override';
+    const mcls  = meth === 'qr_code' ? 'qr' : meth === 'manual_code' ? 'manual' : 'override';
+    const tStr  = r.check_in_time
+      ? new Date(r.check_in_time).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})
+      : '—';
+    const rid   = String(r.attendance_id || r.student_id || r.student_name);
+    const isFresh = newIds.includes(rid);
+
+    // ── Row ──
+    const item = document.createElement('div');
+    item.className = 'ci-item';
+
+    // ── Avatar with photo support ──
+    const av = document.createElement('div');
+    av.className = 'ci-av' + (isFresh ? ' fresh' : '');
+    if (r.profile_photo || r.student_photo || r.photo) {
+      const photoUrl = _resolvePhoto(r.profile_photo || r.student_photo || r.photo);
+      const img = document.createElement('img');
+      img.src = photoUrl;
+      img.alt = '';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+      img.onerror = () => { av.removeChild(img); av.textContent = ini(r.student_name || ''); };
+      av.appendChild(img);
+    } else {
+      av.textContent = ini(r.student_name || '');
+    }
+
+    // ── Info block ──
+    const info = document.createElement('div');
+    info.className = 'ci-info';
+
+    const nm = document.createElement('div');
+    nm.className = 'ci-nm';
+    nm.textContent = r.student_name || '—';
+
+    const sub = document.createElement('div');
+    sub.className = 'ci-sub';
+
+    // Index number
+    if (r.index_number) {
+      const idx = document.createElement('span');
+      idx.className = 'ci-idx';
+      idx.textContent = r.index_number;
+      sub.appendChild(idx);
+    }
+
+    // Programme
+    if (r.program || r.programme) {
+      const prog = r.program || r.programme;
+      if (r.index_number) {
+        const dot = document.createElement('span');
+        dot.className = 'ci-dot';
+        sub.appendChild(dot);
+      }
+      const pr = document.createElement('span');
+      pr.className = 'ci-prog';
+      pr.textContent = prog + (r.level ? ' · L' + r.level : '');
+      sub.appendChild(pr);
+    } else if (r.level) {
+      if (r.index_number) {
+        const dot = document.createElement('span');
+        dot.className = 'ci-dot';
+        sub.appendChild(dot);
+      }
+      const lv = document.createElement('span');
+      lv.className = 'ci-prog';
+      lv.textContent = 'Level ' + r.level;
+      sub.appendChild(lv);
+    }
+
+    info.appendChild(nm);
+    if (sub.children.length) info.appendChild(sub);
+
+    // ── Right meta: method badge + time ──
+    const meta = document.createElement('div');
+    meta.className = 'ci-meta';
+
+    const mchip = document.createElement('span');
+    mchip.className = 'ci-meth ' + mcls;
+    mchip.textContent = mlbl;
+
+    const time = document.createElement('span');
+    time.className = 'ci-time';
+    time.textContent = tStr;
+
+    meta.appendChild(mchip);
+    meta.appendChild(time);
+
+    item.appendChild(av);
+    item.appendChild(info);
+    item.appendChild(meta);
+    list.appendChild(item);
+
+    // Remove "fresh" glow after 4s
+    if (isFresh) setTimeout(() => av.classList.remove('fresh'), 4000);
+  });
+}
+
+// ── Photo URL resolver (mirrors _buildPhotoUrl for students) ──────────────
+function _resolvePhoto(p) {
+  if (!p) return '';
+  p = String(p).trim();
+  if (!p) return '';
+  if (/^(https?:)?\/\//i.test(p) || p.startsWith('data:')) return p;
+  if (p.startsWith('/')) return p;
+  const clean = p.replace(/\\/g, '/').replace(/^\.\//, '');
+  if (clean.startsWith('uploads/')) return '/backend/' + clean;
+  return clean;
+}
+
+// ── QR countdown bar ─────────────────────────────────────────────────────
+function startQRCountdown() {
+  qrCountdown = 15;
+  clearInterval(qrTimerIv);
+  qrTimerIv = setInterval(() => {
+    qrCountdown--;
+    const pct = (qrCountdown / 15 * 100) + '%';
+
+    const timerEl = document.getElementById('qr-timer');
+    const barEl   = document.getElementById('qr-bar');
+    if (timerEl) timerEl.textContent = 'Refreshing in ' + qrCountdown + 's';
+    if (barEl)   barEl.style.width   = pct;
+
+    // Mirror to projector
+    const pBar = document.getElementById('proj-bar');
+    const pTxt = document.getElementById('proj-bar-txt');
+    if (pBar) pBar.style.width  = pct;
+    if (pTxt) pTxt.textContent  = 'Refreshing in ' + qrCountdown + 's';
+
+    if (qrCountdown <= 0) { qrCountdown = 15; updateConsole(); }
+  }, 1000);
+}
+
+// ── End session ───────────────────────────────────────────────────────────
+async function _doEnd() {
+  if (!confirm('End this session? Students will no longer be able to check in.')) return;
+  clearInterval(pollInterval); clearInterval(qrTimerIv); clearInterval(elapsedIv);
+  try { await API.sessions.close(activeSession.session_id); toast('Session ended'); location.reload(); }
+  catch (err) { toast(err.message, 'er'); }
+}
+document.getElementById('end-btn').onclick = _doEnd;
+
+// ── Rotate / issue manual code ────────────────────────────────────────────
+async function issueManualCode() {
+  if (!activeSession) return;
+  try { await API.sessions.rotateQR(activeSession.session_id); toast('Code rotated'); updateConsole(); }
+  catch (err) { toast(err.message, 'er'); }
+}
+function forcePresent() {
+  toast('Use the Attendance page for manual overrides', 'in');
+}
+
+// ── Location map helpers ──────────────────────────────────────────────────
+function _bboxStr(lat, lng, metres) {
+  const d = metres / 111320, dlng = d / Math.cos(lat * Math.PI / 180);
+  return [(lng-dlng).toFixed(6),(lat-d).toFixed(6),(lng+dlng).toFixed(6),(lat+d).toFixed(6)].join(',');
+}
+function _renderMapInto(containerId, lat, lng, radius, label, height) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.style.height = (height || 260) + 'px';
+  el.innerHTML = `
+    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${_bboxStr(lat,lng,radius*3)}&layer=mapnik&marker=${lat},${lng}"
+      loading="lazy" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+    <div class="map-overlay">
+      <div class="map-pin-dot"></div>
+      <div>
+        <div class="map-place">${e(label||'Pinned Location')}</div>
+        <div class="map-coords">${lat.toFixed(5)}, ${lng.toFixed(5)} &bull; ${radius}m radius</div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  FULLSCREEN PROJECTOR MODE
+// ══════════════════════════════════════════════════════════════════════════
+document.getElementById('proj-btn').onclick = openProjector;
+
+function openProjector() {
+  const el = document.getElementById('proj-overlay');
+  el.classList.add('on');
+  if (el.requestFullscreen)            el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  _syncProjectorFeed();
+}
+function closeProjector() {
+  document.getElementById('proj-overlay').classList.remove('on');
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen)           document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+document.getElementById('proj-exit-btn').onclick = closeProjector;
+document.getElementById('proj-end-btn').onclick  = async () => { closeProjector(); await _doEnd(); };
+document.getElementById('proj-fs-btn').onclick   = () => {
+  const el   = document.getElementById('proj-overlay');
+  const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  if (isFS) { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
+  else      { if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); }
+};
+function _updateFSIcon(isFS) {
+  const ico = document.getElementById('proj-fs-ico'), btn = document.getElementById('proj-fs-btn');
+  if (!ico || !btn) return;
+  ico.innerHTML = isFS
+    ? '<path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/>'
+    : '<path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>';
+  const tn = Array.from(btn.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+  if (tn) tn.textContent = isFS ? ' Exit Fullscreen' : ' Fullscreen';
+}
+document.addEventListener('fullscreenchange',       () => _updateFSIcon(!!(document.fullscreenElement)));
+document.addEventListener('webkitfullscreenchange', () => _updateFSIcon(!!(document.webkitFullscreenElement)));
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && document.getElementById('proj-overlay').classList.contains('on')) {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) closeProjector();
+  }
+});
+
+// Sync projector check-in feed — reads photos from ci-av img elements
+function _syncProjectorFeed() {
+  const feed  = document.getElementById('proj-feed');
+  const items = document.querySelectorAll('#ci-list .ci-item');
+  if (!feed) return;
+  if (!items.length) {
+    feed.innerHTML = '<div class="proj-feed-empty">Waiting for students to check in…</div>';
+    return;
+  }
+  feed.innerHTML = '';
+  Array.from(items).reverse().slice(0, 20).forEach(ci => {
+    const nm    = ci.querySelector('.ci-nm')?.textContent  || '—';
+    const idx   = ci.querySelector('.ci-idx')?.textContent || '';
+    const prog  = ci.querySelector('.ci-prog')?.textContent|| '';
+    const time  = ci.querySelector('.ci-time')?.textContent|| '';
+    const mEl   = ci.querySelector('.ci-meth');
+    const mCls  = mEl ? (mEl.className.replace('ci-meth','').trim() || 'qr') : 'qr';
+    const mLbl  = mEl?.textContent || 'QR';
+    // Photo — pull src from img inside .ci-av if present
+    const avImg = ci.querySelector('.ci-av img');
+    const photoSrc = avImg ? avImg.src : '';
+
+    const row = document.createElement('div');
+    row.className = 'proj-ci-row';
+
+    // Avatar with photo
+    const av = document.createElement('div');
+    av.className = 'proj-ci-av';
+    if (photoSrc) {
+      const img = document.createElement('img');
+      img.src = photoSrc; img.alt = '';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+      img.onerror = () => { av.removeChild(img); av.textContent = ini(nm); };
+      av.appendChild(img);
+    } else {
+      av.textContent = ini(nm);
+    }
+
+    // Info
+    const nameEl = document.createElement('div');
+    nameEl.className = 'proj-ci-name';
+    nameEl.textContent = nm;
+
+    const idxEl = document.createElement('div');
+    idxEl.className = 'proj-ci-idx';
+    idxEl.textContent = idx + (prog ? ' · ' + prog : '');
+
+    const methEl = document.createElement('span');
+    methEl.className = 'proj-ci-meth ' + mCls;
+    methEl.textContent = mLbl;
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'proj-ci-time';
+    timeEl.textContent = time;
+
+    row.appendChild(av);
+    row.appendChild(nameEl);
+    row.appendChild(idxEl);
+    row.appendChild(methEl);
+    row.appendChild(timeEl);
+    feed.appendChild(row);
+  });
+}
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#f5f0e8"/>
+<title>EduCore — Student Registration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS — same as student-login.html and signup.html ─── */
+:root {
+  --cream:#f5f0e8; --cream2:#ede8de; --sand:#e8e0d0;
+  --rust:#c84b31;  --rust2:#e05c3a;
+  --coal:#1a1612;  --coal2:#2d2620;
+  --ink:#3d3530;   --ink2:#5a5048;
+  --stone:#8a7d72; --stone2:#b5a898;
+  --gold:#c4973a;  --gold2:#e0b050;
+  --teal:#2a7a6e;  --teal2:#3d9e90;
+  --green:#2a8060; --green2:#3da880;
+  --bg:var(--cream);   --bg2:var(--cream2);
+  --surf:#fff;         --surf2:var(--sand);
+  --border:rgba(58,48,40,0.1); --border2:rgba(58,48,40,0.06);
+  --text:var(--coal);  --muted:var(--ink2); --dim:var(--stone);
+  --accent:var(--teal);  --accent2:var(--teal2);
+  --ff-h:'Playfair Display',Georgia,serif;
+  --ff-b:'DM Sans',system-ui,sans-serif;
+  --ff-m:'DM Mono',monospace;
+  --r:4px; --rl:8px;
+  --ease:cubic-bezier(0.23,1,0.32,1);
+  --sh:0 4px 24px rgba(0,0,0,0.08); --sh-lg:0 16px 48px rgba(0,0,0,0.12);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1a18; --bg2:#152420; --surf:#1c2a26; --surf2:#22302c;
+    --border:rgba(200,240,230,0.09); --border2:rgba(200,240,230,0.05);
+    --text:#e0f0ec; --muted:#7a9e98; --dim:#4a7068;
+    --accent:#3d9e90; --accent2:#50c0b0;
+    --teal:#3d9e90; --teal2:#50c0b0;
+    --gold:#d4a840; --gold2:#e8c060;
+    --rust:#e06040; --rust2:#f07050;
+    --green:#3da880; --green2:#50c090;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--ff-b);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+h1,h2,h3,h4{font-family:var(--ff-h);line-height:1.1;font-weight:500;letter-spacing:-0.01em}
+p{color:var(--muted);line-height:1.8}
+
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
+
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.1}
+.orb1{width:620px;height:620px;background:var(--teal);top:-200px;right:-100px;animation:drift 22s ease-in-out infinite}
+.orb2{width:480px;height:480px;background:var(--gold);bottom:-150px;left:-80px;animation:drift 18s ease-in-out infinite reverse}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,20px)}}
+
+.page{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* nav */
+.nav-top{display:flex;align-items:center;justify-content:space-between;padding:clamp(16px,3vh,22px) clamp(1.25rem,5vw,2.5rem);border-bottom:1px solid var(--border);background:rgba(245,240,232,0.82);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50}
+@media(prefers-color-scheme:dark){.nav-top{background:rgba(14,26,24,0.88)}}
+.nav-brand{display:flex;align-items:center;gap:11px}
+.nav-logo{width:38px;height:38px;border-radius:3px;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(42,122,110,.3)}
+.nav-logo svg{width:18px;height:18px;color:#fff;stroke-width:2.5}
+.nav-name{font-family:var(--ff-h);font-weight:500;font-size:1.05rem;font-style:italic;display:flex;align-items:center;gap:8px}
+.nav-badge{font-size:.63rem;font-weight:600;font-style:normal;font-family:var(--ff-b);color:var(--teal2);background:rgba(42,122,110,.1);border:1px solid rgba(42,122,110,.2);padding:2px 9px;border-radius:99px}
+.nav-right{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:10px}
+.nav-right a{color:var(--teal);font-weight:600;transition:color .2s}
+.nav-right a:hover{color:var(--teal2)}
+
+/* split layout */
+.auth-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+
+/* feature panel */
+.feat-panel{background:#0a1f1c;padding:clamp(3rem,8vh,5rem) clamp(2rem,6vw,4rem);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.feat-panel::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 30%,transparent 90%)}
+.feat-panel::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal2),var(--gold2))}
+.fp-orb{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+.fp-orb1{width:380px;height:380px;background:var(--teal2);opacity:.10;top:-80px;left:-60px}
+.fp-orb2{width:260px;height:260px;background:var(--gold);opacity:.06;bottom:-70px;right:-50px}
+.fp-inner{position:relative;z-index:1}
+.fp-eyebrow{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--teal2);margin-bottom:16px;display:flex;align-items:center;gap:8px;font-family:var(--ff-b)}
+.fp-eyebrow::before{content:'';width:20px;height:1px;background:var(--teal2);display:inline-block}
+.fp-title{font-family:var(--ff-h);font-size:clamp(1.6rem,3.2vw,2.4rem);font-weight:400;line-height:1.12;color:#d8f0ea;margin-bottom:16px;letter-spacing:-.02em}
+.fp-title em{font-style:italic;color:var(--teal2)}
+.fp-sub{font-size:.9rem;color:rgba(190,230,220,.5);line-height:1.85;margin-bottom:2rem;max-width:380px}
+.fp-guarantees{display:flex;flex-direction:column;gap:14px;margin-bottom:1.75rem}
+.fp-g{display:flex;align-items:flex-start;gap:12px}
+.fp-g-ico{width:32px;height:32px;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid}
+.fp-g-ico svg{width:15px;height:15px;stroke-width:1.5}
+.fp-g-ico.a{color:var(--teal2);border-color:rgba(61,158,144,.25);background:rgba(61,158,144,.1)}
+.fp-g-ico.b{color:var(--gold2);border-color:rgba(196,151,58,.25);background:rgba(196,151,58,.08)}
+.fp-g-ico.c{color:#e09090;border-color:rgba(200,88,50,.25);background:rgba(200,88,50,.08)}
+.fp-g-body h4{font-family:var(--ff-b);font-size:.86rem;font-weight:600;color:#d8f0ea;margin-bottom:3px}
+.fp-g-body p{font-size:.78rem;color:rgba(190,230,220,.45);line-height:1.6;margin:0}
+.ml-notice{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(196,151,58,.08);border:1px solid rgba(196,151,58,.2);border-radius:4px}
+.ml-notice svg{width:16px;height:16px;color:var(--gold2);flex-shrink:0;margin-top:2px;stroke-width:1.5}
+.ml-notice-txt{font-size:.77rem;color:rgba(190,230,220,.5);line-height:1.6}
+.ml-notice-txt strong{color:var(--gold2)}
+
+/* form side */
+.auth-side{display:flex;align-items:flex-start;justify-content:center;padding:clamp(2rem,5vh,3.5rem) clamp(1.5rem,5vw,3.5rem);overflow-y:auto;background:var(--bg)}
+.auth-box{width:100%;max-width:440px}
+
+.auth-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+.brand-ico{width:44px;height:44px;border-radius:5px;background:var(--teal);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(42,122,110,.3);color:#fff}
+.brand-ico svg{width:20px;height:20px;stroke-width:2}
+.brand-name{font-family:var(--ff-h);font-size:1.2rem;font-weight:500;color:var(--text);font-style:italic}
+
+/* step bar — matches signup.html exactly */
+.steps-bar{display:flex;align-items:center;gap:0;margin-bottom:1.75rem}
+.step-seg{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
+.step-seg:not(:last-child)::after{content:'';position:absolute;top:15px;left:calc(50% + 16px);right:calc(-50% + 16px);height:1.5px;background:var(--border2);transition:background .4s}
+.step-seg.done::after{background:var(--teal)}
+.step-seg.active::after{background:linear-gradient(90deg,var(--teal),var(--border2))}
+.step-circle{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:600;color:var(--dim);transition:all .3s;position:relative;z-index:1;font-family:var(--ff-h)}
+.step-seg.active .step-circle{border-color:var(--teal);background:var(--teal);color:#fff;box-shadow:0 0 0 4px rgba(42,122,110,.12)}
+.step-seg.done .step-circle{border-color:var(--green);background:var(--green);color:#fff}
+.step-label{font-size:.64rem;color:var(--dim);font-weight:600;font-family:var(--ff-b);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+.step-seg.active .step-label{color:var(--teal2)}
+.step-seg.done .step-label{color:var(--green2)}
+
+/* form fields */
+.auth-form{display:flex;flex-direction:column;gap:1rem}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--ff-b)}
+.fi-w{position:relative}
+.fi{width:100%;background:rgba(255,255,255,.5);border:1px solid var(--border);border-radius:3px;padding:.8rem 1rem;color:var(--text);font-size:.9rem;transition:all .2s;outline:none;-webkit-appearance:none;appearance:none}
+.fi::placeholder{color:var(--dim)}
+.fi:focus{border-color:var(--teal2);background:rgba(42,122,110,.04);box-shadow:0 0 0 3px rgba(42,122,110,.09)}
+.fi.err{border-color:var(--rust)!important}
+.fi-r{padding-right:2.8rem}
+.fi-act{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--dim);padding:4px;border-radius:3px;transition:color .2s;background:none;border:none;cursor:pointer;display:flex;align-items:center}
+.fi-act:hover{color:var(--text)}
+.fi-act svg{width:17px;height:17px}
+.fe{font-size:.73rem;color:var(--rust);min-height:16px}
+.field-hint{font-size:.72rem;color:var(--dim);margin-top:2px}
+
+/* password strength */
+.pw-strength{height:3px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:5px}
+.pw-bar{height:100%;border-radius:99px;transition:width .3s,background .3s;width:0}
+.pw-bar.weak{background:var(--rust);width:33%}
+.pw-bar.fair{background:var(--gold2);width:66%}
+.pw-bar.strong{background:var(--green);width:100%}
+
+.btn-submit{width:100%;padding:.9rem;border-radius:3px;font-family:var(--ff-b);font-weight:600;font-size:.92rem;color:#fff;background:var(--teal);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .22s var(--ease);box-shadow:0 2px 12px rgba(42,122,110,.28)}
+.btn-submit:hover:not(:disabled){transform:translateY(-1px);background:var(--teal2);box-shadow:0 6px 20px rgba(42,122,110,.38)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-submit svg{width:15px;height:15px;stroke-width:2}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn-submit{flex:1}
+.btn-back{padding:.9rem 1.25rem;border-radius:3px;border:1px solid var(--border);color:var(--muted);font-family:var(--ff-b);font-size:.9rem;font-weight:500;background:transparent;cursor:pointer;transition:all .2s}
+.btn-back:hover{border-color:var(--border);color:var(--text)}
+
+.auth-foot{text-align:center;margin-top:1.1rem;font-size:.84rem;color:var(--muted)}
+.auth-foot a{color:var(--teal);font-weight:600;transition:color .2s}
+.auth-foot a:hover{color:var(--teal2)}
+
+/* banners */
+.banner{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:4px;margin-bottom:.75rem;border:1px solid;font-size:.8rem;line-height:1.6}
+.banner.success{background:rgba(42,122,110,.08);border-color:rgba(42,122,110,.2);color:var(--teal)}
+.banner.error{background:rgba(200,75,49,.08);border-color:rgba(200,75,49,.2);color:var(--rust)}
+.banner.info{background:rgba(196,151,58,.08);border-color:rgba(196,151,58,.2);color:var(--gold)}
+.banner svg{width:15px;height:15px;flex-shrink:0;margin-top:1px}
+
+/* spinner */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* verify screen */
+.verify-screen{text-align:center;padding:1rem 0}
+.verify-icon{width:64px;height:64px;border-radius:50%;background:rgba(42,122,110,.1);border:2px solid rgba(42,122,110,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;color:var(--teal)}
+.verify-icon svg{width:28px;height:28px;stroke-width:2}
+.verify-email-box{font-family:var(--ff-m);font-size:.85rem;color:var(--text);background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:8px 14px;display:inline-block;margin:4px 0 1rem}
+.resend-row{margin-top:1rem;font-size:.82rem;color:var(--muted)}
+.resend-btn{color:var(--teal);font-weight:600;background:none;border:none;cursor:pointer;font-size:.82rem;font-family:var(--ff-b);transition:color .2s;padding:0;margin-left:4px}
+.resend-btn:hover{color:var(--teal2)}
+.resend-btn:disabled{opacity:.5;cursor:not-allowed}
+.resend-status{display:block;font-size:.78rem;margin-top:6px;min-height:18px}
+
+@media(max-width:900px){.auth-grid{grid-template-columns:1fr}.feat-panel{display:none}}
+@media(max-width:480px){.nav-top{padding:14px 1rem}.auth-side{padding:1.5rem 1rem}.fg-row{grid-template-columns:1fr}.nav-badge{display:none}}
+@media(max-width:380px){.step-label{display:none}}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+</div>
+
+<div class="page">
+  <nav class="nav-top">
+    <a class="nav-brand" href="index.html">
+      <div class="nav-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <div class="nav-name">EduCore <span class="nav-badge">Student</span></div>
+    </a>
+    <div class="nav-right">
+      Already registered? <a href="student-login.html">Sign in →</a>
+    </div>
+  </nav>
+
+  <div class="auth-grid">
+
+    <!-- Feature panel -->
+    <div class="feat-panel">
+      <div class="fp-orb fp-orb1"></div>
+      <div class="fp-orb fp-orb2"></div>
+      <div class="fp-inner">
+        <div class="fp-eyebrow">Create Account</div>
+        <h1 class="fp-title">Your attendance<br>record, <em>secured.</em></h1>
+        <p class="fp-sub">Register once. EduCore cross-references your index number with your lecturer's master list and activates your account.</p>
+
+        <div class="fp-guarantees">
+          <div class="fp-g">
+            <div class="fp-g-ico a">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div class="fp-g-body"><h4>Master list verified</h4><p>Your index number is checked against your institution's official register.</p></div>
+          </div>
+          <div class="fp-g">
+            <div class="fp-g-ico b">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <div class="fp-g-body"><h4>Device bound on first sign-in</h4><p>Your phone is fingerprinted so only you can mark your attendance.</p></div>
+          </div>
+          <div class="fp-g">
+            <div class="fp-g-ico c">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="fp-g-body"><h4>Tamper-proof records</h4><p>Every check-in is SHA-256 sealed with your location, device and timestamp.</p></div>
+          </div>
+        </div>
+
+        <div class="ml-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="ml-notice-txt">Your index number must be on <strong>your lecturer's master list</strong> before your account can be activated. Ask your lecturer to add you.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form side -->
+    <div class="auth-side">
+      <div class="auth-box">
+        <div class="auth-brand-row">
+          <div class="brand-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div class="brand-name">Student Registration</div>
+        </div>
+
+        <!-- Step bar -->
+        <div class="steps-bar" id="steps-bar">
+          <div class="step-seg active" id="step1"><div class="step-circle">1</div><div class="step-label">Identity</div></div>
+          <div class="step-seg" id="step2"><div class="step-circle">2</div><div class="step-label">Account</div></div>
+          <div class="step-seg" id="step3"><div class="step-circle">3</div><div class="step-label">Verify</div></div>
+        </div>
+
+        <div id="signup-root"></div>
+
+        <div class="auth-foot">
+          Already registered? <a href="student-login.html">Sign in →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/student-api.js"></script>
+<script>
+(function(){
+  /* ── helpers ──────────────────────────────────────────── */
+  function esc(s){const d=document.createElement('div');d.innerText=s;return d.innerHTML;}
+  function setBtnLoading(id,loading,msg){const b=document.getElementById(id);if(!b)return;if(loading){b.disabled=true;b.dataset.og=b.innerHTML;b.innerHTML=`<div class="spinner"></div> ${msg||'Please wait…'}`;}else{b.disabled=false;if(b.dataset.og)b.innerHTML=b.dataset.og;}}
+  function showBanner(target,type,msg){const w=typeof target==='string'?document.getElementById(target):target;if(!w)return;const icons={success:'<polyline points="20 6 9 17 4 12"/>',error:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};w.innerHTML=`<div class="banner ${type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="flex-shrink:0">${icons[type]||icons.info}</svg><span>${msg}</span></div>`;}
+
+  /* ── redirect if already logged in ────────────────────── */
+  if(typeof StudentAPI!=='undefined'&&StudentAPI.store.getToken()){location.href='assets/pages/students/stu-dashboard.html';}
+
+  /* ── state ─────────────────────────────────────────────── */
+  const state={step:1,fullName:'',indexNumber:'',email:'',password:''};
+  const root=document.getElementById('signup-root');
+
+  function setStep(n){
+    state.step=n;
+    [1,2,3].forEach(i=>{
+      const seg=document.getElementById('step'+i);
+      if(!seg)return;
+      seg.className='step-seg'+(i<n?' done':i===n?' active':'');
+      seg.querySelector('.step-circle').textContent=i<n?'✓':i;
+    });
+  }
+
+  /* ── STEP 1 ─────────────────────────────────────────────── */
+  function renderStep1(){
+    setStep(1);
+    root.innerHTML=`
+      <div id="s1-banner"></div>
+      <form class="auth-form" id="s1-form" novalidate>
+        <div class="fg">
+          <label class="fl" for="fullName">Full Name</label>
+          <input type="text" id="fullName" class="fi" placeholder="Your legal full name" autocomplete="name" value="${esc(state.fullName)}"/>
+          <span class="fe" id="err-name"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="indexNumber">Index / Student Number</label>
+          <input type="text" id="indexNumber" class="fi" placeholder="e.g. 5230100620" autocomplete="off" value="${esc(state.indexNumber)}"/>
+          <div class="field-hint">Exactly as it appears on your admission letter.</div>
+          <span class="fe" id="err-index"></span>
+        </div>
+        <button type="submit" class="btn-submit" id="s1-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+          Continue
+        </button>
+      </form>`;
+    document.getElementById('s1-form').addEventListener('submit',e=>{
+      e.preventDefault();
+      document.getElementById('err-name').textContent='';
+      document.getElementById('err-index').textContent='';
+      const name=document.getElementById('fullName').value.trim();
+      const idx=document.getElementById('indexNumber').value.trim();
+      let ok=true;
+      if(!name){document.getElementById('err-name').textContent='Full name is required.';document.getElementById('fullName').classList.add('err');ok=false;}
+      if(!idx){document.getElementById('err-index').textContent='Index number is required.';document.getElementById('indexNumber').classList.add('err');ok=false;}
+      if(!ok)return;
+      state.fullName=name;state.indexNumber=idx;
+      renderStep2();
+    });
+    setTimeout(()=>document.getElementById('fullName').focus(),50);
+  }
+
+  /* ── STEP 2 ─────────────────────────────────────────────── */
+  function renderStep2(){
+    setStep(2);
+    root.innerHTML=`
+      <div id="s2-banner"></div>
+      <form class="auth-form" id="s2-form" novalidate>
+        <div class="fg">
+          <label class="fl" for="email">Email Address</label>
+          <input type="email" id="email" class="fi" placeholder="your.name@email.com" autocomplete="email" value="${esc(state.email)}"/>
+          <div class="field-hint">Used to verify your account and reset your password.</div>
+          <span class="fe" id="err-email"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="password">Password</label>
+          <div class="fi-w">
+            <input type="password" id="password" class="fi fi-r" placeholder="Min. 8 characters" autocomplete="new-password" value="${esc(state.password)}"/>
+            <button type="button" class="fi-act" id="toggle-pw" aria-label="Show/hide password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="pw-strength"><div class="pw-bar" id="pw-bar"></div></div>
+          <span class="fe" id="err-pw"></span>
+        </div>
+        <div class="fg">
+          <label class="fl" for="confirm">Confirm Password</label>
+          <input type="password" id="confirm" class="fi" placeholder="Repeat your password" autocomplete="new-password"/>
+          <span class="fe" id="err-confirm"></span>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn-back" id="s2-back">← Back</button>
+          <button type="submit" class="btn-submit" id="s2-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Create Account
+          </button>
+        </div>
+      </form>`;
+
+    /* password strength meter */
+    document.getElementById('password').addEventListener('input',function(){
+      const v=this.value,bar=document.getElementById('pw-bar');
+      bar.className='pw-bar';
+      if(v.length===0)return;
+      const strong=/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/.test(v)&&v.length>=10;
+      const fair=/(?=.*[a-zA-Z])(?=.*[\d\W])/.test(v)&&v.length>=8;
+      bar.classList.add(strong?'strong':fair?'fair':'weak');
+    });
+
+    /* eye toggle */
+    document.getElementById('toggle-pw').addEventListener('click',()=>{
+      const inp=document.getElementById('password');
+      inp.type=inp.type==='password'?'text':'password';
+    });
+
+    document.getElementById('s2-back').addEventListener('click',renderStep1);
+
+    document.getElementById('s2-form').addEventListener('submit',async e=>{
+      e.preventDefault();
+      ['err-email','err-pw','err-confirm'].forEach(id=>{document.getElementById(id).textContent='';});
+      const email=document.getElementById('email').value.trim();
+      const pw=document.getElementById('password').value;
+      const conf=document.getElementById('confirm').value;
+      let ok=true;
+      if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){document.getElementById('err-email').textContent='Enter a valid email address.';document.getElementById('email').classList.add('err');ok=false;}
+      if(pw.length<8){document.getElementById('err-pw').textContent='Password must be at least 8 characters.';document.getElementById('password').classList.add('err');ok=false;}
+      if(pw!==conf){document.getElementById('err-confirm').textContent='Passwords do not match.';document.getElementById('confirm').classList.add('err');ok=false;}
+      if(!ok)return;
+      state.email=email;state.password=pw;
+      setBtnLoading('s2-btn',true,'Creating account…');
+      try{
+        await StudentAPI.auth.register({student_name:state.fullName,index_number:state.indexNumber,email:state.email,password:state.password});
+        renderStep3();
+      }catch(err){
+        showBanner('s2-banner','error',esc(err.message||'Registration failed. Please try again.'));
+        setBtnLoading('s2-btn',false);
+      }
+    });
+    setTimeout(()=>document.getElementById('email').focus(),50);
+  }
+
+  /* ── STEP 3 — email sent ────────────────────────────────── */
+  function renderStep3(){
+    setStep(3);
+    root.innerHTML=`
+      <div class="verify-screen">
+        <div class="verify-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 style="font-family:var(--ff-h);font-size:1.4rem;font-weight:400;color:var(--text);margin-bottom:8px">Account Created!</h2>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:6px">Verification link sent to:</p>
+        <div class="verify-email-box">${esc(state.email)}</div>
+        <p style="font-size:.82rem;color:var(--dim);margin-bottom:1.5rem;line-height:1.7">
+          Click the link in that email to activate your account.<br>
+          Check your <strong style="color:var(--muted)">Spam / Junk</strong> folder if you don't see it.
+        </p>
+        <a href="student-login.html" class="btn-submit" style="display:inline-flex;max-width:240px;margin:0 auto 1rem;text-decoration:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Go to Sign In
+        </a>
+        <div class="resend-row">
+          Didn't receive it?
+          <button class="resend-btn" id="resend-btn">Resend verification email</button>
+        </div>
+        <span class="resend-status" id="resend-status"></span>
+      </div>`;
+
+    const resendBtn=document.getElementById('resend-btn');
+    const resendStatus=document.getElementById('resend-status');
+    let cooldown=false;
+    resendBtn.addEventListener('click',async()=>{
+      if(cooldown)return;
+      resendBtn.disabled=true;resendStatus.style.color='var(--dim)';resendStatus.textContent='Sending…';
+      try{
+        await StudentAPI.auth.resendVerification(state.email);
+        resendStatus.style.color='var(--teal2)';resendStatus.textContent='✓ Sent! Check your inbox (and spam folder).';
+        cooldown=true;let secs=60;
+        const iv=setInterval(()=>{secs--;resendBtn.textContent=`Resend again in ${secs}s`;if(secs<=0){clearInterval(iv);resendBtn.disabled=false;resendBtn.textContent='Resend verification email';cooldown=false;}},1000);
+      }catch(err){
+        resendStatus.style.color='var(--rust)';resendStatus.textContent=err.message||'Failed. Please try again.';
+        resendBtn.disabled=false;
+      }
+    });
+  }
+
+  /* ── boot ─────────────────────────────────────────────────── */
+  renderStep1();
+})();
+</script>
+</body>
+</html>

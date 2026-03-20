@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EduCore — Settings</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0f0d0b;--bg2:#161310;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--indigo:#5b6bd4;--in2:#7b8dea;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:6px;--r2:10px;--r3:14px;--r4:18px;--sb:250px}
+[data-theme="light"]{--bg:#f2ece2;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--go3:#e0a830;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88;--indigo:#4050b8;--in2:#5566d0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ddIn{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+@keyframes ti{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pageExit{to{opacity:0;transform:translateY(-8px)}}
+.cnt{animation:pageIn .3s var(--ez) both}
+.cnt>*{animation:slideUp .35s var(--ez) both}
+.cnt>*:nth-child(1){animation-delay:.04s}.cnt>*:nth-child(2){animation-delay:.09s}.cnt>*:nth-child(3){animation-delay:.13s}.cnt>*:nth-child(4){animation-delay:.17s}.cnt>*:nth-child(5){animation-delay:.2s}
+.page-exit{animation:pageExit .2s var(--ez) forwards!important}
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .25s var(--ez);scrollbar-width:none}
+.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 13px;border-bottom:1px solid var(--bdr2)}
+.brand{display:flex;align-items:center;gap:9px}
+.b-ico{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(200,150,60,.25)}
+.b-ico svg{width:17px;height:17px;color:#1a1200;stroke-width:2.5}
+.b-nm{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}
+.sb-x{display:none;width:24px;height:24px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center;transition:color .15s;flex-shrink:0}
+.sb-x svg{width:12px;height:12px;stroke-width:2}
+.role-chip{margin:10px 12px 4px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(91,107,212,.12);border:1px solid rgba(91,107,212,.25);color:var(--in2)}
+.role-chip svg{width:10px;height:10px}
+.nav-sect{padding:12px 9px 3px}
+.nav-sect-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:4px}
+.nav{display:flex;flex-direction:column;gap:1px}
+.ni a{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;font-weight:500;transition:background .18s var(--ez),color .18s var(--ez),padding-left .18s var(--ez)}
+.ni a svg{width:17px;height:17px;stroke-width:1.75;flex-shrink:0}
+.ni a:hover{background:rgba(91,107,212,.07);color:var(--in2)}
+.ni.on a{background:rgba(91,107,212,.10);border-left:2px solid var(--in2);padding-left:9px;color:var(--in2);font-weight:600}
+.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nb{min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--rust);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}
+.pip{width:8px;height:8px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}
+.sb-ft{padding:13px 14px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;margin-top:auto}
+.ava{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden;cursor:pointer;transition:opacity .18s}
+.ava:hover{opacity:.85}
+.ava img{width:100%;height:100%;object-fit:cover}
+.un{font-size:.84rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ui{font-size:.68rem;color:var(--dim);font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;cursor:pointer}
+.lg svg{width:14px;height:14px;stroke-width:2}
+.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3);background:rgba(200,88,50,.05)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}
+.ov.on{display:block;animation:fadeIn .2s var(--ez)}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}
+.tb{position:sticky;top:0;z-index:200;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,2.5vw,1.75rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px;transition:background .25s}
+[data-theme="light"] .tb{background:rgba(242,236,226,.92)}
+.tb-l,.tb-r{display:flex;align-items:center;gap:8px}
+.mbt{display:none;width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.mbt svg{width:17px;height:17px;stroke-width:2}
+.mbt:hover{color:var(--in2);border-color:rgba(91,107,212,.3)}
+.pgt{font-family:var(--fh);font-size:1.1rem;font-style:italic;color:var(--tx)}
+.srch{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:0 12px;height:36px;min-width:240px;max-width:360px;transition:border-color .2s,box-shadow .2s}
+.srch:focus-within{border-color:rgba(91,107,212,.4);box-shadow:0 0 0 3px rgba(91,107,212,.08)}
+.srch svg{width:15px;height:15px;color:var(--dim);flex-shrink:0}
+.srch input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.875rem;color:var(--tx);width:100%}
+.srch input::placeholder{color:var(--dim)}
+.kbd{font-size:.68rem;font-family:var(--fm);color:var(--dim);background:var(--surf3);border:1px solid var(--bdr);padding:1px 6px;border-radius:3px;white-space:nowrap}
+.ib{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .18s;position:relative;flex-shrink:0;cursor:pointer}
+.ib svg{width:17px;height:17px;stroke-width:1.75}
+.ib:hover{color:var(--in2);border-color:rgba(91,107,212,.3);background:rgba(91,107,212,.05)}
+.nbd{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:99px;background:var(--rust);color:#fff;font-size:.56rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg);font-family:var(--fm)}
+.prof-wrap{position:relative}
+.prof-btn{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:var(--r2);border:1px solid var(--bdr);background:var(--surf2);cursor:pointer;transition:all .18s}
+.prof-btn:hover,.prof-btn.open{border-color:rgba(91,107,212,.3);background:var(--surf3)}
+.prof-av{width:30px;height:30px;border-radius:var(--r);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.prof-av img{width:100%;height:100%;object-fit:cover}
+.prof-nm{font-size:.875rem;font-weight:600;color:var(--tx);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof-btn svg{width:13px;height:13px;color:var(--dim);flex-shrink:0;transition:transform .22s var(--ez)}
+.prof-btn.open svg{transform:rotate(180deg)}
+.prof-dd{position:absolute;top:calc(100% + 6px);right:0;width:220px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;z-index:400;display:none;animation:ddIn .18s var(--ez)}
+.prof-dd.open{display:block}
+.dd-head{padding:14px 16px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:11px}
+.dd-av{width:40px;height:40px;border-radius:var(--r2);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;font-family:var(--fh);font-style:italic;overflow:hidden;flex-shrink:0}
+.dd-av img{width:100%;height:100%;object-fit:cover}
+.dd-nm{font-size:.92rem;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-id{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+.dd-dept{font-size:.7rem;color:var(--sub)}
+.dd-items{padding:5px}
+.dd-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--r);color:var(--sub);font-size:.875rem;cursor:pointer;transition:all .15s;width:100%}
+.dd-item svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.dd-item:hover{background:rgba(91,107,212,.07);color:var(--in2)}
+.dd-item.danger:hover{background:rgba(200,88,50,.07);color:var(--rust)}
+.dd-sep{height:1px;background:var(--bdr2);margin:4px 5px}
+.cnt{padding:1.75rem clamp(1rem,3vw,2rem);max-width:1100px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;flex-wrap:wrap;gap:10px}
+.ph-t{font-family:var(--fh);font-size:1.5rem;font-style:italic;color:var(--tx)}
+.ph-s{font-size:.875rem;color:var(--sub)}
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}
+.sk-line{height:14px;border-radius:var(--r)}.sk-line.sm{height:10px}.sk-line.lg{height:20px}.sk-block{border-radius:var(--r2)}
+.tw{position:fixed;bottom:1.2rem;right:1.2rem;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.t{pointer-events:all;display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.875rem;color:var(--tx);cursor:pointer;animation:ti .22s var(--ez);max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.t svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--in2)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.4rem}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px 18px;display:flex;align-items:flex-start;gap:13px;transition:border-color .2s,transform .22s var(--ez),box-shadow .22s}
+.sc:hover{border-color:rgba(91,107,212,.22);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.sc-ico{width:40px;height:40px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-ico svg{width:19px;height:19px;stroke-width:1.75}
+.sc-ico.gold{background:rgba(200,150,60,.12);color:var(--go2)}.sc-ico.rust{background:rgba(200,88,50,.12);color:var(--ru2)}.sc-ico.teal{background:rgba(45,158,138,.12);color:var(--te2)}.sc-ico.indigo{background:rgba(91,107,212,.12);color:var(--in2)}.sc-ico.dim{background:var(--surf2);color:var(--sub)}
+.sc-v{font-family:var(--fh);font-size:1.75rem;color:var(--tx);line-height:1}
+.sc-l{font-size:.8rem;color:var(--sub);margin-top:2px}
+.sc-ch{font-size:.72rem;color:var(--te2);margin-top:4px}
+.sc-ch.warn{color:var(--go2)}.sc-ch.bad{color:var(--rust)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.4rem}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:1.4rem}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh-t{font-family:var(--fh);font-size:.95rem;font-style:italic;color:var(--tx)}
+.sh-a{font-size:.82rem;color:var(--in2);transition:opacity .2s;cursor:pointer}
+.sh-a:hover{opacity:.75}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px;transition:border-color .2s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s var(--ez);border:1px solid}
+.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3);transform:translateY(-1px)}
+.btn-indigo{background:rgba(91,107,212,.15);border-color:rgba(91,107,212,.35);color:var(--in2)}.btn-indigo:hover{background:rgba(91,107,212,.25);transform:translateY(-1px)}
+.btn-teal{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}.btn-teal:hover{background:rgba(45,158,138,.18);transform:translateY(-1px)}
+.btn-rust{background:rgba(200,88,50,.1);border-color:rgba(200,88,50,.3);color:var(--ru2)}.btn-rust:hover{background:rgba(200,88,50,.18);transform:translateY(-1px)}
+.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{border-color:rgba(91,107,212,.3);color:var(--in2)}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn-sm{padding:6px 12px;font-size:.8rem}.btn-sm svg{width:13px;height:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:99px;font-size:.65rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.tag.indigo{background:rgba(91,107,212,.08);border-color:rgba(91,107,212,.22);color:var(--in2)}.tag.gold{background:rgba(200,150,60,.08);border-color:rgba(200,150,60,.2);color:var(--go2)}.tag.teal{background:rgba(45,158,138,.08);border-color:rgba(45,158,138,.2);color:var(--te2)}.tag.rust{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--ru2)}
+.tag svg{width:10px;height:10px;flex-shrink:0;stroke-width:2}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:600;border:1px solid}
+.chip.present{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.25);color:var(--te2)}.chip.absent{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--rust)}.chip.late{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.25);color:var(--go2)}.chip.excused{background:rgba(91,107,212,.1);border-color:rgba(91,107,212,.25);color:var(--in2)}.chip.pending{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.25);color:var(--go2)}.chip.approved{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.25);color:var(--te2)}.chip.rejected{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--rust)}
+.chip svg{width:9px;height:9px;flex-shrink:0}
+.tbl-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:.875rem}
+.tbl th{padding:10px 16px;text-align:left;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:var(--surf2);border-bottom:1px solid var(--bdr);white-space:nowrap}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(91,107,212,.03)}
+.fsel-wrap{position:relative}.fsel{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:7px 28px 7px 12px;font-size:.8rem;color:var(--tx);outline:none;cursor:pointer;transition:border-color .2s;appearance:none;-webkit-appearance:none}.fsel:focus{border-color:rgba(91,107,212,.4)}.fsel-wrap::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--dim);pointer-events:none}
+.fl{display:flex;flex-direction:column;gap:4px;font-size:.78rem;color:var(--sub)}
+.fi{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:.75rem 1rem;font-size:.9rem;color:var(--tx);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.fi:focus{border-color:rgba(91,107,212,.45);box-shadow:0 0 0 3px rgba(91,107,212,.1)}
+.fi::placeholder{color:var(--dim)}
+textarea.fi{resize:vertical;min-height:80px}
+.fi-ro{background:var(--surf3);color:var(--sub);cursor:not-allowed}
+.pbar-wrap{height:6px;background:var(--surf3);border-radius:99px;overflow:hidden}
+.pbar{height:100%;border-radius:99px;transition:width .5s var(--ez)}
+.pbar.teal{background:linear-gradient(90deg,var(--teal),var(--te2))}.pbar.gold{background:linear-gradient(90deg,var(--gold),var(--go2))}.pbar.rust{background:linear-gradient(90deg,var(--rust),var(--ru2))}.pbar.indigo{background:linear-gradient(90deg,var(--indigo),var(--in2))}
+.tabs{display:flex;gap:2px;background:var(--surf2);border-radius:var(--r2);padding:3px;margin-bottom:1.2rem;width:fit-content;flex-wrap:wrap}
+.tab{padding:7px 18px;border-radius:var(--r);font-size:.82rem;font-weight:500;color:var(--sub);cursor:pointer;transition:all .2s var(--ez)}
+.tab.on{background:var(--surf);color:var(--tx);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tab:hover:not(.on){color:var(--tx);background:rgba(91,107,212,.05)}
+.scard{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;margin-bottom:1.4rem;transition:border-color .2s}
+.sc-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bdr2)}
+.sc-ht{font-family:var(--fh);font-size:.95rem;font-style:italic;color:var(--tx)}
+.sc-body{padding:16px 18px}
+.alert-live{background:var(--surf);border:1px solid rgba(45,158,138,.25);border-radius:var(--r2);padding:16px;position:relative;overflow:hidden;margin-bottom:1.4rem}
+.alert-live::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--te2),var(--teal))}
+.live-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.25);color:var(--te2);font-size:.68rem;font-weight:700;letter-spacing:.06em;margin-bottom:10px}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;gap:12px}
+.empty svg{width:40px;height:40px;color:var(--dim);stroke-width:1.5}
+.empty-t{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--sub)}
+.empty-s{font-size:.82rem;color:var(--dim);max-width:280px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--te2);display:inline-block;margin-right:5px;animation:pp 2s infinite}
+.sync-label{font-size:.75rem;color:var(--sub);font-family:var(--fm)}
+.toggle{width:40px;height:22px;border-radius:99px;background:var(--surf3);border:1px solid var(--bdr);cursor:pointer;position:relative;transition:all .25s var(--ez);flex-shrink:0}
+.toggle.on{background:var(--in2);border-color:var(--in2)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .25s var(--ez);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(18px)}
+.modal-ov{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:1rem}
+.modal-ov.on{display:flex;animation:fadeIn .2s var(--ez)}
+.modal{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);width:100%;overflow:hidden;animation:ddIn .22s var(--ez);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal-hd{padding:18px 20px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.modal-t{font-family:var(--fh);font-size:1.05rem;font-style:italic;color:var(--tx)}
+.modal-x{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.modal-x:hover{color:var(--tx);background:var(--surf2)}
+.modal-x svg{width:13px;height:13px;stroke-width:2}
+.modal-body{padding:20px}.modal-ft{padding:14px 20px;border-top:1px solid var(--bdr2);display:flex;gap:8px;justify-content:flex-end}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+@media(min-width:1440px){:root{--sb:270px}body{font-size:16px}}
+@media(max-width:1023px) and (min-width:769px){:root{--sb:230px}.stats-row{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.three{grid-template-columns:1fr 1fr}.srch{min-width:180px}}
+@media(max-width:768px) and (min-width:601px){:root{--sb:220px}.stats-row{grid-template-columns:repeat(2,1fr)}.two,.three{grid-template-columns:1fr}.prof-nm{display:none}}
+@media(max-width:600px){:root{--sb:270px}.sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}.main{margin-left:0}.mbt{display:flex}.srch{display:none}.stats-row{grid-template-columns:1fr 1fr}.two,.three{grid-template-columns:1fr}.prof-nm{display:none}.cnt{padding:1.25rem 1rem}.tb{height:54px;padding:0 1rem}.pgt{font-size:1rem}}
+@media(max-width:380px){.stats-row{grid-template-columns:1fr}.tabs{flex-wrap:wrap}}
+</style>
+
+<style>
+.set-layout{display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start}
+@media(max-width:768px){.set-layout{grid-template-columns:1fr}}
+.set-nav{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;position:sticky;top:76px}
+.set-nav-item{display:flex;align-items:center;gap:9px;padding:11px 14px;cursor:pointer;transition:all .18s var(--ez);font-size:.84rem;color:var(--sub);border-left:3px solid transparent}
+.set-nav-item svg{width:15px;height:15px;stroke-width:2;flex-shrink:0}
+.set-nav-item:hover{background:rgba(91,107,212,.06);color:var(--tx)}
+.set-nav-item.on{background:rgba(91,107,212,.09);border-left-color:var(--in2);color:var(--in2);font-weight:600}
+.set-nav-sep{height:1px;background:var(--bdr2);margin:3px 0}
+.set-section{display:none;animation:slideUp .25s var(--ez)}
+.set-section.on{display:block}
+.photo-section{display:flex;align-items:flex-start;gap:20px;padding:18px 0;border-bottom:1px solid var(--bdr2);margin-bottom:18px;flex-wrap:wrap}
+.photo-av{width:80px;height:80px;border-radius:var(--r2);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.6rem;font-style:italic;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;border:3px solid rgba(91,107,212,.3);cursor:pointer;transition:border-color .2s,transform .22s var(--ez);position:relative}
+.photo-av:hover{border-color:var(--in2);transform:scale(1.04)}
+.photo-av img{width:100%;height:100%;object-fit:cover}
+.photo-av-edit{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;border-radius:inherit}
+.photo-av:hover .photo-av-edit{display:flex}
+.photo-av-edit svg{width:20px;height:20px;color:#fff;stroke-width:2}
+.photo-drop{border:2px dashed var(--bdr);border-radius:var(--r2);padding:14px 18px;cursor:pointer;transition:all .22s var(--ez);text-align:center;min-width:200px}
+.photo-drop:hover,.photo-drop.drag-over{border-color:var(--in2);background:rgba(91,107,212,.04)}
+.photo-drop svg{width:20px;height:20px;color:var(--dim);stroke-width:1.75;margin-bottom:5px}
+.photo-drop-hint{font-size:.78rem;color:var(--sub)}.photo-spec{font-size:.68rem;color:var(--dim);margin-top:3px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:500px){.frow{grid-template-columns:1fr}}
+.frow1{margin-bottom:14px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--bdr2);transition:background .15s}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row:hover{background:rgba(91,107,212,.02)}
+.tr-t{font-size:.875rem;font-weight:600;color:var(--tx)}.tr-s{font-size:.78rem;color:var(--sub);margin-top:2px}
+.dev-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;transition:border-color .2s}
+.dev-card:hover{border-color:rgba(91,107,212,.2)}
+.dev-ico{width:38px;height:38px;border-radius:var(--r);background:var(--surf3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dev-ico svg{width:18px;height:18px;color:var(--sub);stroke-width:1.75}
+.dev-nm{font-size:.875rem;font-weight:600;color:var(--tx)}.dev-info{font-size:.72rem;color:var(--sub);font-family:var(--fm)}
+.dev-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700;background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.25);color:var(--te2);margin-top:3px}
+.id-card{background:linear-gradient(135deg,var(--surf2),var(--surf3));border:1px solid rgba(91,107,212,.2);border-radius:var(--r3);padding:22px;position:relative;overflow:hidden;max-width:380px}
+.id-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(91,107,212,.1),transparent 70%);pointer-events:none}
+.id-av{width:52px;height:52px;border-radius:var(--r2);background:linear-gradient(135deg,var(--indigo),var(--in2));display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.1rem;font-style:italic;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.id-av img{width:100%;height:100%;object-fit:cover}
+.id-meta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.id-meta-item{background:rgba(91,107,212,.06);border-radius:var(--r);padding:7px 10px}
+.id-meta-l{font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:2px}
+.id-meta-v{font-size:.8rem;color:var(--tx);font-weight:600;font-family:var(--fm)}
+.pw-wrap{position:relative}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--dim);transition:color .15s}
+.pw-eye:hover{color:var(--tx)}
+.pw-eye svg{width:16px;height:16px;stroke-width:2}
+.pw-strength{height:3px;border-radius:99px;background:var(--surf3);margin-top:5px;overflow:hidden}
+.pw-fill{height:100%;border-radius:99px;transition:width .3s,background .3s}
+.pw-hint{font-size:.7rem;margin-top:3px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.info-grid{grid-template-columns:1fr}}
+.ig-cell{background:var(--surf2);border-radius:var(--r);padding:12px 14px;transition:background .18s}
+.ig-cell:hover{background:var(--surf3)}
+.ig-lbl{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:4px}
+.ig-val{font-size:.875rem;color:var(--tx);font-weight:500}
+</style>
+</head>
+<body>
+<div class="pg">
+<aside class="sb" id="sb">
+  <div class="sb-hd"><div class="brand"><div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="b-nm">EduCore</div></div><button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Student</div>
+  <div class="nav-sect"><div class="nav-sect-label">My Space</div><nav class="nav">
+    <div class="ni"><a href="stu-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="stu-checkin.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Check-in</span><div class="pip" id="pip-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="stu-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span class="nl">Override Requests</span><span class="nb" id="nav-req" style="display:none"></span></a></div>
+    <div class="ni"><a href="stu-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none"></span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="stu-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">My Courses</span></a></div>
+    <div class="ni"><a href="stu-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Account</div><nav class="nav">
+    <div class="ni on"><a href="stu-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div>
+  </nav></div>
+  <div class="sb-ft">
+    <div class="ava" id="sb-av" onclick="navTo('stu-settings.html')" title="Profile">…</div>
+    <div style="flex:1;min-width:0"><div class="un" id="sb-name">&nbsp;</div><div class="ui" id="sb-idx">&nbsp;</div></div>
+    <button class="lg" id="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</aside>
+<div class="ov" id="ov" onclick="closeSb()"></div>
+
+<div class="main">
+  <div class="tb">
+    <div class="tb-l">
+      <button class="mbt" onclick="openSb()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Settings</span>
+    </div>
+    <div class="tb-r">
+      
+      <button class="ib" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="nbd" id="notif-count" style="display:none"></span></button>
+      <div class="prof-wrap">
+        <div class="prof-btn" id="prof-btn" onclick="toggleProf()"><div class="prof-av" id="prof-av">…</div><span class="prof-nm" id="prof-nm">…</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="prof-dd" id="prof-dd">
+          <div class="dd-head"><div class="dd-av" id="dd-av">…</div><div><div class="dd-nm" id="dd-nm">Loading…</div><div class="dd-id" id="dd-idx"></div><div class="dd-dept" id="dd-dept"></div></div></div>
+          <div class="dd-items">
+            <div class="dd-item" onclick="navTo('stu-settings.html')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>View Profile</div>
+            <div class="dd-sep"></div>
+            <div class="dd-item" onclick="toggleTheme()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><span id="theme-lbl">Light Mode</span></div>
+            <div class="dd-sep"></div>
+            <div class="dd-item danger" id="btn-logout2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cnt">
+    <div class="ph"><div class="ph-t">Settings</div><div class="ph-s">Manage your account and preferences</div></div>
+    <div class="set-layout">
+      <div class="set-nav">
+        <div class="set-nav-item on" onclick="showSection('profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</div>
+        <div class="set-nav-item" onclick="showSection('security',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Security</div>
+        <div class="set-nav-item" onclick="showSection('devices',this)" id="nav-devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Devices</div>
+        <div class="set-nav-sep"></div>
+        <div class="set-nav-item" onclick="showSection('identity',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Identity Card</div>
+        <div class="set-nav-item" onclick="showSection('notifications',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Notifications</div>
+        <div class="set-nav-item" onclick="showSection('appearance',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>Appearance</div>
+      </div>
+      <div>
+        <!-- PROFILE -->
+        <div class="set-section on" id="sec-profile">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Profile Information</div></div>
+            <div class="sc-body">
+              <div class="photo-section">
+                <div class="photo-av" id="main-photo-av" onclick="triggerUpload()"><span id="main-photo-initials">?</span><div class="photo-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div></div>
+                <div>
+                  <div class="photo-drop" onclick="triggerUpload()" ondrop="dropFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+                    <div class="photo-drop-hint">Drop a photo here or click to browse</div>
+                    <div class="photo-spec">JPG, PNG, WebP · max 5 MB</div>
+                  </div>
+                  <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileInput(event)">
+                  <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-out btn-sm" onclick="removePhoto()">Remove photo</button></div>
+                </div>
+              </div>
+              <div class="frow">
+                <label class="fl">First name<input class="fi" id="f-fname" type="text" placeholder="First name"></label>
+                <label class="fl">Last name<input class="fi" id="f-lname" type="text" placeholder="Last name"></label>
+              </div>
+              <div class="frow">
+                <label class="fl">Email<input class="fi fi-ro" id="f-email" type="email" readonly></label>
+                <label class="fl">Phone<input class="fi" id="f-phone" type="tel" placeholder="+233 …"></label>
+              </div>
+              <div class="frow">
+                <label class="fl">Index number<input class="fi fi-ro" id="f-idx" readonly></label>
+                <label class="fl">Program<input class="fi fi-ro" id="f-prog" readonly></label>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <button class="btn btn-indigo" onclick="saveProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save changes</button>
+                <button class="btn btn-out" onclick="resetProfileFields()">Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Academic Info</div></div>
+            <div class="sc-body"><div class="info-grid" id="info-grid"><div class="sk sk-block" style="height:56px"></div><div class="sk sk-block" style="height:56px"></div><div class="sk sk-block" style="height:56px"></div><div class="sk sk-block" style="height:56px"></div></div></div>
+          </div>
+        </div>
+        <!-- SECURITY -->
+        <div class="set-section" id="sec-security">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Change Password</div></div>
+            <div class="sc-body">
+              <div class="frow1"><label class="fl">Current password<div class="pw-wrap"><input class="fi" id="pw-cur" type="password" placeholder="Current password"><div class="pw-eye" onclick="togglePw('pw-cur')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div></div></label></div>
+              <div class="frow1"><label class="fl">New password<div class="pw-wrap"><input class="fi" id="pw-new" type="password" placeholder="Min 8 characters" oninput="checkStrength(this.value)"><div class="pw-eye" onclick="togglePw('pw-new')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div></div><div class="pw-strength"><div class="pw-fill" id="pw-fill"></div></div><div class="pw-hint" id="pw-hint" style="color:var(--dim)"></div></label></div>
+              <div class="frow1"><label class="fl">Confirm new password<div class="pw-wrap"><input class="fi" id="pw-conf" type="password" placeholder="Repeat new password"><div class="pw-eye" onclick="togglePw('pw-conf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div></div></label></div>
+              <button class="btn btn-indigo" onclick="changePassword()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Update password</button>
+            </div>
+          </div>
+        </div>
+        <!-- DEVICES -->
+        <div class="set-section" id="sec-devices">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Registered Devices</div><span id="device-slot-lbl" style="font-size:.75rem;color:var(--sub)"></span></div>
+            <div class="sc-body" id="devices-list"><div class="sk sk-block" style="height:72px;margin-bottom:8px"></div><div class="sk sk-block" style="height:72px"></div></div>
+          </div>
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Device Slots</div></div>
+            <div class="sc-body" style="font-size:.84rem;color:var(--sub);line-height:1.6">EduCore allows a maximum of 2 registered devices per student. If you change devices, revoke the old one to free up a slot. Contact your lecturer if you need assistance.</div>
+          </div>
+        </div>
+        <!-- IDENTITY CARD -->
+        <div class="set-section" id="sec-identity">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Student Identity Card</div><button class="btn btn-out btn-sm" onclick="window.print()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print</button></div>
+            <div class="sc-body"><div class="id-card" id="id-card"><div class="sk sk-block" style="height:120px"></div></div></div>
+          </div>
+        </div>
+        <!-- NOTIFICATIONS -->
+        <div class="set-section" id="sec-notifications">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Notification Preferences</div></div>
+            <div class="sc-body" id="notif-body"><div class="sk sk-block" style="height:52px;margin-bottom:8px"></div><div class="sk sk-block" style="height:52px;margin-bottom:8px"></div><div class="sk sk-block" style="height:52px"></div></div>
+          </div>
+        </div>
+        <!-- APPEARANCE -->
+        <div class="set-section" id="sec-appearance">
+          <div class="scard">
+            <div class="sc-hd"><div class="sc-ht">Appearance</div></div>
+            <div class="sc-body">
+              <div class="toggle-row"><div><div class="tr-t">Dark mode</div><div class="tr-s">Use the dark colour scheme</div></div><div class="toggle on" id="dark-toggle" onclick="toggleTheme();this.classList.toggle('on')"></div></div>
+              <div class="toggle-row"><div><div class="tr-t">Compact layout</div><div class="tr-s">Reduce spacing for more content on screen</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+              <div class="toggle-row" style="border-bottom:none"><div><div class="tr-t">Animations</div><div class="tr-s">Page entry and section transition effects</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+<script src="../../js/student-api.js"></script>
+<script>
+if(!StudentAPI.auth.requireAuth('/frontend/student-login.html')){}
+
+function navTo(url){document.querySelector('.cnt')?.classList.add('page-exit');setTimeout(()=>location.href=url,190);}
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.ni a').forEach(a=>{if(a.href){a.addEventListener('click',function(e){if(e.ctrlKey||e.metaKey||e.shiftKey)return;const url=this.getAttribute('href');if(url&&!url.startsWith('javascript')){e.preventDefault();navTo(url);}});}});});
+const $=id=>document.getElementById(id);
+function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML}
+function initials(n){return n?n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase():'?'}
+function setAv(el,src,name){el.innerHTML=src?`<img src="${esc(src)}" alt="">`:`${initials(name)}`}
+function openSb(){$('sb').classList.add('on');$('ov').classList.add('on')}
+function closeSb(){$('sb').classList.remove('on');$('ov').classList.remove('on')}
+function toggleProf(){$('prof-btn').classList.toggle('open');$('prof-dd').classList.toggle('open')}
+document.addEventListener('click',e=>{const w=document.querySelector('.prof-wrap');if(w&&!w.contains(e.target)){$('prof-btn')?.classList.remove('open');$('prof-dd')?.classList.remove('open')}});
+function toggleTheme(){const h=document.documentElement,t=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',t);const l=$('theme-lbl');if(l)l.textContent=t==='dark'?'Light Mode':'Dark Mode';localStorage.setItem('edu-theme',t)}
+function doLogout(){StudentAPI.auth.logout();}
+function toast(msg,type='ok'){const t=document.createElement('div');t.className='t '+type;const ic={ok:'<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',er:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/>',in:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>'};t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">${ic[type]||ic.ok}</svg>${msg}`;$('tw').appendChild(t);t.onclick=()=>t.remove();setTimeout(()=>t.remove(),3500)}
+async function loadIdentity(){
+  try{
+    const d=await StudentAPI.profile.getMe();
+    const name=d.student_name||'Student',photo=d.profile_photo||'';
+    if($('sb-av'))setAv($('sb-av'),photo,name);if($('sb-name'))$('sb-name').textContent=name.split(' ').slice(0,2).join(' ');if($('sb-idx'))$('sb-idx').textContent=d.index_number||'—';
+    if($('prof-av'))setAv($('prof-av'),photo,name);if($('prof-nm'))$('prof-nm').textContent=name.split(' ')[0];
+    if($('dd-av'))setAv($('dd-av'),photo,name);if($('dd-nm'))$('dd-nm').textContent=name;if($('dd-idx'))$('dd-idx').textContent=d.index_number||'—';if($('dd-dept'))$('dd-dept').textContent=`${d.program||'—'} · Level ${d.level||'—'}`;
+    return d;
+  }catch{return null}
+}
+(()=>{const t=localStorage.getItem('edu-theme');if(t){document.documentElement.setAttribute('data-theme',t);const l=document.getElementById('theme-lbl');if(l)l.textContent=t==='dark'?'Light Mode':'Dark Mode';}})();
+
+$('btn-logout').onclick=doLogout;$('btn-logout2').onclick=doLogout;
+
+let profileData=null,pendingPhoto=null,devicesLoaded=false,notifLoaded=false;
+function showSection(id,el){
+  document.querySelectorAll('.set-section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.set-nav-item').forEach(i=>i.classList.remove('on'));
+  const sec=document.getElementById('sec-'+id);if(sec)sec.classList.add('on');
+  if(el)el.classList.add('on');
+  history.replaceState(null,'','#'+id);
+  if(id==='devices'&&!devicesLoaded)loadDevices();
+  if(id==='notifications'&&!notifLoaded)loadNotifPrefs();
+  if(id==='identity')loadIdentityCard();
+}
+async function loadProfile(){
+  try{
+    const d=await loadIdentity();
+    if(!d)return;
+    const name=d.student_name||'Student';
+    profileData={name,photo_url:d.profile_photo||''};
+    const parts=name.trim().split(/\s+/);
+    if($('f-fname'))$('f-fname').value=parts[0]||'';
+    if($('f-lname'))$('f-lname').value=parts.slice(1).join(' ')||'';
+    if($('f-email'))$('f-email').value=d.email||'';
+    if($('f-phone'))$('f-phone').value=d.phone||'';
+    if($('f-idx'))$('f-idx').value=d.index_number||'';
+    if($('f-prog'))$('f-prog').value=d.program||'';
+    const av=$('main-photo-av');
+    if(av){if(d.profile_photo){av.innerHTML=`<img src="${esc(d.profile_photo)}" alt=""><div class="photo-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;}else{const ini=$('main-photo-initials');if(ini)ini.textContent=initials(name);}}
+    const ig=$('info-grid');
+    if(ig){ig.innerHTML=`<div class="ig-cell"><div class="ig-lbl">Index No.</div><div class="ig-val">${esc(d.index_number||'—')}</div></div><div class="ig-cell"><div class="ig-lbl">Program</div><div class="ig-val">${esc(d.program||'—')}</div></div><div class="ig-cell"><div class="ig-lbl">Level</div><div class="ig-val">${esc(d.level||'—')}</div></div><div class="ig-cell"><div class="ig-lbl">Semester</div><div class="ig-val">${esc(d.semester||'—')}</div></div><div class="ig-cell"><div class="ig-lbl">Institution</div><div class="ig-val">${esc(d.institution_name||'—')}</div></div><div class="ig-cell"><div class="ig-lbl">Student ID</div><div class="ig-val" style="font-family:var(--fm);font-size:.8rem">${esc(d.generated_id||'—')}</div></div>`;}
+    const dt=$('dark-toggle');if(dt){const isDark=document.documentElement.getAttribute('data-theme')!=='light';if(isDark)dt.classList.add('on');else dt.classList.remove('on');}
+  }catch(e){toast('Could not load profile','er')}
+}
+async function loadIdentityCard(){
+  try{
+    const d=await StudentAPI.profile.getMe();
+    const name=d.student_name||'Student';
+    const ic=$('id-card');if(!ic)return;
+    ic.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="id-av" id="id-card-av">${initials(name)}</div><div><div style="font-family:var(--fh);font-size:1.05rem;color:var(--tx);margin-bottom:2px">${esc(name)}</div><div style="font-family:var(--fm);font-size:.68rem;color:var(--dim);margin-bottom:5px">${esc(d.generated_id||'')}</div><div style="display:flex;gap:4px;flex-wrap:wrap"><span class="tag indigo">Student</span><span class="tag">Level ${esc(d.level||'')}</span></div></div></div><div class="id-meta-row"><div class="id-meta-item"><div class="id-meta-l">Index No.</div><div class="id-meta-v">${esc(d.index_number||'')}</div></div><div class="id-meta-item"><div class="id-meta-l">Program</div><div class="id-meta-v" style="font-size:.72rem">${esc(d.program||'')}</div></div><div class="id-meta-item"><div class="id-meta-l">Institution</div><div class="id-meta-v" style="font-size:.72rem">${esc(d.institution_name||'')}</div></div><div class="id-meta-item"><div class="id-meta-l">Semester</div><div class="id-meta-v" style="font-size:.72rem">${esc(d.semester||'')}</div></div></div><div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between"><span style="font-size:.62rem;color:var(--dim);font-family:var(--fm)">EduCore · Issued ${new Date().toLocaleDateString()}</span><span class="tag teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Verified</span></div>`;
+    const idav=$('id-card-av');if(idav&&d.profile_photo)idav.innerHTML=`<img src="${esc(d.profile_photo)}" alt="">`;
+  }catch{toast('Could not load profile','er')}
+}
+async function saveProfile(){
+  const fname=$('f-fname').value.trim(),lname=$('f-lname').value.trim();
+  if(!fname){toast('First name is required','er');return;}
+  try{
+    await StudentAPI.profile.update({phone:$('f-phone').value.trim()});
+    if(pendingPhoto){
+      const apiBase=(()=>{try{const url=new URL(window.location.href);const parts=url.pathname.split('/').filter(Boolean);parts.pop();while(parts.length>1&&['assets','pages','students','lecturers','frontend'].includes(parts[parts.length-1]))parts.pop();return '/'+parts.join('/')+'/backend/api.php/';}catch{return '/EduCore/backend/api.php/'}})();
+      const fd=new FormData();fd.append('photo',pendingPhoto);
+      const tk=localStorage.getItem('ec_student_token');const headers={};if(tk)headers['Authorization']=`Bearer ${tk}`;
+      const r=await fetch(apiBase+'student/photo',{method:'POST',headers,body:fd});
+      if(!r.ok){const d=await r.json();throw new Error(d.error||'Photo upload failed');}
+      const pr=await r.json();
+      const av=$('main-photo-av');if(av)av.innerHTML=`<img src="${esc(pr.photo_url)}" alt=""><div class="photo-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+      pendingPhoto=null;
+    }
+    toast('Profile saved','ok');
+  }catch(e){toast(e.message||'Could not save','er')}
+}
+function resetProfileFields(){if(profileData)loadProfile();else toast('No changes to reset','in')}
+function triggerUpload(){$('file-input').click()}
+function handleFileInput(e){processPhoto(e.target.files[0])}
+function dropFile(e){e.preventDefault();$('photo-drop').classList.remove('drag-over');processPhoto(e.dataTransfer.files[0])}
+function dragOver(e){e.preventDefault();$('photo-drop').classList.add('drag-over')}
+function dragLeave(){$('photo-drop').classList.remove('drag-over')}
+function processPhoto(f){
+  if(!f)return;if(f.size>5*1024*1024){toast('File too large — max 5 MB','er');return;}
+  pendingPhoto=f;
+  const reader=new FileReader();reader.onload=ev=>{const av=$('main-photo-av');if(av)av.innerHTML=`<img src="${ev.target.result}" alt=""><div class="photo-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;toast('Photo staged — save profile to apply','in');};reader.readAsDataURL(f);
+}
+function removePhoto(){pendingPhoto=null;const av=$('main-photo-av');if(av){av.innerHTML=`<span id="main-photo-initials">${profileData?initials(profileData.name):'?'}</span><div class="photo-av-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;}toast('Photo removed — save to confirm','in');}
+function togglePw(id){const i=$(id);if(i)i.type=i.type==='password'?'text':'password'}
+function checkStrength(pw){let s=0;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;const levels=[{w:'0%',c:'var(--dim)',t:''},{w:'25%',c:'var(--rust)',t:'Weak'},{w:'50%',c:'var(--go2)',t:'Fair'},{w:'75%',c:'var(--go3)',t:'Good'},{w:'100%',c:'var(--te2)',t:'Strong'}];const l=levels[Math.min(s,4)];const pf=$('pw-fill'),ph=$('pw-hint');if(pf){pf.style.width=l.w;pf.style.background=l.c;}if(ph){ph.style.color=l.c;ph.textContent=l.t;}}
+async function changePassword(){
+  const cur=$('pw-cur')?.value,nw=$('pw-new')?.value,conf=$('pw-conf')?.value;
+  if(!cur){toast('Enter your current password','er');return;}
+  if((nw||'').length<8){toast('New password must be at least 8 characters','er');return;}
+  if(nw!==conf){toast('Passwords do not match','er');return;}
+  toast('Password change is not yet available on this build.','in');
+}
+async function loadDevices(){
+  devicesLoaded=true;
+  try{
+    const data=await StudentAPI.profile.getSecurity();
+    const devices=Array.isArray(data?.devices)?data.devices:[];
+    const activeCount=Number(data?.active_count??devices.filter(d=>d.status==='active').length);
+    const maxDevices=Number(data?.max_devices??2);
+    const lbl=$('device-slot-lbl');if(lbl)lbl.textContent=`${activeCount} / ${maxDevices} slots used`;
+    const list=$('devices-list');if(!list)return;list.innerHTML='';
+    devices.forEach(dev=>{
+      const div=document.createElement('div');div.className='dev-card';
+      const isMobile=/iPhone|Android|iPad|Mobile/i.test(dev.device_name||dev.browser||'');
+      const ico=isMobile?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+      div.innerHTML=`<div class="dev-ico">${ico}</div><div style="flex:1;min-width:0"><div class="dev-nm">${esc(dev.device_name||dev.browser||'Unknown device')}</div><div class="dev-info">Registered ${esc(dev.first_login||'—')} · Last active ${esc(dev.last_login||'—')}</div>${dev.status==='active'?'<div class="dev-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:9px;height:9px;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg>Active device</div>':''}</div><button class="btn btn-out btn-sm" onclick="revokeDevice(this,'${dev.device_id}')" ${dev.status!=='active'?'disabled':''}>Revoke</button>`;
+      list.appendChild(div);
+    });
+    if(!devices.length)list.innerHTML=`<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--dim)">No registered devices</div>`;
+  }catch{const list=$('devices-list');if(list)list.innerHTML=`<div style="padding:16px;text-align:center;font-size:.82rem;color:var(--dim)">Could not load devices</div>`;}
+}
+async function revokeDevice(btn,deviceId){
+  btn.disabled=true;btn.textContent='Revoking…';
+  try{await StudentAPI.profile.removeDevice(Number(deviceId));btn.closest('.dev-card').style.opacity='.4';btn.textContent='Revoked';toast('Device revoked','ok');loadDevices();}
+  catch(e){toast(e.message||'Could not revoke','er');btn.disabled=false;btn.textContent='Revoke';}
+}
+async function loadNotifPrefs(){
+  notifLoaded=true;
+  const defs=[{key:'session_alerts',label:'Session Alerts',sub:'Notify me when a live session starts for my enrolled courses'},{key:'attendance_receipts',label:'Attendance Receipts',sub:'Confirmation when my attendance is recorded'},{key:'override_updates',label:'Override Request Updates',sub:'Notify me when a request is decided'},{key:'course_messages',label:'Course Messages',sub:'Notifications for new messages and announcements'},{key:'low_attendance_warning',label:'Low Attendance Warning',sub:'Alert when my attendance drops below 70%'},{key:'system_announcements',label:'System Announcements',sub:'Institution-wide notices'}];
+  let prefs={};try{prefs=JSON.parse(localStorage.getItem('ec_student_notif_prefs')||'{}');}catch{}
+  const body=$('notif-body');if(!body)return;body.innerHTML='';
+  defs.forEach(def=>{
+    const on=prefs[def.key]!==false;
+    const row=document.createElement('div');row.className='toggle-row';
+    row.innerHTML=`<div><div class="tr-t">${esc(def.label)}</div><div class="tr-s">${esc(def.sub)}</div></div><div class="toggle${on?' on':''}" data-key="${def.key}" onclick="this.classList.toggle('on')"></div>`;
+    body.appendChild(row);
+  });
+  const savebtn=document.createElement('div');savebtn.style.marginTop='16px';
+  savebtn.innerHTML=`<button class="btn btn-indigo" onclick="saveNotifPrefs()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save Preferences</button>`;
+  body.appendChild(savebtn);
+}
+async function saveNotifPrefs(){
+  const prefs={};document.querySelectorAll('#notif-body .toggle').forEach(t=>{prefs[t.dataset.key]=t.classList.contains('on');});
+  try{localStorage.setItem('ec_student_notif_prefs',JSON.stringify(prefs));toast('Preferences saved','ok');}
+  catch{toast('Could not save preferences','er')}
+}
+(()=>{const h=location.hash.replace('#','');const navMap={'profile':0,'security':1,'devices':2,'identity':4,'notifications':5,'appearance':6};if(h&&document.getElementById('sec-'+h)){const items=document.querySelectorAll('.set-nav-item');const idx=navMap[h];showSection(h,idx!=null?items[idx]:null);}})();
+loadProfile();
+</script>
+<script src="../../js/stu-transition.js"></script>
+</body>
+</html>

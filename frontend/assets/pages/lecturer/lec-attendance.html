@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0d0b;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:5px;--r2:8px;--r3:12px;--sb:220px}
+[data-theme="light"]{--bg:#f2ece2;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{height:100%}body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 13px 10px;border-bottom:1px solid var(--bdr2)}.brand{display:flex;align-items:center;gap:8px}.b-ico{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0}.b-ico svg{width:14px;height:14px;color:#1a1200;stroke-width:2.5}.b-nm{font-family:var(--fh);font-size:.88rem;font-style:italic;color:var(--tx)}.sb-x{display:none;width:22px;height:22px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center}.sb-x svg{width:11px;height:11px;stroke-width:2}
+.role-chip{margin:8px 10px 3px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}.role-chip svg{width:8px;height:8px}
+.nav-sect{padding:10px 7px 2px}.nav-sect-label{font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}.nav{display:flex;flex-direction:column;gap:1px}.ni a{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);color:var(--sub);font-size:.79rem;font-weight:500;transition:all .15s}.ni a svg{width:14px;height:14px;stroke-width:1.75;flex-shrink:0}.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:7px;color:var(--go2);font-weight:600}.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nb{min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}.pip{width:7px;height:7px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+.sb-ft{padding:10px 11px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:7px;margin-top:auto}.ava{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}.ava img{width:100%;height:100%;object-fit:cover}.un{font-size:.73rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ui{font-size:.6rem;color:var(--dim);font-family:var(--fm)}.lg{width:24px;height:24px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}.lg svg{width:12px;height:12px;stroke-width:2}.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}.ov.on{display:block}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}.tb{position:sticky;top:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(.9rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}[data-theme="light"] .tb{background:rgba(242,236,226,.92)}.tb-l,.tb-r{display:flex;align-items:center;gap:7px}.mbt{display:none;width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center}.mbt svg{width:14px;height:14px;stroke-width:2}.pgt{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}.ib{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;cursor:pointer}.ib svg{width:14px;height:14px;stroke-width:1.75}.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.77rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:280px}@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.t svg{width:13px;height:13px;stroke-width:2;flex-shrink:0}.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+.cnt{padding:1.4rem clamp(.9rem,2.5vw,1.5rem);max-width:1080px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:10px}.ph-t{font-family:var(--fh);font-size:1.25rem;font-style:italic;color:var(--tx)}.ph-s{font-size:.78rem;color:var(--sub);margin-top:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid}.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3)}.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{border-color:rgba(200,150,60,.3);color:var(--go2)}.btn svg{width:13px;height:13px;stroke-width:2}
+/* Summary cards */
+.sum-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
+.sc{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:12px 14px;text-align:center}
+.sc-v{font-family:var(--fh);font-size:1.4rem;color:var(--tx);line-height:1}.sc-l{font-size:.68rem;color:var(--sub);margin-top:3px}
+.sc-v.hi{color:var(--te2)}.sc-v.warn{color:var(--go2)}.sc-v.lo{color:var(--ru2)}
+/* Filter row */
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.fi{background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:6px 10px;color:var(--tx);font-size:.79rem;outline:none;font-family:var(--fb);transition:border-color .2s;cursor:pointer}
+.fi:focus{border-color:rgba(200,150,60,.4)}
+.mt{padding:4px 11px;border-radius:99px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--bdr);color:var(--sub);transition:all .15s}
+.mt.on{border-color:rgba(200,150,60,.3);color:var(--go2);background:rgba(200,150,60,.08)}
+/* Table */
+.tbl-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;margin-bottom:1.25rem}
+.tbl-hd{padding:11px 14px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.tbl-title{font-size:.82rem;font-weight:600;color:var(--tx)}.tbl-cnt{font-size:.7rem;color:var(--dim);font-family:var(--fm)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);text-align:left;border-bottom:1px solid var(--bdr2);background:var(--surf2)}
+tbody tr{border-bottom:1px solid var(--bdr2);transition:background .12s}tbody tr:last-child{border-bottom:none}tbody tr:hover{background:rgba(200,150,60,.03)}
+td{padding:9px 14px;font-size:.79rem;color:var(--tx);vertical-align:middle}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:.64rem;font-weight:600}
+.cp{background:rgba(45,158,138,.1);border:1px solid rgba(45,158,138,.2);color:var(--te2)}
+.ca{background:rgba(200,88,50,.08);border:1px solid rgba(200,88,50,.18);color:var(--ru2)}
+.cl{background:rgba(200,150,60,.1);border:1px solid rgba(200,150,60,.2);color:var(--go2)}
+.ce{background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.mchip{display:inline-flex;font-size:.61rem;padding:1px 6px;border-radius:99px;font-weight:600}
+.mqr{background:rgba(45,158,138,.08);color:var(--te2);border:1px solid rgba(45,158,138,.15)}
+.mman{background:rgba(200,150,60,.08);color:var(--go2);border:1px solid rgba(200,150,60,.15)}
+.movr{background:rgba(200,88,50,.08);color:var(--ru2);border:1px solid rgba(200,88,50,.15)}
+.eb{width:22px;height:22px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}.eb:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}.eb svg{width:11px;height:11px;stroke-width:2}
+/* Sessions table */
+.sess-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.25rem}
+.sess-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.sh-t{font-family:var(--fh);font-size:.9rem;font-style:italic;color:var(--tx)}.sh-a{font-size:.74rem;color:var(--go2)}
+@media(max-width:900px){.sum-row{grid-template-columns:repeat(3,1fr)}.sess-row{grid-template-columns:1fr}}
+@media(max-width:600px){.sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}.main{margin-left:0}.mbt{display:flex}.sum-row{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL SIZE + RESPONSIVENESS OVERRIDES
+   ═══════════════════════════════════════════════════ */
+
+/* Larger base tokens */
+:root{
+  --sb: 250px;
+  --r: 6px; --r2: 10px; --r3: 14px;
+}
+
+/* Base font bump */
+body { font-size: 15px; }
+
+/* ── SIDEBAR ── */
+.sb-hd { padding: 18px 16px 13px; }
+.b-ico { width: 34px; height: 34px; }
+.b-ico svg { width: 17px; height: 17px; }
+.b-nm { font-size: 1rem; }
+.role-chip { font-size: .68rem; margin: 10px 12px 4px; padding: 4px 10px; }
+.role-chip svg { width: 10px; height: 10px; }
+.nav-sect { padding: 12px 9px 3px; }
+.nav-sect-label { font-size: .62rem; letter-spacing: .11em; }
+.ni a { padding: 9px 11px; font-size: .875rem; gap: 10px; }
+.ni a svg { width: 17px; height: 17px; }
+.ni.on a { padding-left: 9px; }
+.nb { min-width: 18px; height: 18px; font-size: .62rem; padding: 0 4px; }
+.pip { width: 8px; height: 8px; }
+.sb-ft { padding: 13px 14px; gap: 9px; }
+.ava { width: 34px; height: 34px; font-size: .75rem; }
+.un { font-size: .84rem; }
+.ui { font-size: .68rem; }
+.lg { width: 28px; height: 28px; }
+.lg svg { width: 14px; height: 14px; }
+
+/* ── TOPBAR ── */
+.tb { height: 58px; }
+.mbt { width: 36px; height: 36px; }
+.mbt svg { width: 17px; height: 17px; }
+.pgt { font-size: 1.1rem; }
+.srch, .srch-tb { height: 36px; font-size: .875rem; min-width: 240px; }
+.srch svg, .srch-tb svg { width: 15px; height: 15px; }
+.srch input, .srch-tb input { font-size: .875rem; }
+.kbd { font-size: .68rem; }
+.ib { width: 36px; height: 36px; }
+.ib svg { width: 17px; height: 17px; }
+.nbd { width: 16px; height: 16px; font-size: .6rem; }
+
+/* Profile dropdown topbar */
+.prof-btn { padding: 5px 10px 5px 5px; }
+.prof-av { width: 30px; height: 30px; }
+.prof-nm { font-size: .875rem; }
+.prof-btn svg { width: 13px; height: 13px; }
+.dd-head { padding: 14px 16px; }
+.dd-av { width: 40px; height: 40px; }
+.dd-nm { font-size: .92rem; }
+.dd-id, .dd-dept { font-size: .72rem; }
+.dd-item { font-size: .875rem; padding: 9px 11px; }
+.dd-item svg { width: 15px; height: 15px; }
+
+/* ── CONTENT ── */
+.cnt { padding: 1.75rem clamp(1rem,3vw,2rem); }
+.ph-t { font-size: 1.5rem; }
+.ph-s { font-size: .875rem; }
+
+/* ── STAT CARDS ── */
+.sc { padding: 16px 18px; gap: 13px; }
+.sc-ico { width: 40px; height: 40px; }
+.sc-ico svg { width: 19px; height: 19px; }
+.sc-v { font-size: 1.75rem; }
+.sc-l { font-size: .8rem; }
+.sc-ch { font-size: .72rem; }
+
+/* ── PROFILE CARD ── */
+.pc-av { width: 66px; height: 66px; font-size: 1.35rem; }
+.pc-nm { font-size: 1.15rem; }
+.pc-id { font-size: .72rem; }
+.tag { font-size: .68rem; padding: 3px 10px; }
+.tag svg { width: 10px; height: 10px; }
+.pc-courses { font-size: 1.8rem; }
+.pc-cl { font-size: .78rem; }
+
+/* ── SCHEDULE / ITEMS ── */
+.sh-t { font-size: 1rem; }
+.sh-a { font-size: .82rem; }
+.sched-item { padding: 11px 0; }
+.si-time { font-size: .8rem; min-width: 60px; }
+.si-dot { width: 9px; height: 9px; }
+.si-nm { font-size: .9rem; }
+.si-code { font-size: .72rem; }
+.si-act { font-size: .72rem; padding: 4px 11px; }
+
+/* ── QUICK ACTIONS ── */
+.qa { padding: 13px 15px; gap: 11px; }
+.qa-ico { width: 34px; height: 34px; }
+.qa-ico svg { width: 16px; height: 16px; }
+.qa-t { font-size: .9rem; }
+.qa-s { font-size: .73rem; }
+
+/* ── LIVE CARD ── */
+.live-badge { font-size: .72rem; padding: 3px 10px; }
+.live-badge svg { width: 9px; height: 9px; }
+.li-course { font-size: 1.05rem; }
+.li-loc { font-size: .8rem; }
+.li-loc svg { width: 13px; height: 13px; }
+.lc-num { font-size: 1.8rem; }
+.lc-lbl { font-size: .72rem; }
+
+/* ── BUTTONS ── */
+.btn { padding: 9px 18px; font-size: .875rem; }
+.btn svg { width: 15px; height: 15px; }
+.act-btn { font-size: .73rem; padding: 4px 11px; }
+
+/* ── REQUESTS ── */
+.req-nm { font-size: .9rem; }
+.req-t { font-size: .75rem; }
+.req-av { width: 32px; height: 32px; font-size: .68rem; }
+
+/* ── ANOMALY ── */
+.anomaly svg { width: 18px; height: 18px; }
+.anomaly-t { font-size: .9rem; }
+.anomaly-b { font-size: .82rem; }
+
+/* ── SYNC BAR ── */
+.sync-dot { width: 8px; height: 8px; }
+.sync-label { font-size: .75rem; }
+
+/* ── TABLE STYLES (attendance / students) ── */
+.tbl { font-size: .875rem; }
+.tbl th { font-size: .72rem; padding: 10px 14px; }
+.tbl td { padding: 10px 14px; }
+
+/* ── FORM INPUTS (live session) ── */
+.fl { font-size: .78rem; }
+.fi { font-size: .9rem; padding: .75rem 1rem; }
+.sc-t { font-size: 1.3rem; }
+.sc-s { font-size: .875rem; }
+.step-n { font-size: .68rem; }
+.step-l { font-size: .78rem; }
+
+/* ── LIVE CONSOLE ── */
+.lcs-v { font-size: 1.75rem; }
+.lcs-l { font-size: .78rem; }
+.lc-course { font-size: 1.25rem; }
+.mc-val { font-size: 1.85rem; }
+.mc-lbl { font-size: .68rem; }
+.qr-timer { font-size: .78rem; }
+.cp-title { font-size: .92rem; }
+.cp-cnt { font-size: .78rem; }
+.ci-nm { font-size: .9rem; }
+.ci-idx { font-size: .72rem; }
+.ci-time { font-size: .78rem; }
+.ci-meth { font-size: .68rem; padding: 2px 8px; }
+.ci-av { width: 34px; height: 34px; font-size: .7rem; }
+
+/* ── TOAST ── */
+.t { font-size: .875rem; padding: 10px 14px; }
+.t svg { width: 15px; height: 15px; }
+
+/* ── NO-SESSION STATE ── */
+.no-sess svg { width: 32px; height: 32px; }
+.no-sess p { font-size: .9rem; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — COMPUTERS / LAPTOPS / DEVICES
+   ══════════════════════════════════════════ */
+
+/* Large desktop (≥ 1440px) */
+@media (min-width: 1440px) {
+  :root { --sb: 270px; }
+  body { font-size: 16px; }
+  .cnt { padding: 2rem clamp(1.5rem,3vw,2.5rem); }
+}
+
+/* Standard laptop (1024 – 1439px) */
+@media (max-width: 1439px) and (min-width: 1024px) {
+  :root { --sb: 250px; }
+  .cnt { max-width: 100%; }
+  .stats-row { grid-template-columns: repeat(4,1fr); }
+}
+
+/* Small laptop / large tablet (768 – 1023px) */
+@media (max-width: 1023px) and (min-width: 769px) {
+  :root { --sb: 230px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 260px 1fr; }
+  .lc-grid { grid-template-columns: repeat(3,1fr); }
+  .srch, .srch-tb { min-width: 180px; }
+}
+
+/* Tablet portrait (600 – 768px) */
+@media (max-width: 768px) and (min-width: 601px) {
+  :root { --sb: 220px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: repeat(2,1fr); }
+  .srch, .srch-tb { min-width: 160px; max-width: 220px; }
+  .prof-nm { display: none; }
+}
+
+/* Mobile (≤ 600px) */
+@media (max-width: 600px) {
+  :root { --sb: 260px; }
+  body { font-size: 15px; }
+  .sb { transform: translateX(-100%); }
+  .sb.on { transform: none; }
+  .sb-x { display: flex; }
+  .main { margin-left: 0; }
+  .mbt { display: flex; }
+  .srch, .srch-tb { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr 1fr; }
+  .prof-nm { display: none; }
+  .cnt { padding: 1.25rem 1rem; }
+  .tb { height: 54px; padding: 0 1rem; }
+  .pgt { font-size: 1rem; }
+  .pc-av { width: 52px; height: 52px; }
+  .qa-grid { grid-template-columns: 1fr; }
+}
+
+/* Very small mobile (≤ 380px) */
+@media (max-width: 380px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════
+   ATTENDANCE UPGRADES — added styles
+═══════════════════════════════════════════════ */
+
+/* Checkbox column */
+.cb-cell{width:36px;text-align:center;padding-left:10px!important}
+.cb-cell input[type=checkbox]{width:14px;height:14px;accent-color:var(--go2);cursor:pointer;border-radius:3px}
+
+/* Sortable header */
+thead th.sortable{cursor:pointer;user-select:none;transition:color .15s}
+thead th.sortable:hover{color:var(--go2)}
+thead th .sort-ico{display:inline-block;margin-left:4px;opacity:.35;font-style:normal;font-size:.68rem;transition:opacity .15s}
+thead th.sort-asc .sort-ico,thead th.sort-desc .sort-ico{opacity:1;color:var(--go2)}
+
+/* At-risk warning badge */
+.risk-flag{display:inline-flex;align-items:center;gap:3px;padding:1px 5px;border-radius:99px;font-size:.58rem;font-weight:700;background:rgba(200,88,50,.12);border:1px solid rgba(200,88,50,.22);color:var(--ru2);margin-left:4px;vertical-align:middle;white-space:nowrap}
+.risk-flag svg{width:9px;height:9px;stroke-width:2.5;flex-shrink:0}
+
+/* Search box in filter row */
+.srch-att{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:var(--r);padding:0 10px;height:36px;min-width:200px;transition:border-color .2s}
+.srch-att:focus-within{border-color:rgba(200,150,60,.4)}
+.srch-att svg{width:13px;height:13px;color:var(--dim);flex-shrink:0}
+.srch-att input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.82rem;color:var(--tx);width:100%}
+.srch-att input::placeholder{color:var(--dim)}
+
+/* Bulk action bar */
+.bulk-bar{display:none;align-items:center;gap:10px;padding:9px 14px;background:rgba(200,150,60,.07);border:1px solid rgba(200,150,60,.2);border-radius:var(--r2);margin-bottom:10px;flex-wrap:wrap}
+.bulk-bar.on{display:flex;animation:fadeInBar .18s ease}
+@keyframes fadeInBar{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.bulk-label{font-size:.8rem;font-weight:600;color:var(--go2);flex:1}
+.bulk-acts{display:flex;gap:6px;flex-wrap:wrap}
+.bulk-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid}
+.bulk-btn.present{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.25);color:var(--te2)}
+.bulk-btn.present:hover{background:rgba(45,158,138,.2)}
+.bulk-btn.absent{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--ru2)}
+.bulk-btn.absent:hover{background:rgba(200,88,50,.16)}
+.bulk-btn.late{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.25);color:var(--go2)}
+.bulk-btn.late:hover{background:rgba(200,150,60,.18)}
+.bulk-btn.excused{background:var(--surf2);border-color:var(--bdr);color:var(--sub)}
+.bulk-btn.excused:hover{color:var(--tx)}
+.bulk-btn svg{width:11px;height:11px;stroke-width:2}
+
+/* Inline status dropdown */
+.status-dd-wrap{position:relative;display:inline-block}
+.status-chip-btn{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border-radius:99px;padding:2px 8px;font-size:.64rem;font-weight:600;border:1px solid;transition:filter .15s}
+.status-chip-btn:hover{filter:brightness(1.15)}
+.status-chip-btn svg{width:8px;height:8px;stroke-width:2.5;opacity:.7}
+.status-dd{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:500;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden;min-width:140px;animation:ddPop .14s var(--ez)}
+@keyframes ddPop{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:none}}
+.status-dd.open{display:block}
+.sd-item{display:flex;align-items:center;gap:8px;padding:8px 11px;cursor:pointer;font-size:.79rem;color:var(--sub);transition:background .12s}
+.sd-item:hover{background:rgba(200,150,60,.07);color:var(--tx)}
+.sd-item.current{color:var(--go2);font-weight:600}
+.sd-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sd-dot.present{background:var(--te2)}
+.sd-dot.absent{background:var(--ru2)}
+.sd-dot.late{background:var(--go2)}
+.sd-dot.excused{background:var(--dim)}
+
+/* History tooltip modal */
+.hist-modal-ov{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem}
+.hist-modal-ov.on{display:flex;animation:fadeInM .18s ease}
+@keyframes fadeInM{from{opacity:0}to{opacity:1}}
+.hist-modal{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);width:100%;max-width:460px;overflow:hidden;animation:ddPop .2s var(--ez);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.hm-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bdr2)}
+.hm-t{font-family:var(--fh);font-size:.95rem;font-style:italic;color:var(--tx)}
+.hm-x{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.hm-x:hover{color:var(--tx);background:var(--surf2)}
+.hm-x svg{width:12px;height:12px;stroke-width:2}
+.hm-body{padding:14px 16px;max-height:340px;overflow-y:auto}
+.hist-entry{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr2)}
+.hist-entry:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.hist-det{flex:1;min-width:0}
+.hist-what{font-size:.8rem;font-weight:600;color:var(--tx)}
+.hist-who{font-size:.7rem;color:var(--sub);margin-top:1px}
+.hist-when{font-size:.66rem;color:var(--dim);font-family:var(--fm);margin-top:2px}
+
+/* Pagination bar */
+.pag-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--bdr2);flex-wrap:wrap;gap:8px}
+.pag-info{font-size:.74rem;color:var(--dim);font-family:var(--fm)}
+.pag-btns{display:flex;gap:4px}
+.pag-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:var(--r);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--bdr);color:var(--sub);background:transparent}
+.pag-btn:hover:not(:disabled){border-color:rgba(200,150,60,.3);color:var(--go2)}
+.pag-btn:disabled{opacity:.35;cursor:not-allowed}
+.pag-btn svg{width:13px;height:13px;stroke-width:2}
+.pag-pg{display:flex;gap:3px}
+.pag-n{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.74rem;cursor:pointer;transition:all .15s;color:var(--sub)}
+.pag-n:hover{border-color:rgba(200,150,60,.3);color:var(--go2)}
+.pag-n.cur{background:rgba(200,150,60,.12);border-color:rgba(200,150,60,.3);color:var(--go2);font-weight:700}
+
+/* Export async state */
+.btn-export-loading{opacity:.7;pointer-events:none}
+
+</style>
+</head>
+<body>
+<div class="pg">
+<aside class="sb" id="sb">
+  <div class="sb-hd"><div class="brand"><div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="b-nm">EduCore</div></div><button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>Lecturer</div>
+  <div class="nav-sect"><div class="nav-sect-label">Active Ops</div><nav class="nav">
+    <div class="ni"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+    <div class="ni"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req">0</span></a></div>
+    <div class="ni" id="nav-msg-item"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+    <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="nl">Students</span></a></div>
+    <div class="ni on"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Intelligence</div><nav class="nav"><div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div></nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">System</div><nav class="nav"><div class="ni"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div></nav></div>
+  <div class="sb-ft"><div class="ava" id="sb-ava">?</div><div style="flex:1;min-width:0"><div class="un" id="sb-nm">—</div><div class="ui" id="sb-id">—</div></div><button class="lg" id="lg-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div>
+</aside>
+<div class="ov" id="ov"></div>
+<div class="main">
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Attendance — Audit Trail</span>
+    </div>
+    <div class="tb-r">
+      <div class="ib" id="th-btn"><svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg></div>
+      <button class="btn btn-gold" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </header>
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+      <div class="ph"><div><div class="ph-t">Attendance Records</div><div class="ph-s" id="att-sub">Loading…</div></div></div>
+      <!-- Summary -->
+      <div class="sum-row">
+        <div class="sc"><div class="sc-v hi" id="s-present">—</div><div class="sc-l">Total Present</div></div>
+        <div class="sc"><div class="sc-v lo" id="s-absent">—</div><div class="sc-l">Total Absent</div></div>
+        <div class="sc"><div class="sc-v warn" id="s-late">—</div><div class="sc-l">Total Late</div></div>
+        <div class="sc"><div class="sc-v" id="s-excused">—</div><div class="sc-l">Excused</div></div>
+        <div class="sc"><div class="sc-v" id="s-rate">—</div><div class="sc-l">Overall Rate</div></div>
+      </div>
+      <!-- Filters -->
+      <div class="filter-row" style="gap:10px">
+        <div class="srch-att">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="f-search" placeholder="Search name or index…">
+        </div>
+        <select class="fi" id="f-course"><option value="">All Courses</option></select>
+        <select class="fi" id="f-status">
+          <option value="">All Statuses</option>
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+          <option value="late">Late</option>
+          <option value="excused">Excused</option>
+        </select>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="mt on" data-m="">All Methods</button>
+          <button class="mt" data-m="qr_code">QR</button>
+          <button class="mt" data-m="manual_code">Manual</button>
+          <button class="mt" data-m="manual_override">Override</button>
+        </div>
+        <input type="date" class="fi" id="f-date" title="Filter by date">
+      </div>
+
+      <!-- Bulk action bar (shown when rows selected) -->
+      <div class="bulk-bar" id="bulk-bar">
+        <span class="bulk-label" id="bulk-label">0 selected</span>
+        <div class="bulk-acts">
+          <button class="bulk-btn present" onclick="bulkUpdate('present')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>Present</button>
+          <button class="bulk-btn absent" onclick="bulkUpdate('absent')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Absent</button>
+          <button class="bulk-btn late" onclick="bulkUpdate('late')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Late</button>
+          <button class="bulk-btn excused" onclick="bulkUpdate('excused')">Excused</button>
+        </div>
+        <button class="btn btn-out" style="font-size:.73rem;padding:5px 10px" onclick="clearSelection()">Clear</button>
+      </div>
+
+      <!-- Table -->
+      <div class="tbl-wrap">
+        <div class="tbl-hd">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="tbl-title">Detailed Records</span>
+            <span id="risk-summary" style="font-size:.7rem;color:var(--ru2);display:none"></span>
+          </div>
+          <span class="tbl-cnt" id="rec-cnt">—</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th class="cb-cell"><input type="checkbox" id="cb-all" title="Select all" onchange="toggleAllCbs(this.checked)"></th>
+                <th class="sortable" data-col="student_name">Student <i class="sort-ico">↕</i></th>
+                <th class="sortable" data-col="course_code">Course <i class="sort-ico">↕</i></th>
+                <th class="sortable" data-col="session_date">Date <i class="sort-ico">↕</i></th>
+                <th class="sortable" data-col="status">Status <i class="sort-ico">↕</i></th>
+                <th>Method</th>
+                <th class="sortable" data-col="check_in_time">Check-in <i class="sort-ico">↕</i></th>
+                <th>History</th>
+              </tr>
+            </thead>
+            <tbody id="att-tbody">
+              <tr><td colspan="8"><div class="sk" style="height:36px;margin:8px 14px"></div></td></tr>
+              <tr><td colspan="8"><div class="sk" style="height:36px;margin:8px 14px"></div></td></tr>
+              <tr><td colspan="8"><div class="sk" style="height:36px;margin:8px 14px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div class="pag-bar" id="pag-bar" style="display:none">
+          <span class="pag-info" id="pag-info"></span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="pag-pg" id="pag-pg"></div>
+            <div class="pag-btns">
+              <button class="pag-btn" id="pag-prev" onclick="changePage(-1)" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>Prev
+              </button>
+              <button class="pag-btn" id="pag-next" onclick="changePage(1)" disabled>
+                Next<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History modal -->
+      <div class="hist-modal-ov" id="hist-modal" onclick="if(event.target===this)closeHist()">
+        <div class="hist-modal">
+          <div class="hm-hd">
+            <div class="hm-t">Audit Trail</div>
+            <div class="hm-x" onclick="closeHist()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          </div>
+          <div class="hm-body" id="hist-body"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   ATTENDANCE — fully upgraded controller
+   Features:
+   • No prompt() — inline status dropdown per row
+   • Bulk select + bulk status update
+   • Real-time debounce search (name / index)
+   • Client-side pagination (PAGE_SIZE rows per page)
+   • Sortable columns (click header to toggle asc/desc)
+   • At-risk flags (<75% attendance rate per student)
+   • Audit trail modal per record
+   • Error toasts on every catch block
+   • DOM built with createElement (no raw innerHTML in rows)
+═══════════════════════════════════════════════════════ */
+'use strict';
+
+const PAGE_SIZE   = 25;
+const RISK_THRESH = 75; // % below which student is flagged
+
+let allRecs      = [];   // full unfiltered dataset
+let filteredRecs = [];   // after search/filter applied
+let sortedRecs   = [];   // after sort applied
+let filterMethod = '';
+let sortCol      = '';
+let sortDir      = 'asc';
+let currentPage  = 1;
+let selectedIds  = new Set();   // set of attendance_id strings
+
+// Per-student attendance rate cache { student_id: rate% }
+let rateCache = {};
+
+/* ─── helpers ─── */
+function _e(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _ini(n){ return n?n.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase():'?'; }
+function fmtDate(d){ return d?new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—'; }
+function fmtTime(t){ return t?new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—'; }
+let _searchTimer = null;
+
+const STATUS_META = {
+  present: { cls:'cp', dot:'present', label:'Present' },
+  absent:  { cls:'ca', dot:'absent',  label:'Absent'  },
+  late:    { cls:'cl', dot:'late',    label:'Late'    },
+  excused: { cls:'ce', dot:'excused', label:'Excused' },
+};
+const METH_META = {
+  qr_code:         { cls:'mqr',  label:'QR'       },
+  manual_code:     { cls:'mman', label:'Manual'   },
+  manual_override: { cls:'movr', label:'Override' },
+};
+
+/* ─── course filter ─── */
+async function loadCourseFilter(){
+  try{
+    const res = await API.classes.list();
+    const cls = Array.isArray(res)?res:(res.classes||res.data||[]);
+    const sel = document.getElementById('f-course');
+    cls.forEach(c=>{
+      const o = document.createElement('option');
+      o.value = c.class_id;
+      o.textContent = `${c.course_code||''} ${c.class_name}`.trim();
+      sel.appendChild(o);
+    });
+  } catch(err){ toast('Could not load course list: '+err.message,'er'); }
+}
+
+/* ─── summary cards ─── */
+async function loadSummary(){
+  try{
+    const res = await API.attendance.summary({});
+    const s = res.summary||res||{};
+    document.getElementById('s-present').textContent = s.total_present??'—';
+    document.getElementById('s-absent').textContent  = s.total_absent??'—';
+    document.getElementById('s-late').textContent    = s.total_late??'—';
+    document.getElementById('s-excused').textContent = s.total_excused??'—';
+    const rate = s.attendance_rate!=null ? Math.round(s.attendance_rate)+'%' : '—';
+    document.getElementById('s-rate').textContent = rate;
+  } catch(err){ toast('Could not load summary: '+err.message,'er'); }
+}
+
+/* ─── load records ─── */
+async function loadRecords(){
+  const tbody = document.getElementById('att-tbody');
+  const colSpan = 8;
+  tbody.innerHTML = `<tr><td colspan="${colSpan}"><div class="sk" style="height:36px;margin:8px 14px"></div></td></tr>`.repeat(3);
+  clearSelection();
+
+  const params = {};
+  const course = document.getElementById('f-course').value;
+  const status = document.getElementById('f-status').value;
+  const date   = document.getElementById('f-date').value;
+  if(course) params.class_id = course;
+  if(status) params.status   = status;
+  if(date)   params.date     = date;
+  if(filterMethod) params.method = filterMethod;
+
+  try{
+    const res = await API.attendance.summary(params);
+    allRecs = Array.isArray(res)?res:(res.records||res.data||[]);
+    // Build per-student rate cache for at-risk flags
+    buildRateCache(allRecs);
+    applyFiltersAndSort();
+  } catch(err){
+    toast('Failed to load records: '+err.message,'er');
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="padding:18px;color:var(--dim);font-size:.8rem">Failed to load records.</td></tr>`;
+  }
+}
+
+/* ─── build rate cache ─── */
+function buildRateCache(recs){
+  const byStudent = {};
+  recs.forEach(r=>{
+    const id = r.student_id||r.index_number||r.student_name;
+    if(!id) return;
+    if(!byStudent[id]) byStudent[id]={total:0,present:0};
+    byStudent[id].total++;
+    if(r.status==='present'||r.status==='late') byStudent[id].present++;
+  });
+  rateCache = {};
+  Object.entries(byStudent).forEach(([id,d])=>{
+    rateCache[id] = d.total>0 ? Math.round(d.present/d.total*100) : 100;
+  });
+  // Show at-risk summary
+  const atRisk = Object.values(rateCache).filter(v=>v<RISK_THRESH).length;
+  const rs = document.getElementById('risk-summary');
+  if(atRisk>0){ rs.textContent=`⚠ ${atRisk} student${atRisk!==1?'s':''} below ${RISK_THRESH}% threshold`; rs.style.display=''; }
+  else rs.style.display='none';
+}
+
+/* ─── apply search + sort ─── */
+function applyFiltersAndSort(){
+  const q = (document.getElementById('f-search').value||'').toLowerCase().trim();
+  filteredRecs = q
+    ? allRecs.filter(r=>(r.student_name||'').toLowerCase().includes(q)||(r.index_number||'').toLowerCase().includes(q))
+    : allRecs.slice();
+
+  // Sort
+  if(sortCol){
+    filteredRecs.sort((a,b)=>{
+      let va = a[sortCol]||'', vb = b[sortCol]||'';
+      if(sortCol==='session_date'||sortCol==='check_in_time'){ va=new Date(va||0).getTime(); vb=new Date(vb||0).getTime(); return sortDir==='asc'?va-vb:vb-va; }
+      va=String(va).toLowerCase(); vb=String(vb).toLowerCase();
+      return sortDir==='asc'?(va<vb?-1:va>vb?1:0):(va>vb?-1:va<vb?1:0);
+    });
+  }
+  sortedRecs = filteredRecs;
+  currentPage = 1;
+  renderCurrentPage();
+}
+
+/* ─── pagination ─── */
+function renderCurrentPage(){
+  const total = sortedRecs.length;
+  const pages = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if(currentPage>pages) currentPage=pages;
+  const start = (currentPage-1)*PAGE_SIZE;
+  const end   = Math.min(start+PAGE_SIZE, total);
+  const slice = sortedRecs.slice(start, end);
+
+  document.getElementById('att-sub').textContent = `${total} record${total!==1?'s':''}`;
+  document.getElementById('rec-cnt').textContent  = `${start+1}–${end} of ${total}`;
+
+  renderTable(slice);
+  renderPagination(pages, total, start+1, end);
+}
+
+function renderPagination(pages, total, from, to){
+  const bar = document.getElementById('pag-bar');
+  if(pages<=1){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  document.getElementById('pag-info').textContent = `Showing ${from}–${to} of ${total}`;
+  document.getElementById('pag-prev').disabled = currentPage<=1;
+  document.getElementById('pag-next').disabled = currentPage>=pages;
+
+  const pg = document.getElementById('pag-pg');
+  pg.innerHTML='';
+  const range=[], WING=2;
+  for(let i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-currentPage)<=WING) range.push(i);
+    else if(range[range.length-1]!=='…') range.push('…');
+  }
+  range.forEach(n=>{
+    if(n==='…'){ const s=document.createElement('span'); s.textContent='…'; s.style.cssText='padding:0 3px;color:var(--dim);font-size:.74rem;display:flex;align-items:center'; pg.appendChild(s); return; }
+    const b=document.createElement('button'); b.className='pag-n'+(n===currentPage?' cur':'');
+    b.textContent=n; b.onclick=()=>{ currentPage=n; renderCurrentPage(); };
+    pg.appendChild(b);
+  });
+}
+
+window.changePage = function(delta){
+  currentPage += delta;
+  renderCurrentPage();
+};
+
+/* ─── render table rows (DOM-safe, no raw innerHTML in data) ─── */
+function renderTable(recs){
+  const tbody = document.getElementById('att-tbody');
+  while(tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+  if(!recs.length){
+    const tr=document.createElement('tr');
+    const td=document.createElement('td'); td.colSpan=8; td.style.cssText='padding:24px;text-align:center;color:var(--dim);font-size:.82rem';
+    td.textContent='No records found.'; tr.appendChild(td); tbody.appendChild(tr); return;
+  }
+
+  // Update select-all checkbox state
+  const cbAll = document.getElementById('cb-all');
+  const pageIds = recs.map(r=>String(r.attendance_id));
+  const allSelected = pageIds.every(id=>selectedIds.has(id));
+  cbAll.checked = allSelected && recs.length>0;
+  cbAll.indeterminate = !allSelected && pageIds.some(id=>selectedIds.has(id));
+
+  recs.forEach(r=>{
+    const sid   = String(r.attendance_id||'');
+    const st    = r.status||'absent';
+    const meth  = r.verification_method||'';
+    const stuId = r.student_id||r.index_number||r.student_name;
+    const rate  = rateCache[stuId];
+    const atRisk = rate!=null && rate < RISK_THRESH;
+
+    const tr = document.createElement('tr');
+    if(selectedIds.has(sid)) tr.classList.add('selected-row');
+
+    // ── Checkbox ──
+    const tdCb = document.createElement('td'); tdCb.className='cb-cell';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=selectedIds.has(sid);
+    cb.onchange=()=>{ toggleRow(sid, cb.checked); };
+    tdCb.appendChild(cb); tr.appendChild(tdCb);
+
+    // ── Student ──
+    const tdStu = document.createElement('td');
+    const wrap  = document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:8px';
+    const av    = document.createElement('div');
+    av.style.cssText='width:26px;height:26px;border-radius:var(--r);background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:var(--sub);font-family:var(--fh);font-style:italic;flex-shrink:0';
+    av.textContent = _ini(r.student_name||'');
+    const info = document.createElement('div');
+    const nm   = document.createElement('div'); nm.style.cssText='font-weight:600;font-size:.78rem'; nm.textContent = r.student_name||'—';
+    const idx  = document.createElement('div'); idx.style.cssText='font-size:.63rem;color:var(--dim);font-family:var(--fm)'; idx.textContent = r.index_number||'';
+    info.appendChild(nm); info.appendChild(idx);
+    wrap.appendChild(av); wrap.appendChild(info);
+    if(atRisk){
+      const flag = document.createElement('span'); flag.className='risk-flag';
+      flag.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+rate+'%';
+      flag.title = `Attendance rate: ${rate}% — below ${RISK_THRESH}% threshold`;
+      wrap.appendChild(flag);
+    }
+    tdStu.appendChild(wrap); tr.appendChild(tdStu);
+
+    // ── Course ──
+    const tdCo = document.createElement('td'); tdCo.style.fontSize='.76rem';
+    tdCo.textContent = ((r.course_code||'')+' '+(r.class_name||'')).trim()||'—';
+    tr.appendChild(tdCo);
+
+    // ── Date ──
+    const tdDt = document.createElement('td'); tdDt.style.cssText='font-family:var(--fm);font-size:.73rem';
+    tdDt.textContent = fmtDate(r.session_date); tr.appendChild(tdDt);
+
+    // ── Status — inline dropdown ──
+    const tdSt = document.createElement('td');
+    tdSt.appendChild(buildStatusDD(r.attendance_id, st));
+    tr.appendChild(tdSt);
+
+    // ── Method ──
+    const tdMe = document.createElement('td');
+    if(meth && METH_META[meth]){
+      const mc = document.createElement('span'); mc.className=`mchip ${METH_META[meth].cls}`; mc.textContent=METH_META[meth].label;
+      tdMe.appendChild(mc);
+    } else { tdMe.textContent='—'; }
+    tr.appendChild(tdMe);
+
+    // ── Check-in time ──
+    const tdTm = document.createElement('td'); tdTm.style.cssText='font-family:var(--fm);font-size:.73rem';
+    tdTm.textContent = fmtTime(r.check_in_time); tr.appendChild(tdTm);
+
+    // ── History button ──
+    const tdHist = document.createElement('td');
+    const hb = document.createElement('button'); hb.className='eb'; hb.title='View audit trail';
+    hb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    hb.onclick=()=>openHist(r);
+    tdHist.appendChild(hb); tr.appendChild(tdHist);
+
+    tbody.appendChild(tr);
+  });
+}
+
+/* ─── inline status dropdown ─── */
+function buildStatusDD(attId, currentStatus){
+  const wrap = document.createElement('div'); wrap.className='status-dd-wrap';
+
+  const meta = STATUS_META[currentStatus]||STATUS_META.absent;
+  const btn  = document.createElement('button');
+  btn.className=`status-chip-btn chip ${meta.cls}`; btn.dataset.attid=attId;
+  btn.innerHTML=`${meta.label}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>`;
+  btn.onclick=(e)=>{ e.stopPropagation(); toggleStatusDD(wrap); };
+
+  const dd = document.createElement('div'); dd.className='status-dd';
+  ['present','absent','late','excused'].forEach(s=>{
+    const item = document.createElement('div');
+    item.className='sd-item'+(s===currentStatus?' current':'');
+    const dot  = document.createElement('span'); dot.className=`sd-dot ${s}`;
+    const lbl  = document.createElement('span'); lbl.textContent=STATUS_META[s].label;
+    item.appendChild(dot); item.appendChild(lbl);
+    item.onclick=(e)=>{ e.stopPropagation(); closeAllStatusDDs(); applyStatusChange(attId, s, btn, wrap); };
+    dd.appendChild(item);
+  });
+
+  wrap.appendChild(btn); wrap.appendChild(dd);
+  return wrap;
+}
+
+function toggleStatusDD(wrap){
+  const dd = wrap.querySelector('.status-dd');
+  const wasOpen = dd.classList.contains('open');
+  closeAllStatusDDs();
+  if(!wasOpen) dd.classList.add('open');
+}
+function closeAllStatusDDs(){ document.querySelectorAll('.status-dd.open').forEach(d=>d.classList.remove('open')); }
+document.addEventListener('click', closeAllStatusDDs);
+
+async function applyStatusChange(attId, newStatus, btn, wrap){
+  const dd = wrap.querySelector('.status-dd');
+  dd.classList.remove('open');
+  try{
+    await API.attendance.edit(attId, {status: newStatus});
+    // Update button appearance
+    const meta = STATUS_META[newStatus];
+    btn.className=`status-chip-btn chip ${meta.cls}`;
+    btn.innerHTML=`${meta.label}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg>`;
+    // Update dropdown item highlights
+    wrap.querySelectorAll('.sd-item').forEach(item=>{
+      item.classList.toggle('current', item.querySelector('span:last-child').textContent===meta.label);
+    });
+    // Update allRecs so re-renders stay consistent
+    const rec = allRecs.find(r=>r.attendance_id===attId);
+    if(rec) rec.status = newStatus;
+    toast('Status updated to '+meta.label);
+    buildRateCache(allRecs); // refresh at-risk flags
+  } catch(err){ toast('Update failed: '+err.message,'er'); }
+}
+
+/* ─── bulk selection ─── */
+function toggleRow(id, checked){
+  if(checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBulkBar();
+  // Keep select-all checkbox consistent
+  const cbAll = document.getElementById('cb-all');
+  const visibleIds = sortedRecs.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE).map(r=>String(r.attendance_id));
+  const allSel = visibleIds.length>0 && visibleIds.every(id=>selectedIds.has(id));
+  cbAll.checked = allSel;
+  cbAll.indeterminate = !allSel && visibleIds.some(id=>selectedIds.has(id));
+}
+
+window.toggleAllCbs = function(checked){
+  const visibleIds = sortedRecs.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE).map(r=>String(r.attendance_id));
+  visibleIds.forEach(id=>{ if(checked) selectedIds.add(id); else selectedIds.delete(id); });
+  // Re-check individual checkboxes in tbody
+  document.querySelectorAll('#att-tbody input[type=checkbox]').forEach(cb=>{ cb.checked=checked; });
+  updateBulkBar();
+};
+
+function updateBulkBar(){
+  const bar   = document.getElementById('bulk-bar');
+  const label = document.getElementById('bulk-label');
+  const n = selectedIds.size;
+  if(n>0){ bar.classList.add('on'); label.textContent=`${n} student${n!==1?'s':''} selected`; }
+  else    { bar.classList.remove('on'); }
+}
+
+window.clearSelection = function(){
+  selectedIds.clear();
+  document.querySelectorAll('#att-tbody input[type=checkbox]').forEach(cb=>cb.checked=false);
+  const cbAll=document.getElementById('cb-all'); cbAll.checked=false; cbAll.indeterminate=false;
+  updateBulkBar();
+};
+
+window.bulkUpdate = async function(newStatus){
+  if(!selectedIds.size) return;
+  const ids = [...selectedIds];
+  const meta = STATUS_META[newStatus];
+  let ok=0, fail=0;
+  await Promise.all(ids.map(async id=>{
+    try{
+      await API.attendance.edit(Number(id), {status: newStatus});
+      const rec = allRecs.find(r=>String(r.attendance_id)===id);
+      if(rec) rec.status = newStatus;
+      ok++;
+    } catch{ fail++; }
+  }));
+  toast(`${ok} record${ok!==1?'s':''} marked ${meta.label}${fail?` (${fail} failed)`:''}`);
+  buildRateCache(allRecs);
+  clearSelection();
+  applyFiltersAndSort();
+};
+
+/* ─── sortable columns ─── */
+document.querySelectorAll('thead th.sortable').forEach(th=>{
+  th.onclick=()=>{
+    const col = th.dataset.col;
+    if(sortCol===col){ sortDir = sortDir==='asc'?'desc':'asc'; }
+    else { sortCol=col; sortDir='asc'; }
+    document.querySelectorAll('thead th.sortable').forEach(h=>{
+      h.classList.remove('sort-asc','sort-desc');
+      h.querySelector('.sort-ico').textContent='↕';
+    });
+    th.classList.add(sortDir==='asc'?'sort-asc':'sort-desc');
+    th.querySelector('.sort-ico').textContent = sortDir==='asc'?'↑':'↓';
+    applyFiltersAndSort();
+  };
+});
+
+/* ─── debounce search ─── */
+document.getElementById('f-search').addEventListener('input', ()=>{
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(applyFiltersAndSort, 250);
+});
+
+/* ─── audit trail modal ─── */
+window.openHist = function(rec){
+  const modal = document.getElementById('hist-modal');
+  const body  = document.getElementById('hist-body');
+  body.innerHTML='';
+  modal.classList.add('on');
+
+  // Header info
+  const info = document.createElement('div');
+  info.style.cssText='margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bdr2)';
+  info.innerHTML=`<div style="font-size:.84rem;font-weight:600;color:var(--tx)">${_e(rec.student_name||'—')}</div>`
+    +`<div style="font-size:.72rem;color:var(--sub);margin-top:2px">${_e((rec.course_code||'')+' '+( rec.class_name||'')).trim()} · ${fmtDate(rec.session_date)}</div>`;
+  body.appendChild(info);
+
+  // Build history from rec fields + any audit_trail array
+  const entries = [];
+  if(rec.check_in_time) entries.push({
+    status: rec.status,
+    what: `Checked in as ${rec.status}`,
+    who:  rec.verification_method ? `Method: ${METH_META[rec.verification_method]?.label||rec.verification_method}` : 'System',
+    when: rec.check_in_time,
+  });
+  if(rec.override_by||rec.override_reason) entries.push({
+    status:'excused',
+    what: 'Manual override applied',
+    who:  (rec.override_by?`By: ${rec.override_by}`:'Lecturer')+( rec.override_reason?` — "${rec.override_reason}"`:''),
+    when: rec.override_at||rec.check_in_time,
+  });
+  if(rec.audit_trail&&Array.isArray(rec.audit_trail)){
+    rec.audit_trail.forEach(a=>entries.push({
+      status: a.new_status||a.status,
+      what: `Changed to ${a.new_status||a.status}`,
+      who: a.changed_by||'Lecturer',
+      when: a.changed_at||a.created_at,
+    }));
+  }
+
+  if(!entries.length){
+    const em=document.createElement('div'); em.style.cssText='padding:20px;text-align:center;color:var(--dim);font-size:.8rem'; em.textContent='No detailed history available for this record.';
+    body.appendChild(em); return;
+  }
+
+  entries.forEach(e=>{
+    const row  = document.createElement('div'); row.className='hist-entry';
+    const dot  = document.createElement('div'); dot.className=`hist-dot ${e.status||'absent'}`;
+    dot.style.background = e.status==='present'?'var(--te2)':e.status==='late'?'var(--go2)':e.status==='excused'?'var(--dim)':'var(--ru2)';
+    const det  = document.createElement('div'); det.className='hist-det';
+    const what = document.createElement('div'); what.className='hist-what'; what.textContent=e.what;
+    const who  = document.createElement('div'); who.className='hist-who';  who.textContent=e.who;
+    const when = document.createElement('div'); when.className='hist-when';
+    when.textContent = e.when ? new Date((e.when+'').replace(' ','T')).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    det.appendChild(what); det.appendChild(who); det.appendChild(when);
+    row.appendChild(dot); row.appendChild(det); body.appendChild(row);
+  });
+};
+
+window.closeHist = function(){ document.getElementById('hist-modal').classList.remove('on'); };
+
+/* ─── export ─── */
+window.exportCSV = async function(){
+  const btn = document.querySelector('.btn-gold');
+  if(!allRecs.length){ toast('No records to export','in'); return; }
+  btn.classList.add('btn-export-loading');
+  btn.textContent = 'Exporting…';
+  try{
+    // Try backend export endpoint first; fall back to client-side
+    if(API.attendance.export){
+      const res = await API.attendance.export({});
+      if(res.url){ const a=document.createElement('a');a.href=res.url;a.download='attendance_export.csv';a.click(); toast('Export downloaded'); return; }
+    }
+  } catch(_){}
+  // Client-side fallback
+  const rows = [
+    ['Student','Index','Course','Date','Status','Method','Check-in Time'],
+    ...allRecs.map(r=>[
+      r.student_name||'', r.index_number||'',
+      `${r.course_code||''} ${r.class_name||''}`.trim(),
+      r.session_date||'', r.status||'',
+      r.verification_method||'', r.check_in_time||''
+    ])
+  ];
+  const csv = rows.map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = `attendance_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('Export downloaded');
+  btn.classList.remove('btn-export-loading');
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV';
+};
+
+/* ─── filter/method wiring ─── */
+document.querySelectorAll('.mt').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.mt').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    filterMethod = t.dataset.m;
+    loadRecords();
+  };
+});
+document.getElementById('f-course').onchange = loadRecords;
+document.getElementById('f-status').onchange = loadRecords;
+document.getElementById('f-date').onchange   = loadRecords;
+
+/* ─── boot ─── */
+loadCourseFilter();
+loadSummary();
+loadRecords();
+
+// URL param: pre-filter by student_id if coming from students page
+(()=>{ const p=new URLSearchParams(location.search); if(p.get('student_id')){} })();
+
+// ── Messages unread badge ─────────────────────────────────────────────────
+(function loadMsgBadge(){
+  if(typeof API === 'undefined') return;
+  function refreshMsgBadge(){
+    API.messages ? API.messages.unreadCounts().then(r=>{
+      const total=(r.channels||[]).reduce((s,c)=>s+(c.unread||0),0);
+      const el=document.getElementById('nav-msg');
+      if(el){el.textContent=total>9?'9+':total;el.style.display=total>0?'flex':'none';}
+    }).catch(()=>{}) : null;
+  }
+  refreshMsgBadge();
+  setInterval(refreshMsgBadge,15000);
+})();
+
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>

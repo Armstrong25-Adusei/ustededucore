@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCore — Requests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0d0b;--surf:#1d1a16;--surf2:#252119;--surf3:#2d2921;--bdr:rgba(255,235,205,.07);--bdr2:rgba(255,235,205,.04);--tx:#ede3d5;--sub:#9e8e7e;--dim:#5e4e3e;--gold:#c8963c;--go2:#e0ae50;--go3:#f0c060;--rust:#c85832;--ru2:#e06843;--teal:#2d9e8a;--te2:#45bca5;--fh:'Playfair Display',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'DM Mono',monospace;--ez:cubic-bezier(.23,1,.32,1);--r:5px;--r2:8px;--r3:12px;--sb:220px}
+[data-theme="light"]{--bg:#f2ece2;--surf:#faf6ef;--surf2:#ede7dc;--surf3:#e4ddd0;--bdr:rgba(60,45,30,.09);--bdr2:rgba(60,45,30,.05);--tx:#1a1410;--sub:#5a4a38;--dim:#8a7a68;--gold:#a87828;--go2:#c89040;--rust:#a83e1e;--ru2:#c04828;--teal:#1f7a68;--te2:#2d9e88}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{height:100%}body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.pg{display:flex;min-height:100vh}
+.sb{width:var(--sb);flex-shrink:0;display:flex;flex-direction:column;background:var(--surf);border-right:1px solid var(--bdr);position:fixed;top:0;bottom:0;left:0;z-index:300;overflow-y:auto;overflow-x:hidden;transition:transform .22s var(--ez);scrollbar-width:none}.sb::-webkit-scrollbar{display:none}
+.sb-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 13px 10px;border-bottom:1px solid var(--bdr2)}.brand{display:flex;align-items:center;gap:8px}.b-ico{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;flex-shrink:0}.b-ico svg{width:14px;height:14px;color:#1a1200;stroke-width:2.5}.b-nm{font-family:var(--fh);font-size:.88rem;font-style:italic;color:var(--tx)}.sb-x{display:none;width:22px;height:22px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);align-items:center;justify-content:center}.sb-x svg{width:11px;height:11px;stroke-width:2}
+.role-chip{margin:8px 10px 3px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:rgba(200,150,60,.10);border:1px solid rgba(200,150,60,.22);color:var(--go2)}.role-chip svg{width:8px;height:8px}
+.nav-sect{padding:10px 7px 2px}.nav-sect-label{font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:0 9px;margin-bottom:3px}.nav{display:flex;flex-direction:column;gap:1px}.ni a{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r);color:var(--sub);font-size:.79rem;font-weight:500;transition:all .15s}.ni a svg{width:14px;height:14px;stroke-width:1.75;flex-shrink:0}.ni a:hover{background:rgba(200,150,60,.07);color:var(--go2)}.ni.on a{background:rgba(200,150,60,.10);border-left:2px solid var(--go2);padding-left:7px;color:var(--go2);font-weight:600}.nl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nb{min-width:15px;height:15px;padding:0 3px;border-radius:99px;background:var(--rust);color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fm)}.pip{width:7px;height:7px;border-radius:50%;background:var(--te2);flex-shrink:0;animation:pp 1.8s infinite}@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(69,188,165,.5)}70%{box-shadow:0 0 0 5px rgba(69,188,165,0)}}
+.sb-ft{padding:10px 11px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:7px;margin-top:auto}.ava{width:28px;height:28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--go2));display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;color:#1a1200;flex-shrink:0;font-family:var(--fh);font-style:italic;overflow:hidden}.ava img{width:100%;height:100%;object-fit:cover}.un{font-size:.73rem;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ui{font-size:.6rem;color:var(--dim);font-family:var(--fm)}.lg{width:24px;height:24px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}.lg svg{width:12px;height:12px;stroke-width:2}.lg:hover{color:var(--rust);border-color:rgba(200,88,50,.3)}
+.ov{display:none;position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)}.ov.on{display:block}
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-width:0}.tb{position:sticky;top:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(.9rem,2.5vw,1.5rem);background:rgba(15,13,11,.92);border-bottom:1px solid var(--bdr);backdrop-filter:blur(16px);gap:10px}[data-theme="light"] .tb{background:rgba(242,236,226,.92)}.tb-l,.tb-r{display:flex;align-items:center;gap:7px}.mbt{display:none;width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);align-items:center;justify-content:center}.mbt svg{width:14px;height:14px;stroke-width:2}.pgt{font-family:var(--fh);font-size:1rem;font-style:italic;color:var(--tx)}.ib{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);color:var(--sub);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;cursor:pointer}.ib svg{width:14px;height:14px;stroke-width:1.75}.ib:hover{color:var(--go2);border-color:rgba(200,150,60,.3)}
+.sk{background:linear-gradient(90deg,var(--bdr2) 25%,var(--bdr) 50%,var(--bdr2) 75%);background-size:200% 100%;animation:sk 1.4s ease-in-out infinite;border-radius:var(--r)}@keyframes sk{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.tw{position:fixed;bottom:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}.t{pointer-events:all;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);font-size:.77rem;color:var(--tx);cursor:pointer;animation:ti .2s var(--ez);max-width:280px}@keyframes ti{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.t svg{width:13px;height:13px;stroke-width:2;flex-shrink:0}.t.ok svg{color:var(--te2)}.t.er svg{color:var(--rust)}.t.in svg{color:var(--go2)}
+.cnt{padding:1.4rem clamp(.9rem,2.5vw,1.5rem);max-width:900px;width:100%}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}.ph-t{font-family:var(--fh);font-size:1.25rem;font-style:italic;color:var(--tx)}.ph-s{font-size:.78rem;color:var(--sub);margin-top:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid;white-space:nowrap}.btn-gold{background:var(--go2);border-color:var(--go2);color:#1a1200}.btn-gold:hover{background:var(--go3)}.btn-out{background:transparent;border-color:var(--bdr);color:var(--sub)}.btn-out:hover{color:var(--tx)}.btn svg{width:13px;height:13px;stroke-width:2}.btn:disabled{opacity:.5;cursor:not-allowed}
+/* Request cards */
+.req-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.rcard{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);overflow:hidden;transition:border-color .2s}
+.rcard.flag{border-color:rgba(200,88,50,.3)}
+.rc-top{padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
+.rc-av{width:40px;height:40px;border-radius:var(--r2);background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--sub);font-family:var(--fh);font-style:italic;flex-shrink:0;overflow:hidden}
+.rc-av img{width:100%;height:100%;object-fit:cover}
+.rc-nm{font-weight:600;font-size:.86rem;color:var(--tx);margin-bottom:1px}
+.rc-idx{font-size:.65rem;color:var(--dim);font-family:var(--fm);margin-bottom:5px}
+.rc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.rtag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:.63rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr);color:var(--sub)}
+.rtag.warn{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--ru2)}
+.rtag.ok{background:rgba(45,158,138,.08);border-color:rgba(45,158,138,.2);color:var(--te2)}
+.rc-time{margin-left:auto;font-size:.68rem;color:var(--dim);font-family:var(--fm);white-space:nowrap;flex-shrink:0}
+.rc-detail{padding:0 16px 12px;display:flex;gap:14px;flex-wrap:wrap}
+.rc-det-item{flex:1;min-width:130px}
+.rd-l{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:2px}
+.rd-v{font-size:.77rem;color:var(--tx)}
+.rc-flag{padding:8px 16px;background:rgba(200,88,50,.06);border-top:1px solid rgba(200,88,50,.12);display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--ru2)}
+.rc-flag svg{width:13px;height:13px;stroke-width:2;flex-shrink:0}
+.rc-acts{padding:10px 16px;border-top:1px solid var(--bdr2);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.act-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--r);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid}
+.act-btn.ap{background:rgba(45,158,138,.1);border-color:rgba(45,158,138,.3);color:var(--te2)}.act-btn.ap:hover{background:rgba(45,158,138,.2)}
+.act-btn.rj{background:rgba(200,88,50,.08);border-color:rgba(200,88,50,.2);color:var(--rust)}.act-btn.rj:hover{background:rgba(200,88,50,.15)}
+.act-btn svg{width:12px;height:12px;stroke-width:2}
+/* Status filter tabs */
+.tabs{display:flex;gap:4px;margin-bottom:1.1rem}
+.tab{padding:5px 14px;border-radius:99px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--bdr);color:var(--sub);transition:all .15s}
+.tab.on{background:rgba(200,150,60,.1);border-color:rgba(200,150,60,.3);color:var(--go2)}
+/* Empty state */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r3);gap:12px}
+.empty svg{width:32px;height:32px;color:var(--dim);stroke-width:1.5}
+.empty p{font-size:.8rem;color:var(--sub)}
+@media(max-width:600px){.sb{transform:translateX(-100%)}.sb.on{transform:none}.sb-x{display:flex}.main{margin-left:0}.mbt{display:flex}}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL SIZE + RESPONSIVENESS OVERRIDES
+   ═══════════════════════════════════════════════════ */
+
+/* Larger base tokens */
+:root{
+  --sb: 250px;
+  --r: 6px; --r2: 10px; --r3: 14px;
+}
+
+/* Base font bump */
+body { font-size: 15px; }
+
+/* ── SIDEBAR ── */
+.sb-hd { padding: 18px 16px 13px; }
+.b-ico { width: 34px; height: 34px; }
+.b-ico svg { width: 17px; height: 17px; }
+.b-nm { font-size: 1rem; }
+.role-chip { font-size: .68rem; margin: 10px 12px 4px; padding: 4px 10px; }
+.role-chip svg { width: 10px; height: 10px; }
+.nav-sect { padding: 12px 9px 3px; }
+.nav-sect-label { font-size: .62rem; letter-spacing: .11em; }
+.ni a { padding: 9px 11px; font-size: .875rem; gap: 10px; }
+.ni a svg { width: 17px; height: 17px; }
+.ni.on a { padding-left: 9px; }
+.nb { min-width: 18px; height: 18px; font-size: .62rem; padding: 0 4px; }
+.pip { width: 8px; height: 8px; }
+.sb-ft { padding: 13px 14px; gap: 9px; }
+.ava { width: 34px; height: 34px; font-size: .75rem; }
+.un { font-size: .84rem; }
+.ui { font-size: .68rem; }
+.lg { width: 28px; height: 28px; }
+.lg svg { width: 14px; height: 14px; }
+
+/* ── TOPBAR ── */
+.tb { height: 58px; }
+.mbt { width: 36px; height: 36px; }
+.mbt svg { width: 17px; height: 17px; }
+.pgt { font-size: 1.1rem; }
+.srch, .srch-tb { height: 36px; font-size: .875rem; min-width: 240px; }
+.srch svg, .srch-tb svg { width: 15px; height: 15px; }
+.srch input, .srch-tb input { font-size: .875rem; }
+.kbd { font-size: .68rem; }
+.ib { width: 36px; height: 36px; }
+.ib svg { width: 17px; height: 17px; }
+.nbd { width: 16px; height: 16px; font-size: .6rem; }
+
+/* Profile dropdown topbar */
+.prof-btn { padding: 5px 10px 5px 5px; }
+.prof-av { width: 30px; height: 30px; }
+.prof-nm { font-size: .875rem; }
+.prof-btn svg { width: 13px; height: 13px; }
+.dd-head { padding: 14px 16px; }
+.dd-av { width: 40px; height: 40px; }
+.dd-nm { font-size: .92rem; }
+.dd-id, .dd-dept { font-size: .72rem; }
+.dd-item { font-size: .875rem; padding: 9px 11px; }
+.dd-item svg { width: 15px; height: 15px; }
+
+/* ── CONTENT ── */
+.cnt { padding: 1.75rem clamp(1rem,3vw,2rem); }
+.ph-t { font-size: 1.5rem; }
+.ph-s { font-size: .875rem; }
+
+/* ── STAT CARDS ── */
+.sc { padding: 16px 18px; gap: 13px; }
+.sc-ico { width: 40px; height: 40px; }
+.sc-ico svg { width: 19px; height: 19px; }
+.sc-v { font-size: 1.75rem; }
+.sc-l { font-size: .8rem; }
+.sc-ch { font-size: .72rem; }
+
+/* ── PROFILE CARD ── */
+.pc-av { width: 66px; height: 66px; font-size: 1.35rem; }
+.pc-nm { font-size: 1.15rem; }
+.pc-id { font-size: .72rem; }
+.tag { font-size: .68rem; padding: 3px 10px; }
+.tag svg { width: 10px; height: 10px; }
+.pc-courses { font-size: 1.8rem; }
+.pc-cl { font-size: .78rem; }
+
+/* ── SCHEDULE / ITEMS ── */
+.sh-t { font-size: 1rem; }
+.sh-a { font-size: .82rem; }
+.sched-item { padding: 11px 0; }
+.si-time { font-size: .8rem; min-width: 60px; }
+.si-dot { width: 9px; height: 9px; }
+.si-nm { font-size: .9rem; }
+.si-code { font-size: .72rem; }
+.si-act { font-size: .72rem; padding: 4px 11px; }
+
+/* ── QUICK ACTIONS ── */
+.qa { padding: 13px 15px; gap: 11px; }
+.qa-ico { width: 34px; height: 34px; }
+.qa-ico svg { width: 16px; height: 16px; }
+.qa-t { font-size: .9rem; }
+.qa-s { font-size: .73rem; }
+
+/* ── LIVE CARD ── */
+.live-badge { font-size: .72rem; padding: 3px 10px; }
+.live-badge svg { width: 9px; height: 9px; }
+.li-course { font-size: 1.05rem; }
+.li-loc { font-size: .8rem; }
+.li-loc svg { width: 13px; height: 13px; }
+.lc-num { font-size: 1.8rem; }
+.lc-lbl { font-size: .72rem; }
+
+/* ── BUTTONS ── */
+.btn { padding: 9px 18px; font-size: .875rem; }
+.btn svg { width: 15px; height: 15px; }
+.act-btn { font-size: .73rem; padding: 4px 11px; }
+
+/* ── REQUESTS ── */
+.req-nm { font-size: .9rem; }
+.req-t { font-size: .75rem; }
+.req-av { width: 32px; height: 32px; font-size: .68rem; }
+
+/* ── ANOMALY ── */
+.anomaly svg { width: 18px; height: 18px; }
+.anomaly-t { font-size: .9rem; }
+.anomaly-b { font-size: .82rem; }
+
+/* ── SYNC BAR ── */
+.sync-dot { width: 8px; height: 8px; }
+.sync-label { font-size: .75rem; }
+
+/* ── TABLE STYLES (attendance / students) ── */
+.tbl { font-size: .875rem; }
+.tbl th { font-size: .72rem; padding: 10px 14px; }
+.tbl td { padding: 10px 14px; }
+
+/* ── FORM INPUTS (live session) ── */
+.fl { font-size: .78rem; }
+.fi { font-size: .9rem; padding: .75rem 1rem; }
+.sc-t { font-size: 1.3rem; }
+.sc-s { font-size: .875rem; }
+.step-n { font-size: .68rem; }
+.step-l { font-size: .78rem; }
+
+/* ── LIVE CONSOLE ── */
+.lcs-v { font-size: 1.75rem; }
+.lcs-l { font-size: .78rem; }
+.lc-course { font-size: 1.25rem; }
+.mc-val { font-size: 1.85rem; }
+.mc-lbl { font-size: .68rem; }
+.qr-timer { font-size: .78rem; }
+.cp-title { font-size: .92rem; }
+.cp-cnt { font-size: .78rem; }
+.ci-nm { font-size: .9rem; }
+.ci-idx { font-size: .72rem; }
+.ci-time { font-size: .78rem; }
+.ci-meth { font-size: .68rem; padding: 2px 8px; }
+.ci-av { width: 34px; height: 34px; font-size: .7rem; }
+
+/* ── TOAST ── */
+.t { font-size: .875rem; padding: 10px 14px; }
+.t svg { width: 15px; height: 15px; }
+
+/* ── NO-SESSION STATE ── */
+.no-sess svg { width: 32px; height: 32px; }
+.no-sess p { font-size: .9rem; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — COMPUTERS / LAPTOPS / DEVICES
+   ══════════════════════════════════════════ */
+
+/* Large desktop (≥ 1440px) */
+@media (min-width: 1440px) {
+  :root { --sb: 270px; }
+  body { font-size: 16px; }
+  .cnt { padding: 2rem clamp(1.5rem,3vw,2.5rem); }
+}
+
+/* Standard laptop (1024 – 1439px) */
+@media (max-width: 1439px) and (min-width: 1024px) {
+  :root { --sb: 250px; }
+  .cnt { max-width: 100%; }
+  .stats-row { grid-template-columns: repeat(4,1fr); }
+}
+
+/* Small laptop / large tablet (768 – 1023px) */
+@media (max-width: 1023px) and (min-width: 769px) {
+  :root { --sb: 230px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 260px 1fr; }
+  .lc-grid { grid-template-columns: repeat(3,1fr); }
+  .srch, .srch-tb { min-width: 180px; }
+}
+
+/* Tablet portrait (600 – 768px) */
+@media (max-width: 768px) and (min-width: 601px) {
+  :root { --sb: 220px; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: repeat(2,1fr); }
+  .srch, .srch-tb { min-width: 160px; max-width: 220px; }
+  .prof-nm { display: none; }
+}
+
+/* Mobile (≤ 600px) */
+@media (max-width: 600px) {
+  :root { --sb: 260px; }
+  body { font-size: 15px; }
+  .sb { transform: translateX(-100%); }
+  .sb.on { transform: none; }
+  .sb-x { display: flex; }
+  .main { margin-left: 0; }
+  .mbt { display: flex; }
+  .srch, .srch-tb { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .two { grid-template-columns: 1fr; }
+  .lc-main { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr 1fr; }
+  .prof-nm { display: none; }
+  .cnt { padding: 1.25rem 1rem; }
+  .tb { height: 54px; padding: 0 1rem; }
+  .pgt { font-size: 1rem; }
+  .pc-av { width: 52px; height: 52px; }
+  .qa-grid { grid-template-columns: 1fr; }
+}
+
+/* Very small mobile (≤ 380px) */
+@media (max-width: 380px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .lc-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="pg">
+<aside class="sb" id="sb">
+  <div class="sb-hd"><div class="brand"><div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><div class="b-nm">EduCore</div></div><button class="sb-x" id="sb-x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  <div class="role-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>Lecturer</div>
+  <div class="nav-sect"><div class="nav-sect-label">Active Ops</div><nav class="nav">
+    <div class="ni"><a href="lec-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nl">Dashboard</span></a></div>
+    <div class="ni"><a href="lec-live.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nl">Live Session</span><div class="pip" id="nav-live" style="display:none"></div></a></div>
+    <div class="ni on"><a href="lec-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg><span class="nl">Requests</span><span class="nb" id="nav-req">0</span></a></div>
+    <div class="ni" id="nav-msg-item"><a href="lec-messages.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="nl">Messages</span><span class="nb" id="nav-msg" style="display:none">0</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Academic</div><nav class="nav">
+    <div class="ni"><a href="lec-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span class="nl">Courses</span></a></div>
+    <div class="ni"><a href="lec-students.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="nl">Students</span></a></div>
+    <div class="ni"><a href="lec-attendance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="nl">Attendance</span></a></div>
+  </nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">Intelligence</div><nav class="nav"><div class="ni"><a href="lec-analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nl">Analytics</span></a></div></nav></div>
+  <div class="nav-sect"><div class="nav-sect-label">System</div><nav class="nav"><div class="ni"><a href="lec-settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span class="nl">Settings</span></a></div></nav></div>
+  <div class="sb-ft"><div class="ava" id="sb-ava">?</div><div style="flex:1;min-width:0"><div class="un" id="sb-nm">—</div><div class="ui" id="sb-id">—</div></div><button class="lg" id="lg-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div>
+</aside>
+<div class="ov" id="ov"></div>
+<div class="main">
+  <header class="tb">
+    <div class="tb-l">
+      <button class="mbt" id="mbt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <span class="pgt">Requests — Conflict Resolution</span>
+    </div>
+    <div class="tb-r">
+      <div class="ib" id="th-btn"><svg id="ico-dk" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="ico-lt" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg></div>
+      <button class="btn btn-gold" id="bulk-approve-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve All
+      </button>
+    </div>
+  </header>
+  <main style="flex:1;display:flex;justify-content:center">
+    <div class="cnt">
+      <div class="ph">
+        <div><div class="ph-t">Pending Requests</div><div class="ph-s" id="req-sub">Loading…</div></div>
+      </div>
+      <div class="tabs">
+        <button class="tab on" data-s="pending">Pending</button>
+        <button class="tab" data-s="approved">Approved</button>
+        <button class="tab" data-s="rejected">Rejected</button>
+      </div>
+      <div class="req-list" id="req-list">
+        <div class="sk" style="height:120px"></div>
+        <div class="sk" style="height:120px"></div>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+<div class="tw" id="tw"></div>
+<script src="../../js/api.js"></script>
+<script src="../../js/lec-dashboard.js"></script>
+<script>
+window.LecPage = {
+  async boot() {
+    let currentStatus='pending', pendingReqs=[];
+    function rd(d){if(!d)return'—';const dy=Math.floor((Date.now()-new Date(d))/86400000);return dy===0?'Today':dy===1?'Yesterday':dy+'d ago';}
+    async function loadRequests(){const list=document.getElementById('req-list');list.innerHTML='<div class="sk" style="height:120px"></div><div class="sk" style="height:120px"></div>';try{const res=await API.override.getPending();const all=Array.isArray(res)?res:(res.requests||res.data||[]);pendingReqs=all.filter(r=>r.status===currentStatus||(!r.status&&currentStatus==='pending'));document.getElementById('req-sub').textContent=`${pendingReqs.length} ${currentStatus} request${pendingReqs.length!==1?'s':''}`;document.getElementById('nav-req').textContent=all.filter(r=>!r.status||r.status==='pending').length||'0';renderRequests(pendingReqs);}catch{list.innerHTML='<p style="color:var(--dim);font-size:.8rem">Failed to load requests.</p>';}}
+    function renderRequests(reqs){const list=document.getElementById('req-list');if(!reqs.length){list.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><p>No ${currentStatus} requests.</p></div>`;return;}list.innerHTML=reqs.map(r=>{const flagged=r.flag_reason||(r.biometric_attempts>3?'Multiple biometric failures':null);return`<div class="rcard ${flagged?'flag':''}" id="rcard-${r.override_id}"><div class="rc-top"><div class="rc-av">${window.ini(r.student_name||'')}</div><div style="flex:1;min-width:0"><div class="rc-nm">${window.esc(r.student_name||'—')}</div><div class="rc-idx">${window.esc(r.index_number||'—')} ${r.program?'· '+window.esc(r.program):''}</div><div class="rc-tags"><span class="rtag">Device Reset</span>${r.geofence_passed?'<span class="rtag ok">✓ In Geofence</span>':'<span class="rtag warn">✗ Outside Geofence</span>'}${r.biometric_attempts>3?`<span class="rtag warn">⚠ ${r.biometric_attempts} Bio Attempts</span>`:''}</div></div><div class="rc-time">${rd(r.requested_at)}</div></div>${r.override_reason?`<div class="rc-detail"><div class="rc-det-item"><div class="rd-l">Student Reason</div><div class="rd-v">${window.esc(r.override_reason)}</div></div></div>`:''}${flagged?`<div class="rc-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${window.esc(flagged)}</div>`:''}${currentStatus==='pending'?`<div class="rc-acts"><button class="act-btn ap" onclick="approve(${r.override_id},this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>Approve</button><button class="act-btn rj" onclick="reject(${r.override_id},this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reject</button><span style="font-size:.68rem;color:var(--dim);margin-left:4px">Session #${r.session_id||'—'}</span></div>`:`<div class="rc-acts"><span style="font-size:.74rem;color:var(--sub);font-weight:600;text-transform:capitalize">${r.status||currentStatus}</span>${r.decided_at?`<span style="font-size:.68rem;color:var(--dim);margin-left:8px">${new Date(r.decided_at).toLocaleDateString('en-GB')}</span>`:''}</div>`}</div>`}).join('');}
+    window.approve=async(id,btn)=>{btn.disabled=true;btn.textContent='…';try{await API.override.approve(id);toast('Request approved');document.getElementById(`rcard-${id}`)?.remove();pendingReqs=pendingReqs.filter(r=>r.override_id!==id);if(!pendingReqs.length)renderRequests([]);}catch(err){toast(err.message,'er');btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;stroke-width:2"><polyline points="20 6 9 17 4 12"/></svg>Approve';}};
+    window.reject=async(id,btn)=>{const reason=prompt('Reason for rejection (optional):');btn.disabled=true;try{await API.override.reject(id,{reason:reason||undefined});toast('Request rejected');document.getElementById(`rcard-${id}`)?.remove();pendingReqs=pendingReqs.filter(r=>r.override_id!==id);if(!pendingReqs.length)renderRequests([]);}catch(err){toast(err.message,'er');btn.disabled=false;}};
+    document.getElementById('bulk-approve-btn').onclick=async()=>{if(!pendingReqs.length){toast('No pending requests','in');return;}if(!confirm(`Approve all ${pendingReqs.length} pending requests?`))return;const btn=document.getElementById('bulk-approve-btn');btn.disabled=true;let ok=0;for(const r of pendingReqs){try{await API.override.approve(r.override_id);ok++;}catch{}}toast(`Approved ${ok} of ${pendingReqs.length} requests`);btn.disabled=false;loadRequests();};
+    document.querySelectorAll('.tab').forEach(t=>{t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');currentStatus=t.dataset.s;loadRequests();};});
+    loadRequests();
+  }
+};
+
+// ── Messages unread badge ─────────────────────────────────────────────────
+(function loadMsgBadge(){
+  if(typeof API === 'undefined') return;
+  function refreshMsgBadge(){
+    API.messages ? API.messages.unreadCounts().then(r=>{
+      const total=(r.channels||[]).reduce((s,c)=>s+(c.unread||0),0);
+      const el=document.getElementById('nav-msg');
+      if(el){el.textContent=total>9?'9+':total;el.style.display=total>0?'flex':'none';}
+    }).catch(()=>{}) : null;
+  }
+  refreshMsgBadge();
+  setInterval(refreshMsgBadge,15000);
+})();
+
+
+// ── Profile photo helpers ─────────────────────────────────────────────────
+// Resolves the best available photo URL with a cache-buster so the browser
+// always picks up freshly uploaded photos without a hard refresh.
+function _buildPhotoUrl(lec) {
+  const p = lec.profile_photo || lec.photo || null;
+  if (!p) return null;
+  let path = p;
+  if (!path.startsWith('http') && !path.startsWith('/')) {
+    // Convert relative backend path to absolute: /backend/uploads/...
+    path = '/backend/' + path;
+  }
+  const ts = lec.profile_photo_updated_at
+    ? '?v=' + new Date(lec.profile_photo_updated_at).getTime()
+    : '';
+  return path.startsWith('http') ? path : (path + ts);
+}
+// Sets an avatar element: injects a photo <img> or falls back to initials.
+function _setAvatar(el, url, initials) {
+  if (!el) return;
+  el.textContent = '';
+  if (url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    img.onerror = function() { if (this.parentElement) this.parentElement.textContent = initials || '?'; };
+    el.appendChild(img);
+  } else {
+    el.textContent = initials || '?';
+  }
+}
+
+</script>
+</body>
+</html>
