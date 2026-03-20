@@ -42,7 +42,7 @@ const StudentAPI = (() => {
     // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
     const BACKEND = 'https://ustededucore.rf.gd';
     if (window.location.origin !== BACKEND) {
-      return BACKEND + '/backend/api.php/';
+      return '/api/';  // Vercel proxy — vercel.json rewrites /api/* to InfinityFree
     }
 
     // ── 3. Same-origin: auto-detect from script location ─────────────────
