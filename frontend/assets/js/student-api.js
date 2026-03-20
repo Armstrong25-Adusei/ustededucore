@@ -36,39 +36,45 @@ const StudentAPI = (() => {
   // 2. Calculate from current page location and intelligently remove /frontend/
   // 3. Final fallback with correct path
   const BASE = (() => {
-    // ── 1. Manual override (highest priority) ────────────────────────────
-    if (window.EDUCORE_API_BASE) return window.EDUCORE_API_BASE.replace(/\/?$/, '/');
-
-    // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
-    const BACKEND = 'https://ustededucore.rf.gd';
-    if (window.location.origin !== BACKEND) {
-      return '/api/';  // Vercel proxy — vercel.json rewrites /api/* to InfinityFree
-    }
-
-    // ── 3. Same-origin: auto-detect from script location ─────────────────
     try {
       const src = (document.currentScript || {}).src || '';
       if (src && src.startsWith('http')) {
         const url   = new URL(src);
         const parts = url.pathname.split('/').filter(Boolean);
-        parts.splice(-3); // remove student-api.js, js, assets/js
-        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') parts.pop();
+        // student-api.js lives at: <root>/frontend/assets/js/student-api.js
+        // Remove last 3 segments (student-api.js, js, assets) to get <root>/frontend
+        parts.splice(-3);
+        // If we ended up at /xx/frontend, remove that segment
+        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') {
+          parts.pop();
+        }
         const root = parts.length ? '/' + parts.join('/') + '/' : '/';
         return root + 'backend/api.php/';
       }
     } catch (_) {}
-
-    // ── 4. Fallback: derive from current page URL ─────────────────────────
+    
+    // Fallback: calculate from current page location
     try {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      parts.pop();
-      while (parts.length > 1 &&
-             ['assets','pages','students','lecturers','frontend'].includes(parts[parts.length - 1])) {
+      const url = new URL(window.location.href);
+      const parts = url.pathname.split('/').filter(Boolean);
+      // Current page examples:
+      // - /www.educore.com/frontend/student-login.html
+      // - /www.educore.com/frontend/assets/pages/students/dashboard.html
+      
+      // Remove filename and walk up directory tree
+      parts.pop(); // Remove the HTML filename
+      
+      // Remove all path segments until we're out of subdirectories
+      // This removes: assets, pages, students (subdirectory name), frontend
+      while (parts.length > 1 && 
+             ['assets', 'pages', 'students', 'lecturers', 'frontend'].includes(parts[parts.length - 1])) {
         parts.pop();
       }
+      
       return '/' + parts.join('/') + '/backend/api.php/';
     } catch (_) {}
-
+    
+    // Ultimate fallback - explicitly correct path
     return '/backend/api.php/';
   })();
 
@@ -83,9 +89,10 @@ const StudentAPI = (() => {
     uuid    : 'ec_device_uuid',
   };
 
-  const DEBUG = (() => {
+  const DEBUG = true; // TEMP: force debug to see raw responses
+  const _DEBUG_orig = (() => {
     try {
-      return localStorage.getItem('ec_student_api_debug') === '1' || window.__STUDENT_API_DEBUG__ === true;
+      return localStorage.getItem('ec_student_api_debug') === '1' || window.__STUDENT_API_DEBUG__ === true; // (unused - DEBUG forced true above)
     } catch (_) {
       return false;
     }
@@ -170,14 +177,38 @@ const StudentAPI = (() => {
   // ── Login page resolution ─────────────────────────────────────
   function _loginPage(override) {
     if (override) return override;
-    // On InfinityFree: /frontend/student-login.html
-    // On Vercel: /student-login.html (files are at root)
-    const BACKEND = 'https://ustededucore.rf.gd';
-    if (window.location.origin === BACKEND) {
-      return '/frontend/student-login.html';
-    }
-    // Vercel or other host — login page is at root
-    return '/student-login.html';
+    // Calculate login page URL using same strategy as BASE
+    try {
+      const src = (document.currentScript || {}).src || '';
+      if (src && src.startsWith('http')) {
+        const url   = new URL(src);
+        const parts = url.pathname.split('/').filter(Boolean);
+        // student-api.js lives at: <root>/frontend/assets/js/student-api.js
+        // Remove last 3 segments (student-api.js, js, assets) to get <root>/frontend
+        parts.splice(-3);
+        // If we ended up at /xx/frontend, remove that segment
+        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') {
+          parts.pop();
+        }
+        const root = parts.length ? '/' + parts.join('/') + '/' : '/';
+        return root + 'frontend/student-login.html';
+      }
+    } catch (_) {}
+    
+    // Fallback: calculate from current page location
+    try {
+      const url = new URL(window.location.href);
+      const parts = url.pathname.split('/').filter(Boolean);
+      // Remove filename and subdirectories
+      parts.pop();
+      while (parts.length > 1 && 
+             ['assets', 'pages', 'students', 'lecturers', 'frontend'].includes(parts[parts.length - 1])) {
+        parts.pop();
+      }
+      return '/' + parts.join('/') + '/frontend/student-login.html';
+    } catch (_) {}
+    
+    return '/frontend/student-login.html';
   }
 
   // ── One-shot redirect guard — prevents parallel 401s from each
@@ -237,8 +268,18 @@ const StudentAPI = (() => {
     }
 
     let data;
-    try { data = await res.json(); }
-    catch { throw new StudentAPIError('Invalid server response.', res.status); }
+    try {
+      const rawText = await res.text();
+      if (DEBUG) console.log('[StudentAPI] Raw response:', rawText.substring(0, 300));
+      try { data = JSON.parse(rawText); }
+      catch {
+        console.error('[StudentAPI] Non-JSON response:', rawText.substring(0, 500));
+        throw new StudentAPIError('Invalid server response.', res.status);
+      }
+    } catch(e) {
+      if (e instanceof StudentAPIError) throw e;
+      throw new StudentAPIError('Invalid server response.', res.status);
+    }
 
     if (!res.ok) {
       const msg = data?.error || data?.message || `Server error ${res.status}`;
