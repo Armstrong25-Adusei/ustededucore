@@ -33,42 +33,8 @@ const API = (() => {
   // 2. Calculate from current page location and remove /frontend/ if present
   // 3. Final fallback with correct path
   const BASE = (() => {
-    // ── 1. Manual override (highest priority) ────────────────────────────
-    if (window.EDUCORE_API_BASE) return window.EDUCORE_API_BASE.replace(/\/?$/, '/');
-
-    // ── 2. Cross-origin detection (Vercel → InfinityFree) ────────────────
-    // On Vercel: use /api/ proxy (vercel.json rewrites to InfinityFree backend)
-    // This avoids CORS entirely — browser sees it as same-origin.
-    const BACKEND = 'https://ustededucore.rf.gd';
-    if (window.location.origin !== BACKEND) {
-      return 'https://ustededucore.rf.gd/backend/api.php/';
-    }
-
-    // ── 3. Same-origin: auto-detect from script location ─────────────────
-    try {
-      const src = (document.currentScript || {}).src || '';
-      if (src && src.startsWith('http')) {
-        const url   = new URL(src);
-        const parts = url.pathname.split('/').filter(Boolean);
-        parts.splice(-3); // remove api.js, js, assets
-        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') parts.pop();
-        const root = parts.length ? '/' + parts.join('/') + '/' : '/';
-        return root + 'backend/api.php/';
-      }
-    } catch (_) {}
-
-    // ── 4. Fallback: derive from current page URL ─────────────────────────
-    try {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      parts.pop();
-      while (parts.length > 1 &&
-             ['assets','pages','students','lecturers','frontend'].includes(parts[parts.length - 1])) {
-        parts.pop();
-      }
-      return '/' + parts.join('/') + '/backend/api.php/';
-    } catch (_) {}
-
-    return '/backend/api.php/';
+    // ── ALWAYS use InfinityFree backend directly ─────────────────────────
+    return 'https://ustededucore.rf.gd/backend/api.php/';
   })();
 
   // ÔöÇÔöÇ Device fingerprint (stable per browser/device) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
