@@ -36,45 +36,10 @@ const StudentAPI = (() => {
   // 2. Calculate from current page location and intelligently remove /frontend/
   // 3. Final fallback with correct path
   const BASE = (() => {
-    try {
-      const src = (document.currentScript || {}).src || '';
-      if (src && src.startsWith('http')) {
-        const url   = new URL(src);
-        const parts = url.pathname.split('/').filter(Boolean);
-        // student-api.js lives at: <root>/frontend/assets/js/student-api.js
-        // Remove last 3 segments (student-api.js, js, assets) to get <root>/frontend
-        parts.splice(-3);
-        // If we ended up at /xx/frontend, remove that segment
-        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') {
-          parts.pop();
-        }
-        const root = parts.length ? '/' + parts.join('/') + '/' : '/';
-        return root + 'backend/api.php/';
-      }
-    } catch (_) {}
-    
-    // Fallback: calculate from current page location
-    try {
-      const url = new URL(window.location.href);
-      const parts = url.pathname.split('/').filter(Boolean);
-      // Current page examples:
-      // - /www.educore.com/frontend/student-login.html
-      // - /www.educore.com/frontend/assets/pages/students/dashboard.html
-      
-      // Remove filename and walk up directory tree
-      parts.pop(); // Remove the HTML filename
-      
-      // Remove all path segments until we're out of subdirectories
-      // This removes: assets, pages, students (subdirectory name), frontend
-      while (parts.length > 1 && 
-             ['assets', 'pages', 'students', 'lecturers', 'frontend'].includes(parts[parts.length - 1])) {
-        parts.pop();
-      }
-      
-      return '/' + parts.join('/') + '/backend/api.php/';
-    } catch (_) {}
-    
-    // Ultimate fallback - explicitly correct path
+    // ── ALWAYS use InfinityFree backend directly ─────────────────────────
+    // Whether running on Vercel, InfinityFree, or localhost,
+    // API calls always go straight to the InfinityFree backend.
+    // CORS is handled by sending simple requests (text/plain, no Auth header).
     return 'https://ustededucore.rf.gd/backend/api.php/';
   })();
 
@@ -177,38 +142,14 @@ const StudentAPI = (() => {
   // ── Login page resolution ─────────────────────────────────────
   function _loginPage(override) {
     if (override) return override;
-    // Calculate login page URL using same strategy as BASE
-    try {
-      const src = (document.currentScript || {}).src || '';
-      if (src && src.startsWith('http')) {
-        const url   = new URL(src);
-        const parts = url.pathname.split('/').filter(Boolean);
-        // student-api.js lives at: <root>/frontend/assets/js/student-api.js
-        // Remove last 3 segments (student-api.js, js, assets) to get <root>/frontend
-        parts.splice(-3);
-        // If we ended up at /xx/frontend, remove that segment
-        if (parts.length > 0 && parts[parts.length - 1] === 'frontend') {
-          parts.pop();
-        }
-        const root = parts.length ? '/' + parts.join('/') + '/' : '/';
-        return root + 'frontend/student-login.html';
-      }
-    } catch (_) {}
-    
-    // Fallback: calculate from current page location
-    try {
-      const url = new URL(window.location.href);
-      const parts = url.pathname.split('/').filter(Boolean);
-      // Remove filename and subdirectories
-      parts.pop();
-      while (parts.length > 1 && 
-             ['assets', 'pages', 'students', 'lecturers', 'frontend'].includes(parts[parts.length - 1])) {
-        parts.pop();
-      }
-      return '/' + parts.join('/') + '/frontend/student-login.html';
-    } catch (_) {}
-    
-    return '/frontend/student-login.html';
+    // On InfinityFree: /frontend/assets/pages/students/ → login is at /frontend/login... 
+    // Use absolute paths based on current host
+    const host = window.location.origin;
+    if (host.includes('ustededucore.rf.gd')) {
+      return host + '/frontend/student-login.html';
+    }
+    // On Vercel: student-login.html is at root of frontend deployment
+    return host + '/student-login.html';
   }
 
   // ── One-shot redirect guard — prevents parallel 401s from each
