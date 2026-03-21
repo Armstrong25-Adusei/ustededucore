@@ -41,7 +41,7 @@ const API = (() => {
     // This avoids CORS entirely — browser sees it as same-origin.
     const BACKEND = 'https://ustededucore.rf.gd';
     if (window.location.origin !== BACKEND) {
-      return '/api/';
+      return 'https://ustededucore.rf.gd/backend/api.php/';
     }
 
     // ── 3. Same-origin: auto-detect from script location ─────────────────
@@ -136,13 +136,16 @@ const API = (() => {
 
   // ÔöÇÔöÇ Core fetch ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function request(method, endpoint, body = null, opts = {}) {
-    const headers = { 'Content-Type': 'application/json' };
+    // Use text/plain to avoid CORS preflight (simple request)
+    // PHP reads php://input regardless of Content-Type
+    const headers = { 'Content-Type': 'text/plain' };
 
     // Auto-attach the right token depending on namespace
     const tk = opts.useStudentToken
       ? studentToken.get()
       : lecturerToken.get();
-    if (tk) headers['Authorization'] = `Bearer ${tk}`;
+    // Authorization header omitted — triggers CORS preflight
+    // Token sent as ?_token= query param instead
 
     const config = { method, headers };
     if (body !== null && method !== 'GET') {
@@ -204,7 +207,8 @@ const API = (() => {
     const tk = opts.useStudentToken
       ? studentToken.get()
       : lecturerToken.get();
-    if (tk) headers['Authorization'] = `Bearer ${tk}`;
+    // Authorization header omitted — triggers CORS preflight
+    // Token sent as ?_token= query param instead
 
     let res;
     try {
