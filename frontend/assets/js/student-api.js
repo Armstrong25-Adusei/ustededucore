@@ -75,7 +75,7 @@ const StudentAPI = (() => {
     } catch (_) {}
     
     // Ultimate fallback - explicitly correct path
-    return '/backend/api.php/';
+    return 'https://ustededucore.rf.gd/backend/api.php/';
   })();
 
   // App root, e.g. '/' derived from '/backend/api.php/'
@@ -217,10 +217,14 @@ const StudentAPI = (() => {
 
   // ── Core fetch ───────────────────────────────────────────────
   async function request(method, endpoint, body = null, opts = {}) {
-    const headers = { 'Content-Type': 'application/json' };
+    // Use text/plain to avoid CORS preflight (simple request)
+    // PHP reads php://input regardless of Content-Type
+    const headers = { 'Content-Type': 'text/plain' };
     const tk = store.getToken();
     if (tk) {
-      headers['Authorization'] = `Bearer ${tk}`;
+      // Authorization header removed — triggers CORS preflight on InfinityFree
+      // Token is passed as ?_token= query param instead (see below)
+      // headers['Authorization'] = `Bearer ${tk}`;
     }
 
     const config = { method, headers };
